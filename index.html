@@ -1,0 +1,659 @@
+<!-- PATCH: Remove Dark Mode and keep the dashboard in Light Mode only -->
+
+<!doctype html>
+
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Green River Panels — Wood Pellets Operations Dashboard</title>
+    <!-- FontAwesome & Tailwind CSS (Local / Offline) -->
+    <link rel="stylesheet" href="./fontawesome-free-7.3.1-web/css/all.min.css" />
+    <script src="./tailwind/tailwind_v3.js"></script>
+
+    <!-- jQuery (Local / Offline) -->
+    <script src="./jquery-3.7.1.min.js"></script>
+
+    <!-- Export Libraries (Local / Offline) -->
+    <script src="./xlsx.full.min.js"></script>
+    <script src="./html2pdf.bundle.min.js"></script>
+
+    <!-- Leaflet GIS Map Engine (Local / Offline) -->
+    <link rel="stylesheet" href="./leaflet/leaflet.css" />
+    <script src="./leaflet/leaflet.js"></script>
+
+    <style>
+      /* ค่าที่ Tailwind ไม่มีเทียบเท่า: กำหนดขนาดหน้าพิมพ์ และความถูกต้องของสี */
+      @page {
+        size: A4 portrait;
+        margin: 10mm 12mm 12mm 12mm;
+      }
+
+      html, body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        transition: background-color 0.25s ease, color 0.25s ease;
+      }
+
+      /* ปรับแต่งหมุด Leaflet ให้พื้นหลังโปร่งใส สะอาดตา */
+      .leaflet-div-icon {
+        background: transparent !important;
+        border: none !important;
+      }
+
+      /* รูปแบบการ์ดขั้นตอน BPM ในหน้าพิมพ์ — ปลดเปลื้องกรอบ Modal ออกทั้งหมดให้พิมพ์เป็นกระดาษทางการ A4 สะอาด 100% */
+      @media print {
+        /* ซ่อนส่วนประกอบ UI ที่ไม่เกี่ยวกับเอกสาร */
+        header, nav, #dashboardView, #queryView, #mapView, #mapModal, .no-print,
+        #bpmModalHeaderBar, .modal-controls {
+          display: none !important;
+        }
+
+        /* ปรับพื้นหลังและขจัด Scrollbar */
+        html, body {
+          background: #ffffff !important;
+          color: #0f172a !important;
+          overflow: visible !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        /* ปลดเปลื้อง Modal Backdrop และ Frame */
+        #bpmModal {
+          position: static !important;
+          display: block !important;
+          background: transparent !important;
+          backdrop-filter: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          overflow: visible !important;
+          width: 100% !important;
+          height: auto !important;
+        }
+
+        #bpmModal > div {
+          max-width: 100% !important;
+          max-height: none !important;
+          box-shadow: none !important;
+          border-radius: 0 !important;
+          border: none !important;
+          overflow: visible !important;
+          width: 100% !important;
+        }
+
+        #bpmModalBody {
+          overflow: visible !important;
+          max-height: none !important;
+          padding: 0 !important;
+        }
+
+        .bpm-print-container {
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .bpm-step-card {
+          page-break-inside: avoid;
+          break-inside: avoid;
+          margin-bottom: 8px !important;
+        }
+
+        .bpm-doc-header {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+      }
+
+      /* ===================================================
+         Smooth Animations สำหรับหน้าเว็บและ Modal (Interactive Experience)
+         =================================================== */
+      @keyframes fadeInSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes modalScaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.96) translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .page-fade-in {
+        animation: fadeInSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .modal-pop-in {
+        animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+    </style>
+  </head>
+
+  <body class="bg-slate-100 text-slate-800 antialiased">
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md">
+            <i class="fa-solid fa-industry text-xl"></i>
+          </div>
+
+          <div>
+            <h1 class="text-lg font-bold text-slate-900 leading-tight" data-i18n="header_title">
+              Wood Pellets Operations Dashboard
+            </h1>
+
+            <p class="text-xs text-slate-500" data-i18n="header_subtitle">
+              ระบบติดตามขั้นตอนการผลิตและจัดส่งสินค้าแบบ Real-time
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <!-- Navigation View Tabs -->
+          <nav class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button
+              id="navDashboardBtn"
+              onclick="switchView('dashboard')"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center"
+            >
+              <i class="fa-solid fa-chart-pie mr-1.5 text-indigo-600"></i>
+              <span data-i18n="nav_dashboard">ภาพรวม Dashboard</span>
+            </button>
+            <button
+              id="navQueryBtn"
+              onclick="switchView('query')"
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center"
+            >
+              <i class="fa-solid fa-table-list mr-1.5"></i>
+              <span data-i18n="nav_query">สืบค้นคำสั่งซื้อ (Order Query)</span>
+            </button>
+            <button
+              id="navMapBtn"
+              onclick="switchView('map')"
+              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center"
+            >
+              <i class="fa-solid fa-map-location-dot mr-1.5 text-rose-500"></i>
+              <span data-i18n="nav_map">แผนที่พิกัดรวม (GIS Map)</span>
+            </button>
+          </nav>
+
+          <!-- Language Button -->
+          <button
+            onclick="toggleLanguage()"
+            class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+          >
+            <i class="fa-solid fa-globe text-indigo-600 mr-1"></i>
+            <span id="lang-label">EN / TH</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      <!-- VIEW 1: Main Dashboard (Operations View) -->
+      <div id="dashboardView" class="space-y-8">
+        <!-- Quick Search for Dashboard -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <input
+            type="text"
+            id="searchInput"
+            onkeyup="filterDashboard()"
+            data-i18n-placeholder="search_placeholder"
+            placeholder="ค้นหาด้วย Order No หรือ ชื่อลูกค้า..."
+            class="w-full sm:w-80 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+          />
+
+          <div id="searchResultCount" class="text-xs text-slate-500 font-medium"></div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div id="kpiCardsContainer"></div>
+
+        <!-- 7-Step Pipeline -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <h2 class="text-base font-bold text-slate-900 mb-6 flex items-center">
+            <i class="fa-solid fa-diagram-project text-indigo-600 mr-2"></i>
+            <span> ภาพรวมสถานะขั้นตอนการทำงาน (7-Step Pipeline) </span>
+          </h2>
+          <div id="pipelineContainer"></div>
+        </div>
+
+        <!-- Wood Pellets Quick Summary Bar (BPM Operational Metrics) -->
+        <div id="woodPelletsQuickBarContainer"></div>
+
+        <!-- Production Section (Full Width) -->
+        <div id="prodSection" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"></div>
+
+        <!-- Shipment Orders Section (Full Width at the bottom with 10 rows/page and pagination) -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-200 gap-3"
+          >
+            <div>
+              <h2 class="text-base font-bold text-slate-900 flex items-center">
+                <i class="fa-solid fa-truck-ramp-box text-indigo-600 mr-2"></i>
+                <span data-i18n="shipment_section_title"> รายการจัดส่งและกำหนดการสำคัญ </span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                คลิกเลือกแถวคำสั่งซื้อเพื่อดูความคืบหน้าและข้อมูลใน 7-Step Pipeline ด้านบน
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Selector: 10, 20, 50, 100 rows -->
+              <div class="flex items-center space-x-1.5 text-xs text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
+                <span>แสดง:</span>
+                <select
+                  id="dashboardPageSizeSelect"
+                  onchange="handleDashboardPageSizeChange()"
+                  class="bg-transparent font-bold text-slate-800 focus:outline-none cursor-pointer"
+                >
+                  <option value="10" selected>10 แถว</option>
+                  <option value="20">20 แถว</option>
+                  <option value="50">50 แถว</option>
+                  <option value="100">100 แถว</option>
+                </select>
+              </div>
+
+              <!-- Periodic Export Dropdown for Dashboard -->
+              <div class="relative inline-block text-left">
+                <button
+                  type="button"
+                  onclick="toggleDashExportPeriodDropdown()"
+                  class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center transition-colors shadow-sm"
+                  id="btnDashExportPeriodMenu"
+                >
+                  <i class="fa-solid fa-calendar-days mr-1.5 text-indigo-600"></i>
+                  <span>ส่งออกงวด (เดือน/ปี)</span>
+                  <i class="fa-solid fa-chevron-down ml-1.5 text-[10px]"></i>
+                </button>
+                <div
+                  id="dashExportPeriodDropdown"
+                  class="hidden absolute right-0 mt-2 w-52 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 py-1 divide-y divide-slate-100 text-xs"
+                >
+                  <div class="py-1">
+                    <button
+                      onclick="exportByPeriod('month'); toggleDashExportPeriodDropdown();"
+                      class="text-slate-700 hover:bg-slate-50 flex items-center w-full px-4 py-2.5 text-left font-medium"
+                    >
+                      <i class="fa-solid fa-file-excel mr-2 text-emerald-600"></i>
+                      <div>
+                        <div class="font-bold text-slate-800">Export ประจำเดือน</div>
+                        <div class="text-[10px] text-slate-400">สรุปข้อมูลรอบเดือนปัจจุบัน</div>
+                      </div>
+                    </button>
+                  </div>
+                  <div class="py-1">
+                    <button
+                      onclick="exportByPeriod('year'); toggleDashExportPeriodDropdown();"
+                      class="text-slate-700 hover:bg-slate-50 flex items-center w-full px-4 py-2.5 text-left font-medium"
+                    >
+                      <i class="fa-solid fa-file-excel mr-2 text-indigo-600"></i>
+                      <div>
+                        <div class="font-bold text-slate-800">Export ประจำปี (Yearly)</div>
+                        <div class="text-[10px] text-slate-400">สรุปทั้งปี + Sheet แยกเดือน</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Export Excel -->
+              <button
+                onclick="exportToExcel()"
+                class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center transition-colors shadow-sm"
+              >
+                <i class="fa-solid fa-file-excel mr-1.5 text-emerald-600"></i>
+                Export Excel
+              </button>
+
+              <!-- Export PDF -->
+              <button
+                onclick="exportToPDF()"
+                class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center transition-colors shadow-sm"
+              >
+                <i class="fa-solid fa-file-pdf mr-1.5 text-rose-600"></i>
+                Export PDF
+              </button>
+            </div>
+          </div>
+
+          <div id="exportableArea" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="orderTable">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-semibold text-slate-800 uppercase bg-slate-50/60">
+                  <th class="pb-3 px-3 w-16 text-center" data-i18n="th_no">ลำดับ</th>
+                  <th class="pb-3 px-3" data-i18n="th_sa">SA Number / Customer</th>
+                  <th class="pb-3 px-3" data-i18n="th_pod">Destination & Line</th>
+                  <th class="pb-3 px-3" data-i18n="th_etd">ETD</th>
+                  <th class="pb-3 px-3" data-i18n="th_eta">ETA</th>
+                  <th class="pb-3 px-3 text-right" data-i18n="th_status">Status</th>
+                </tr>
+              </thead>
+
+              <tbody id="orderTableBody" class="divide-y divide-slate-100 text-xs text-slate-700"></tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls for Dashboard Shipment Table -->
+          <div id="dashboardTablePaginationContainer"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: Order Query & Search (20 rows per page + pagination) -->
+      <div id="queryView" class="hidden space-y-6">
+        <!-- Filter & Search Toolbar Card -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-100 gap-2">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 flex items-center">
+                <i class="fa-solid fa-database text-indigo-600 mr-2"></i>
+                <span data-i18n="query_title">สืบค้นรายการคำสั่งซื้อทั้งหมด (Order Master Query)</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5" data-i18n="query_subtitle">
+                ค้นหา กรองข้อมูล และส่งออกรายงาน (20 แถว/หน้า)
+              </p>
+            </div>
+
+            <!-- Export Buttons for Query & Periodic Reports -->
+            <div class="flex items-center flex-wrap gap-2">
+              <!-- Periodic Export Dropdown -->
+              <div class="relative inline-block text-left">
+                <button
+                  type="button"
+                  onclick="toggleExportPeriodDropdown()"
+                  class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center transition-colors shadow-sm"
+                  id="btnExportPeriodMenu"
+                >
+                  <i class="fa-solid fa-calendar-days mr-1.5 text-indigo-600"></i>
+                  <span>Export ประจำงวด (เดือน/ปี)</span>
+                  <i class="fa-solid fa-chevron-down ml-1.5 text-[10px]"></i>
+                </button>
+                <div
+                  id="exportPeriodDropdown"
+                  class="hidden absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20 py-1 divide-y divide-slate-100 text-xs"
+                >
+                  <div class="py-1">
+                    <button
+                      onclick="exportByPeriod('month'); toggleExportPeriodDropdown();"
+                      class="text-slate-700 hover:bg-slate-50 flex items-center w-full px-4 py-2 text-left font-medium"
+                    >
+                      <i class="fa-solid fa-file-excel mr-2.5 text-emerald-600"></i>
+                      <div>
+                        <div class="font-bold text-slate-800">Export Excel ประจำเดือน</div>
+                        <div class="text-[10px] text-slate-400">ตามเดือนและปีที่เลือกในตัวกรอง</div>
+                      </div>
+                    </button>
+                    <button
+                      onclick="printPeriodicReport('month'); toggleExportPeriodDropdown();"
+                      class="text-slate-700 hover:bg-slate-50 flex items-center w-full px-4 py-2 text-left font-medium"
+                    >
+                      <i class="fa-solid fa-print mr-2.5 text-indigo-600"></i>
+                      <div>
+                        <div class="font-bold text-slate-800">พิมพ์ / PDF รายเดือน (ครบทุกแถว)</div>
+                        <div class="text-[10px] text-slate-400">พิมพ์เต็มทุกแถวต่อเนื่องหลายหน้า A4</div>
+                      </div>
+                    </button>
+                  </div>
+                  <div class="py-1">
+                    <button
+                      onclick="exportByPeriod('year'); toggleExportPeriodDropdown();"
+                      class="text-slate-700 hover:bg-slate-50 flex items-center w-full px-4 py-2 text-left font-medium"
+                    >
+                      <i class="fa-solid fa-file-excel mr-2.5 text-emerald-600"></i>
+                      <div>
+                        <div class="font-bold text-slate-800">Export Excel ประจำปี (Summary)</div>
+                        <div class="text-[10px] text-slate-400">สรุปยอดรวมทั้งปี + Sheet รายเดือน</div>
+                      </div>
+                    </button>
+                    <button
+                      onclick="printPeriodicReport('year'); toggleExportPeriodDropdown();"
+                      class="text-slate-700 hover:bg-slate-50 flex items-center w-full px-4 py-2 text-left font-medium"
+                    >
+                      <i class="fa-solid fa-print mr-2.5 text-indigo-600"></i>
+                      <div>
+                        <div class="font-bold text-slate-800">พิมพ์ / PDF รายปี (ครบ 100+ แถว)</div>
+                        <div class="text-[10px] text-slate-400">พิมพ์ต่อเนื่องทุกหน้า ไม่โดนตัดแบ่งหน้า</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- General Export Excel -->
+              <button
+                onclick="exportQueryToExcel()"
+                class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center transition-colors shadow-sm"
+                title="ส่งออกตามรายการที่กรองไว้ทั้งหมด"
+              >
+                <i class="fa-solid fa-file-excel mr-1.5 text-emerald-600"></i>
+                Export Excel (ตามค้นหา)
+              </button>
+              <!-- Export PDF -->
+              <button
+                onclick="exportQueryToPDF()"
+                class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center transition-colors shadow-sm"
+              >
+                <i class="fa-solid fa-file-pdf mr-1.5 text-rose-600"></i>
+                Export PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Search Inputs & Filters Grid (Extended with Year & Month) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
+            <!-- Keyword Search (Order No, MO No, PO No, Customer) -->
+            <div class="sm:col-span-2 relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400"></i>
+              <input
+                type="text"
+                id="querySearchInput"
+                oninput="handleQuerySearch()"
+                data-i18n-placeholder="search_mo_order_placeholder"
+                placeholder="ค้นหา Order No, MO, PO, ลูกค้า..."
+                class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-colors"
+              />
+            </div>
+
+            <!-- Year Filter -->
+            <div>
+              <select
+                id="queryYearFilter"
+                onchange="handleQuerySearch()"
+                class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
+              >
+                <option value="ALL">-- ทุกปี (All Years) --</option>
+                <option value="2026" selected>ปี 2026</option>
+                <option value="2025">ปี 2025</option>
+                <option value="2027">ปี 2027</option>
+              </select>
+            </div>
+
+            <!-- Month Filter -->
+            <div>
+              <select
+                id="queryMonthFilter"
+                onchange="handleQuerySearch()"
+                class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
+              >
+                <option value="ALL">-- ทุกเดือน (All Months) --</option>
+                <option value="01">มกราคม (Jan)</option>
+                <option value="02">กุมภาพันธ์ (Feb)</option>
+                <option value="03">มีนาคม (Mar)</option>
+                <option value="04">เมษายน (Apr)</option>
+                <option value="05">พฤษภาคม (May)</option>
+                <option value="06">มิถุนายน (Jun)</option>
+                <option value="07">กรกฎาคม (Jul)</option>
+                <option value="08">สิงหาคม (Aug)</option>
+                <option value="09">กันยายน (Sep)</option>
+                <option value="10">ตุลาคม (Oct)</option>
+                <option value="11">พฤศจิกายน (Nov)</option>
+                <option value="12">ธันวาคม (Dec)</option>
+              </select>
+            </div>
+
+            <!-- Step Filter -->
+            <div>
+              <select
+                id="queryStepFilter"
+                onchange="handleQuerySearch()"
+                class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
+              >
+                <option value="ALL">-- ทุกขั้นตอน (All Steps) --</option>
+                <option value="1">Step 1: Sale</option>
+                <option value="2">Step 2: RA</option>
+                <option value="3">Step 3: Woods Planning</option>
+                <option value="4">Step 4: Pelletizing</option>
+                <option value="5">Step 5: QA</option>
+                <option value="6">Step 6: Warehouse</option>
+                <option value="7">Step 7: Shipment</option>
+              </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div>
+              <select
+                id="queryStatusFilter"
+                onchange="handleQuerySearch()"
+                class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
+              >
+                <option value="ALL">-- ทุกสถานะ (All Statuses) --</option>
+                <option value="In Production">อยู่ระหว่างการผลิต</option>
+                <option value="On Schedule">ตามกำหนดการ</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bottom bar of toolbar: Page size and result count badge -->
+          <div class="flex items-center justify-between text-xs pt-1">
+            <div id="queryResultBadge" class="text-slate-500 font-semibold flex items-center">
+              <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-2"></span>
+              พบทั้งหมด <strong id="queryTotalCount" class="text-slate-800 mx-1">0</strong> รายการ
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <span class="text-slate-400">แสดงหน้าละ:</span>
+              <select
+                id="queryPageSizeSelect"
+                onchange="handlePageSizeChange()"
+                class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none"
+              >
+                <option value="10">10 แถว</option>
+                <option value="20" selected>20 แถว</option>
+                <option value="50">50 แถว</option>
+                <option value="100">100 แถว</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Query Table Card -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="overflow-x-auto" id="queryExportableArea">
+            <table class="w-full text-left border-collapse text-xs" id="queryTable">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase bg-slate-50/70">
+                  <th class="py-3 px-3 w-14 text-center" data-i18n="th_no">ลำดับ</th>
+                  <th class="py-3 px-3">Order No.</th>
+                  <th class="py-3 px-3">MO No.</th>
+                  <th class="py-3 px-3">Customer / PO No.</th>
+                  <th class="py-3 px-3">Product & Specs</th>
+                  <th class="py-3 px-3">Destination & Line</th>
+                  <th class="py-3 px-3">Step</th>
+                  <th class="py-3 px-3">Progress</th>
+                  <th class="py-3 px-3">ETD / ETA</th>
+                  <th class="py-3 px-3">Status</th>
+                  <th class="py-3 px-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="queryTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Container -->
+          <div id="queryPaginationContainer"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: GIS Map Overview (All Locations with Dispersion Animation) -->
+      <div id="mapView" class="hidden space-y-6">
+        <!-- Map View Content Container (Rendered dynamically) -->
+        <div id="mapViewContainer"></div>
+      </div>
+    </main>
+
+    <!-- Green River Panels Wood Pellets BPM Full Form Modal -->
+    <div id="bpmModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden modal-pop-in">
+        <!-- Modal Top Bar -->
+        <div id="bpmModalHeaderBar" class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <div class="flex items-center space-x-2">
+            <div class="bg-indigo-600 text-white p-1.5 rounded-lg text-sm">
+              <i class="fa-solid fa-file-invoice"></i>
+            </div>
+            <h3 class="text-sm sm:text-base font-bold text-slate-900" id="bpmModalHeaderTitle">แบบฟอร์ม BPM ฉบับเต็ม (Full BPM Form)</h3>
+          </div>
+          <div class="flex items-center space-x-2 modal-controls">
+            <button id="bpmModalPrintBtn" onclick="printBpmModal()" class="text-xs px-3.5 py-1.5 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg flex items-center shadow-sm font-semibold transition-colors">
+              <i class="fa-solid fa-print mr-1.5"></i> พิมพ์ / PDF
+            </button>
+            <button id="bpmModalCloseBtn" onclick="closeBpmModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-200/60 transition-colors">
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+        </div>
+        <!-- Modal Body Content -->
+        <div id="bpmModalBody" class="flex-1 overflow-y-auto"></div>
+      </div>
+    </div>
+
+    <!-- Green River Panels Wood Pellets EUDR Geolocation & Map Modal -->
+    <div id="mapModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden modal-pop-in">
+        <!-- Map Modal Top Bar -->
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <div class="flex items-center space-x-2.5">
+            <div class="bg-rose-600 text-white p-2 rounded-xl text-sm shadow-sm">
+              <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900" id="mapModalHeaderTitle">
+                พิกัดแปลงปลูกไม้และโรงงาน (EUDR Geolocation)
+              </h3>
+              <p class="text-[11px] text-slate-500" id="mapModalHeaderSub">
+                ตรวจสอบตำแหน่งแหล่งกำเนิดไม้ตามคำสั่งซื้อ
+              </p>
+            </div>
+          </div>
+          <button onclick="closeMapModal()" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-200/60 transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+        <!-- Map Modal Body Content -->
+        <div id="mapModalBody" class="p-6 overflow-y-auto flex-1"></div>
+      </div>
+    </div>
+
+    <!-- Hidden Iframe สำหรับสั่งพิมพ์เอกสาร BPM โดยเฉพาะ (ป้องกันไม่ให้ติด about:blank ที่หัว/ท้ายกระดาษ) -->
+    <iframe id="bpmPrintIframe" style="position:fixed; right:0; bottom:0; width:0; height:0; border:0; visibility:hidden;"></iframe>
+
+    <!-- JavaScript -->
+    <script src="./app.js"></script>
+    <script src="./language.js"></script>
+    <script src="./components.js"></script>
+    <script src="./data.js"></script>
+  </body>
+</html>
