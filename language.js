@@ -1,3 +1,8 @@
+const _dNow = new Date();
+const _dYear = _dNow.getFullYear();
+const _mEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][_dNow.getMonth()];
+const _mTh = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."][_dNow.getMonth()];
+
 const translations = {
   th: {
     header_title: "Green River Panels — Wood Pellets Operations Dashboard",
@@ -5,9 +10,11 @@ const translations = {
     sys_live: "System Live",
 
     // Navigation
-    nav_dashboard: "ภาพรวม Dashboard",
-    nav_query: "สืบค้นคำสั่งซื้อ (Order Query)",
-    nav_map: "แผนที่พิกัดรวม (GIS Map)",
+    // Nav Tabs (Clean & Compact เพื่อป้องกัน Navbar ล้น)
+    nav_dashboard: "แดชบอร์ด",
+    nav_query: "สืบค้นออเดอร์",
+    nav_map: "แผนที่จุด GIS",
+    nav_cadastral: "รูปแปลงที่ดิน",
 
     // KPI
     kpi_active: "ยอดรวมคำสั่งซื้อ",
@@ -21,20 +28,26 @@ const translations = {
     kpi_qa: "รายการเบี่ยงเบนด้านคุณภาพ",
     kpi_qa_cases: "รายการ",
     kpi_qa_sub: "ผ่านเกณฑ์มาตรฐาน ISO 9001",
+    kpi_moisture: "ควบคุมความชื้นเฉลี่ย",
+    kpi_moisture_sub: "ได้มาตรฐาน ENplus A1 / ISO 17225-2",
 
-    // Pipeline
-    pipeline_title: "ภาพรวมสถานะขั้นตอนการทำงาน (7-Step Pipeline)",
+    // Pipeline (8-Step Full Lifecycle: Sale->RA->Production->QC->QA->Storage->RA Verification->Shipment)
+    pipeline_title: "ภาพรวมสถานะขั้นตอนการทำงาน (8 ขั้นตอน)",
     step1_name: "ฝ่ายขาย",
-    step2_name: "ฝ่ายกำกับดูแล (RA)",
+    step2_name: "ฝ่ายกำกับดูแล",
     approved_badge: "อนุมัติแล้ว",
-    step3_name: "การผลิต — การวางแผนวัสดุสำหรับงานไม้",
-    step3_status: "สถานะ: เปิดดำเนินการ",
-    step4_name: "ตรวจสอบคุณภาพ",
+    step3_name: "ฝ่ายผลิต",
+    step3_status: "สถานะ: กำลังผลิต",
+    step4_name: "ควบคุมคุณภาพหน้างาน",
     step4_val: "ไม่พบข้อเบี่ยงเบน",
-    step4_sub: "สร้าง COA แล้ว",
-    step5_name: "คลังสินค้า",
-    step5_sub: "พร้อมจัดเตรียมสินค้า",
-    step6_name: "จัดส่ง",
+    step4_sub: "ผ่านเกณฑ์ 5 จุดตรวจ",
+    step5_name: "ประกันคุณภาพ",
+    step5_sub: "สร้าง COA เรียบร้อย",
+    step6_name: "คลังสินค้า",
+    step6_sub: "พร้อมจัดเตรียมสินค้า",
+    step7_name: "ตรวจสอบเอกสาร",
+    step7_sub: "เอกสารส่งออกครบถ้วน",
+    step8_name: "จัดส่งสินค้า",
 
     // Production & QC
     prod_section_title: "สรุปการผลิตและการทำงาน",
@@ -51,7 +64,7 @@ const translations = {
     total_downtime: "เวลารวมเครื่องหยุด (Downtime)",
     yield_qty: "ปริมาณ Yield รวม",
     stock_movement: "การเคลื่อนไหวสต็อก (Warehouse 1)",
-    btn_view_bpm: "ดูแบบฟอร์ม BPM ฉบับเต็ม (Full BPM Form)",
+    btn_view_bpm: "ดูแบบฟอร์ม BPM ฉบับเต็ม",
 
     // Shipment
     shipment_section_title: "รายการจัดส่งและกำหนดการสำคัญ",
@@ -95,6 +108,12 @@ const translations = {
     reg_desc:
       "ใบอนุญาตส่งออกและขนส่งมีกำหนดหมดอายุวันที่ <strong>2027-03-31</strong> (ต้องดำเนินการต่ออายุล่วงหน้า 30 วันก่อนวันหมดอายุ)",
 
+    // Time Range Filters
+    time_range_all: `ทั้งปี ${_dYear}`,
+    time_range_month: `เดือนนี้ (${_mTh})`,
+    time_range_week: "สัปดาห์นี้",
+    time_range_today: "วันนี้",
+    btn_print_cert: "พิมพ์ใบรับรอง EUDR",
     // Search
     result_count: "แสดง {count} รายการ",
     no_data: "ไม่พบข้อมูลที่ค้นหา",
@@ -114,10 +133,11 @@ const translations = {
     header_subtitle: "Real-time production and shipment tracking system",
     sys_live: "System Live",
 
-    // Navigation
-    nav_dashboard: "Dashboard Overview",
-    nav_query: "Order Query & Reports",
-    nav_map: "GIS Map Overview",
+    // Navigation (Clean & Compact)
+    nav_dashboard: "Dashboard",
+    nav_query: "Order Query",
+    nav_map: "GIS Map",
+    nav_cadastral: "Cadastral",
 
     // KPI
     kpi_active: "Total Orders",
@@ -131,20 +151,26 @@ const translations = {
     kpi_qa: "Quality Deviations",
     kpi_qa_cases: "Cases",
     kpi_qa_sub: "Passed ISO 9001 standard",
+    kpi_moisture: "Avg Moisture Control",
+    kpi_moisture_sub: "Compliant with ENplus A1 / ISO 17225-2",
 
-    // Pipeline
-    pipeline_title: "Workflow Status Overview (7-Step Pipeline)",
-    step1_name: "Sales Department",
-    step2_name: "Regulatory (RA)",
-    approved_badge: "APPROVED",
-    step3_name: "Production — Woods material planning",
-    step3_status: "Status: Open (In Progress)",
-    step4_name: "QA Inspection",
+    // Pipeline (8-Step Full Lifecycle)
+    pipeline_title: "8-Step Lifecycle Workflow Overview",
+    step1_name: "Sale",
+    step2_name: "RA",
+    approved_badge: "Approved",
+    step3_name: "Production",
+    step3_status: "Status: In Progress",
+    step4_name: "QC In-line",
     step4_val: "Zero Deviation",
-    step4_sub: "COA Generated",
-    step5_name: "Warehouse",
-    step5_sub: "Ready for Pick",
-    step6_name: "Shipment",
+    step4_sub: "5 Checkpoints Passed",
+    step5_name: "QA Lab",
+    step5_sub: "COA Ready",
+    step6_name: "Storage",
+    step6_sub: "Ready for Pick",
+    step7_name: "RA Verification",
+    step7_sub: "GGL / SBP / EUDR Verified",
+    step8_name: "Shipment",
 
     // Production & QC
     prod_section_title: "Production & Machinery Operations",
@@ -205,6 +231,12 @@ const translations = {
     reg_desc:
       "Export and transport licenses are set to expire on <strong>2027-03-31</strong> (Renewal required 30 days prior to expiration)",
 
+    // Time Range Filters
+    time_range_all: `All ${_dYear}`,
+    time_range_month: `${_mEn} ${_dYear}`,
+    time_range_week: "This Week",
+    time_range_today: "Today",
+    btn_print_cert: "Print EUDR Certificate",
     // Search
     result_count: "Showing {count} items",
     no_data: "No data found",
@@ -220,4 +252,61 @@ const translations = {
   },
 };
 
-let currentLang = "th";
+let currentLang = "en";
+try {
+  const savedLang = localStorage.getItem("dashboard_lang");
+  if (savedLang === "th" || savedLang === "en") currentLang = savedLang;
+  else currentLang = "en";
+} catch (e) {
+  currentLang = "en";
+}
+
+function applyLanguage(lang) {
+  currentLang = lang || currentLang || "en";
+  try { localStorage.setItem("dashboard_lang", currentLang); } catch (e) {}
+  // สลับป้ายแสดงบนปุ่ม: ถ้าหน้าเว็บเป็นภาษาอังกฤษ ให้ปุ่มแสดง "TH", ถ้าหน้าเว็บเป็นภาษาไทย ให้ปุ่มแสดง "EN"
+  const targetLabel = currentLang === "en" ? "TH" : "EN";
+  $("#lang-label").text(targetLabel);
+  $("#lang-toggle-btn").attr("title", currentLang === "en" ? "Switch to Thai (เปลี่ยนเป็นภาษาไทย)" : "Switch to English (เปลี่ยนเป็นภาษาอังกฤษ)");
+
+  $("[data-i18n]").each(function () {
+    const key = $(this).attr("data-i18n");
+    if (translations[currentLang] && translations[currentLang][key]) {
+      $(this).html(translations[currentLang][key]);
+    }
+  });
+
+  $("[data-i18n-placeholder]").each(function () {
+    const key = $(this).attr("data-i18n-placeholder");
+    if (translations[currentLang] && translations[currentLang][key]) {
+      $(this).attr("placeholder", translations[currentLang][key]);
+    }
+  });
+
+  $("html").attr("lang", currentLang);
+
+  // รีเฟรชตัวเลือกใน Dropdown Filters ให้เป็นภาษาที่เลือกพร้อมยอดนับจริง
+  if (typeof populateQueryFilters === "function") {
+    populateQueryFilters();
+  }
+
+  const view = typeof currentView !== "undefined" ? currentView : "dashboard";
+  if (view === "dashboard" && typeof renderDashboard === "function" && typeof globalData !== "undefined") {
+    renderDashboard(typeof dashboardFilteredData !== "undefined" && dashboardFilteredData.length > 0 ? dashboardFilteredData : globalData);
+  } else if (view === "query") {
+    if (typeof filterQueryTable === "function") {
+      filterQueryTable();
+    } else if (typeof renderOrderQueryView === "function") {
+      renderOrderQueryView();
+    }
+  } else if (view === "cadastral" && typeof renderCadastralView === "function") {
+    renderCadastralView();
+  } else if (view === "map" && typeof renderMapOverview === "function") {
+    renderMapOverview();
+  }
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === "en" ? "th" : "en";
+  applyLanguage(currentLang);
+}

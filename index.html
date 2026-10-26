@@ -7,12 +7,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Green River Panels — Wood Pellets Operations Dashboard</title>
+
+    <!-- Favicon (100% Local / Offline — No External Internet Connection) -->
+    <link rel="icon" type="image/x-icon" href="/BPM/wood_pellets/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='25' fill='%2315803d'/%3E%3Ccircle cx='50' cy='50' r='36' fill='%23166534'/%3E%3Cpath d='M50 20 L68 55 L58 55 L72 75 L28 75 L42 55 L32 55 Z' fill='%234ade80'/%3E%3Crect x='46' y='75' width='8' height='10' fill='%23b45309' rx='2'/%3E%3C/svg%3E" />
+
     <!-- FontAwesome & Tailwind CSS (Local / Offline) -->
     <link rel="stylesheet" href="./fontawesome-free-7.3.1-web/css/all.min.css" />
     <script src="./tailwind/tailwind_v3.js"></script>
 
     <!-- jQuery (Local / Offline) -->
     <script src="./jquery-3.7.1.min.js"></script>
+
+    <!-- SweetAlert2 (Local / Offline Standalone) -->
+    <script src="./sweetalert2/sweetalert2.all.min.js"></script>
 
     <!-- Export Libraries (Local / Offline) -->
     <script src="./xlsx.full.min.js"></script>
@@ -136,6 +144,49 @@
       .modal-pop-in {
         animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
+
+      /* GIS Map & Cadastral Map Fullscreen Support — ครอบคลุม 100% เต็มจอความกว้างและความสูง */
+      #gisMapBoxWrapper:fullscreen,
+      #gisMapBoxWrapper:-webkit-full-screen,
+      #gisMapBoxWrapper.is-map-fullscreen,
+      #cadastralMapBoxWrapper:fullscreen,
+      #cadastralMapBoxWrapper:-webkit-full-screen {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        z-index: 99999 !important;
+        margin: 0 !important;
+        padding: 14px !important;
+        border-radius: 0 !important;
+        background: #020617 !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      #gisMapBoxWrapper:fullscreen #gisMapViewport,
+      #gisMapBoxWrapper:-webkit-full-screen #gisMapViewport,
+      #gisMapBoxWrapper.is-map-fullscreen #gisMapViewport,
+      #cadastralMapBoxWrapper:fullscreen #cadastralMapViewport,
+      #cadastralMapBoxWrapper:-webkit-full-screen #cadastralMapViewport {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        border-radius: 12px !important;
+      }
+
+      #gisMapBoxWrapper:fullscreen #leafletMap,
+      #gisMapBoxWrapper:-webkit-full-screen #leafletMap,
+      #gisMapBoxWrapper.is-map-fullscreen #leafletMap,
+      #cadastralMapBoxWrapper:fullscreen #cadastralLeafletMap,
+      #cadastralMapBoxWrapper:-webkit-full-screen #cadastralLeafletMap {
+        width: 100% !important;
+        height: 100% !important;
+      }
     </style>
   </head>
 
@@ -159,42 +210,56 @@
           </div>
         </div>
 
-        <div class="flex items-center space-x-3">
-          <!-- Navigation View Tabs -->
+        <div class="flex items-center space-x-2 lg:space-x-3 shrink-0">
+          <!-- Navigation View Tabs (Clean & Compact — ป้องกันตัวอักษรล้น) -->
           <nav class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button
               id="navDashboardBtn"
               onclick="switchView('dashboard')"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center"
+              title="แดชบอร์ดภาพรวมคำสั่งซื้อและการดำเนินงาน (Dashboard Overview)"
+              class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center whitespace-nowrap"
             >
               <i class="fa-solid fa-chart-pie mr-1.5 text-indigo-600"></i>
-              <span data-i18n="nav_dashboard">ภาพรวม Dashboard</span>
+              <span data-i18n="nav_dashboard">แดชบอร์ด</span>
             </button>
             <button
               id="navQueryBtn"
               onclick="switchView('query')"
-              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center"
+              title="สืบค้นและรายงานคำสั่งซื้อ (Order Query & Reports)"
+              class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center whitespace-nowrap"
             >
               <i class="fa-solid fa-table-list mr-1.5"></i>
-              <span data-i18n="nav_query">สืบค้นคำสั่งซื้อ (Order Query)</span>
+              <span data-i18n="nav_query">สืบค้นออเดอร์</span>
             </button>
             <button
               id="navMapBtn"
               onclick="switchView('map')"
-              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center"
+              title="แผนที่ดาวเทียมแสดงหมุดพิกัดคำสั่งซื้อ (GIS Map Overview)"
+              class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center whitespace-nowrap"
             >
               <i class="fa-solid fa-map-location-dot mr-1.5 text-rose-500"></i>
-              <span data-i18n="nav_map">แผนที่พิกัดรวม (GIS Map)</span>
+              <span data-i18n="nav_map">แผนที่จุด GIS</span>
+            </button>
+            <button
+              id="navCadastralBtn"
+              onclick="switchView('cadastral')"
+              title="ตรวจสอบรูปแปลงเรขาคณิต KML / GeoJSON (Cadastral Boundary)"
+              class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center whitespace-nowrap"
+            >
+              <i class="fa-solid fa-draw-polygon mr-1.5 text-emerald-600"></i>
+              <span data-i18n="nav_cadastral">รูปแปลงที่ดิน</span>
             </button>
           </nav>
 
-          <!-- Language Button -->
+          <!-- Language Button (สลับแสดงภาษาเป้าหมาย: หน้าเว็บ EN จะแสดง TH) -->
           <button
+            id="lang-toggle-btn"
             onclick="toggleLanguage()"
             class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+            title="Switch to Thai (เปลี่ยนเป็นภาษาไทย)"
           >
             <i class="fa-solid fa-globe text-indigo-600 mr-1"></i>
-            <span id="lang-label">EN / TH</span>
+            <span id="lang-label">TH</span>
           </button>
         </div>
       </div>
@@ -205,16 +270,53 @@
       
       <!-- VIEW 1: Main Dashboard (Operations View) -->
       <div id="dashboardView" class="space-y-8">
-        <!-- Quick Search for Dashboard -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <input
-            type="text"
-            id="searchInput"
-            onkeyup="filterDashboard()"
-            data-i18n-placeholder="search_placeholder"
-            placeholder="ค้นหาด้วย Order No หรือ ชื่อลูกค้า..."
-            class="w-full sm:w-80 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
-          />
+        <!-- Quick Search & Time Range Filter for Dashboard -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="relative w-full sm:w-80">
+              <input
+                type="text"
+                id="searchInput"
+                onkeyup="filterDashboard()"
+                data-i18n-placeholder="search_placeholder"
+                placeholder="ค้นหาด้วย Order No หรือ ชื่อลูกค้า..."
+                class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+              />
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+            </div>
+
+            <!-- Time Range Quick Selector Pills -->
+            <div class="inline-flex items-center p-1 bg-slate-100 rounded-xl space-x-1 text-xs">
+              <button
+                type="button"
+                id="pill-range-all"
+                onclick="filterDashboardTimeRange('all')"
+                class="dashboard-time-pill px-3 py-1 rounded-lg font-semibold transition-all bg-indigo-600 text-white shadow-xs"
+                data-i18n="time_range_all"
+              >All 2026</button>
+              <button
+                type="button"
+                id="pill-range-month"
+                onclick="filterDashboardTimeRange('month')"
+                class="dashboard-time-pill px-3 py-1 rounded-lg font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-white"
+                data-i18n="time_range_month"
+              >Oct 2026</button>
+              <button
+                type="button"
+                id="pill-range-week"
+                onclick="filterDashboardTimeRange('week')"
+                class="dashboard-time-pill px-3 py-1 rounded-lg font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-white"
+                data-i18n="time_range_week"
+              >This Week</button>
+              <button
+                type="button"
+                id="pill-range-today"
+                onclick="filterDashboardTimeRange('today')"
+                class="dashboard-time-pill px-3 py-1 rounded-lg font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-white"
+                data-i18n="time_range_today"
+              >Today</button>
+            </div>
+          </div>
 
           <div id="searchResultCount" class="text-xs text-slate-500 font-medium"></div>
         </div>
@@ -222,11 +324,11 @@
         <!-- KPI Cards -->
         <div id="kpiCardsContainer"></div>
 
-        <!-- 7-Step Pipeline -->
+        <!-- 8-Step Pipeline -->
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h2 class="text-base font-bold text-slate-900 mb-6 flex items-center">
             <i class="fa-solid fa-diagram-project text-indigo-600 mr-2"></i>
-            <span> ภาพรวมสถานะขั้นตอนการทำงาน (7-Step Pipeline) </span>
+            <span data-i18n="pipeline_title">8-Step Lifecycle Workflow Overview</span>
           </h2>
           <div id="pipelineContainer"></div>
         </div>
@@ -362,6 +464,7 @@
               <h2 class="text-base font-bold text-slate-900 flex items-center">
                 <i class="fa-solid fa-database text-indigo-600 mr-2"></i>
                 <span data-i18n="query_title">สืบค้นรายการคำสั่งซื้อทั้งหมด (Order Master Query)</span>
+                <span id="queryDataSourceBadge" class="ml-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs"><i class="fa-solid fa-cube text-amber-500 mr-1"></i>Mock Data</span>
               </h2>
               <p class="text-xs text-slate-500 mt-0.5" data-i18n="query_subtitle">
                 ค้นหา กรองข้อมูล และส่งออกรายงาน (20 แถว/หน้า)
@@ -468,7 +571,7 @@
               />
             </div>
 
-            <!-- Year Filter -->
+            <!-- Year Filter (Dynamic: Mockdata -> DB) -->
             <div>
               <select
                 id="queryYearFilter"
@@ -476,13 +579,10 @@
                 class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
               >
                 <option value="ALL">-- ทุกปี (All Years) --</option>
-                <option value="2026" selected>ปี 2026</option>
-                <option value="2025">ปี 2025</option>
-                <option value="2027">ปี 2027</option>
               </select>
             </div>
 
-            <!-- Month Filter -->
+            <!-- Month Filter (Dynamic: Mockdata -> DB) -->
             <div>
               <select
                 id="queryMonthFilter"
@@ -490,22 +590,10 @@
                 class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
               >
                 <option value="ALL">-- ทุกเดือน (All Months) --</option>
-                <option value="01">มกราคม (Jan)</option>
-                <option value="02">กุมภาพันธ์ (Feb)</option>
-                <option value="03">มีนาคม (Mar)</option>
-                <option value="04">เมษายน (Apr)</option>
-                <option value="05">พฤษภาคม (May)</option>
-                <option value="06">มิถุนายน (Jun)</option>
-                <option value="07">กรกฎาคม (Jul)</option>
-                <option value="08">สิงหาคม (Aug)</option>
-                <option value="09">กันยายน (Sep)</option>
-                <option value="10">ตุลาคม (Oct)</option>
-                <option value="11">พฤศจิกายน (Nov)</option>
-                <option value="12">ธันวาคม (Dec)</option>
               </select>
             </div>
 
-            <!-- Step Filter -->
+            <!-- Step Filter (Dynamic: Mockdata -> DB) -->
             <div>
               <select
                 id="queryStepFilter"
@@ -513,17 +601,10 @@
                 class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
               >
                 <option value="ALL">-- ทุกขั้นตอน (All Steps) --</option>
-                <option value="1">Step 1: Sale</option>
-                <option value="2">Step 2: RA</option>
-                <option value="3">Step 3: Woods Planning</option>
-                <option value="4">Step 4: Pelletizing</option>
-                <option value="5">Step 5: QA</option>
-                <option value="6">Step 6: Warehouse</option>
-                <option value="7">Step 7: Shipment</option>
               </select>
             </div>
 
-            <!-- Status Filter -->
+            <!-- Status Filter (Dynamic: Mockdata -> DB) -->
             <div>
               <select
                 id="queryStatusFilter"
@@ -531,8 +612,6 @@
                 class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
               >
                 <option value="ALL">-- ทุกสถานะ (All Statuses) --</option>
-                <option value="In Production">อยู่ระหว่างการผลิต</option>
-                <option value="On Schedule">ตามกำหนดการ</option>
               </select>
             </div>
           </div>
@@ -593,6 +672,12 @@
         <!-- Map View Content Container (Rendered dynamically) -->
         <div id="mapViewContainer"></div>
       </div>
+
+      <!-- VIEW 4: Cadastral Boundary Polygon View (KML / GeoJSON Inspector) -->
+      <div id="cadastralView" class="hidden space-y-6">
+        <!-- Cadastral View Content Container (Rendered dynamically) -->
+        <div id="cadastralViewContainer"></div>
+      </div>
     </main>
 
     <!-- Green River Panels Wood Pellets BPM Full Form Modal -->
@@ -630,11 +715,11 @@
               <i class="fa-solid fa-map-location-dot"></i>
             </div>
             <div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900" id="mapModalHeaderTitle">
-                พิกัดแปลงปลูกไม้และโรงงาน (EUDR Geolocation)
+              <h3 class="text-sm sm:text-base font-bold text-slate-900" id="mapModalHeaderTitle" data-i18n="map_modal_title">
+                EUDR Geolocation & Plantation Mapping
               </h3>
               <p class="text-[11px] text-slate-500" id="mapModalHeaderSub">
-                ตรวจสอบตำแหน่งแหล่งกำเนิดไม้ตามคำสั่งซื้อ
+                Biomass Origin & EUDR Compliance Traceability
               </p>
             </div>
           </div>
@@ -647,13 +732,143 @@
       </div>
     </div>
 
+    <!-- Modal สำหรับนำเข้าไฟล์ KML / GeoJSON พร้อมผูกกับ MO No. และป้องกันแปลงซ้ำ -->
+    <div id="cadastralImportModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden modal-pop-in border border-slate-100">
+        <!-- Modal Top Bar -->
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50/50">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+              <i class="fa-solid fa-file-arrow-up text-sm"></i>
+            </div>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">
+                นำเข้าแปลงที่ดิน (KML / GeoJSON)
+              </h3>
+              <p class="text-[11px] text-slate-500">
+                รองรับไฟล์จาก Google Earth และมาตรฐาน EUDR
+              </p>
+            </div>
+          </div>
+          <button onclick="closeCadastralImportModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/60 transition-colors">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body Content -->
+        <div class="p-6 space-y-4">
+          <!-- เลือกไฟล์ KML หรือ GeoJSON -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+              1. เลือกไฟล์ KML หรือ GeoJSON: <span class="text-rose-500">*</span>
+            </label>
+            <div 
+              onclick="document.getElementById('modalCadastralFileInput').click()"
+              class="border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/30 hover:bg-emerald-50/70 p-4 rounded-2xl text-center cursor-pointer transition-all"
+            >
+              <i class="fa-solid fa-cloud-arrow-up text-3xl text-emerald-600 mb-1.5"></i>
+              <p class="text-xs font-bold text-slate-800" id="modalFileNameDisplay">
+                คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่
+              </p>
+              <p class="text-[10px] text-slate-500 mt-0.5">
+                รองรับนามสกุล .kml, .kmz, .geojson, .json
+              </p>
+            </div>
+            <input 
+              type="file" 
+              id="modalCadastralFileInput" 
+              accept=".kml,.geojson,.json" 
+              class="hidden" 
+              onchange="onModalFileSelected(event)" 
+            />
+          </div>
+
+          <!-- เลือก MO No. ที่ต้องการผูก -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+              2. ผูกแปลงนี้เข้ากับคำสั่งซื้อ (MO No.):
+            </label>
+            <select 
+              id="modalTargetMoNo" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+            >
+              <option value="AUTO">🔍 ตรวจจับอัตโนมัติจากชื่อไฟล์ / ชื่อแปลง (Auto-Detect)</option>
+              <option value="NONE">-- แปลงทั่วไป (ยังไม่ผูกกับ MO) --</option>
+            </select>
+            <p class="text-[10px] text-slate-400 mt-1">
+              * ถ้าระบุ MO จะแสดงป้ายรหัส MO บนแผนที่และเชื่อมโยงกับคำสั่งซื้อนั้นทันที
+            </p>
+          </div>
+
+          <!-- ตัวเลือกป้องกันข้อมูลแปลงซ้ำซ้อน -->
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1.5">
+            <label class="flex items-start space-x-2.5 cursor-pointer">
+              <input 
+                type="checkbox" 
+                id="modalCheckDuplicate" 
+                checked 
+                class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+              />
+              <span class="text-xs text-slate-700 font-medium">
+                <strong>ตรวจจับแปลงซ้ำอัตโนมัติ (Smart De-duplication):</strong>
+                <span class="block text-[10px] text-slate-500">
+                  หากพบว่ามีพิกัดเดียวกันหรือชื่อแปลงซ้ำ จะทำการอัปเดตข้อมูลเป็นเวอร์ชันล่าสุด แทนที่จะสร้างหมุดใหม่ซ้ำซ้อน
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Modal Footer Buttons -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-2">
+          <button 
+            type="button" 
+            onclick="closeCadastralImportModal()"
+            class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold border border-slate-200 transition-colors"
+          >
+            ยกเลิก
+          </button>
+          <button 
+            type="button" 
+            onclick="submitCadastralImportModal()"
+            id="btnConfirmModalImport"
+            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center"
+          >
+            <i class="fa-solid fa-check mr-1.5"></i> เริ่มนำเข้าข้อมูล
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Hidden Iframe สำหรับสั่งพิมพ์เอกสาร BPM โดยเฉพาะ (ป้องกันไม่ให้ติด about:blank ที่หัว/ท้ายกระดาษ) -->
     <iframe id="bpmPrintIframe" style="position:fixed; right:0; bottom:0; width:0; height:0; border:0; visibility:hidden;"></iframe>
 
-    <!-- JavaScript -->
-    <script src="./app.js"></script>
+    <!-- 1. Language & Data Store -->
     <script src="./language.js"></script>
-    <script src="./components.js"></script>
     <script src="./data.js"></script>
+
+    <!-- 2. UI Components (Modularized: < 400 lines per file) -->
+    <script src="./components/kpi_pipeline.js"></script>
+    <script src="./components/production_table.js"></script>
+    <script src="./components/query_components.js"></script>
+    <script src="./components/bpm_modal.js"></script>
+    <script src="./components/bpm_print_style.js"></script>
+    <script src="./components/bpm_print.js"></script>
+    <script src="./components/map_overview.js"></script>
+    <script src="./components/cadastral_view.js"></script>
+
+    <!-- 3. Logic Engines & Controllers (Modularized: < 400 lines per file) -->
+    <script src="./js/cadastral_engine.js"></script>
+    <script src="./js/cadastral_export.js"></script>
+    <script src="./js/cadastral_map_ctrl.js"></script>
+    <script src="./js/cadastral_upload_ctrl.js"></script>
+    <script src="./js/gis_map_ctrl.js"></script>
+    <script src="./js/export_period_ctrl.js"></script>
+    <script src="./js/query_controller.js"></script>
+    <script src="./js/dashboard_controller.js"></script>
+    <script src="./js/complaint_ctrl.js"></script>
+
+    <!-- 4. Core Router & Main App Lifecycle -->
+    <script src="./app.js"></script>
   </body>
 </html>

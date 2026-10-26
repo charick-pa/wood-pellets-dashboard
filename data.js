@@ -563,13 +563,17 @@ function generateMockOrders() {
 
     // ตรวจสอบและกำหนด orderDate, shipmentDate และ location พิกัด GPS ให้ทุกรายการ
     baseOrders.forEach((o, i) => {
-        if (!o.orderDate) {
-            const m = String((i % 12) + 1).padStart(2, '0');
-            o.orderDate = `2026-${m}-${String((i % 25) + 1).padStart(2, '0')}`;
-        }
-        if (!o.requestedDeliveryDate) {
-            o.requestedDeliveryDate = o.orderDate;
-        }
+        let yr = "2026";
+        if (i % 7 === 1) yr = "2027";
+        else if (i % 7 === 2) yr = "2028";
+        else if (i % 7 === 3) yr = "2025";
+
+        const m = String((i % 12) + 1).padStart(2, '0');
+        const day = String((i % 25) + 1).padStart(2, '0');
+        o.orderDate = `${yr}-${m}-${day}`;
+        o.requestedDeliveryDate = `${yr}-${m}-${day}`;
+        if (!o.step6) o.step6 = {};
+        o.step6.etd = `${yr}/${m}/${day}`;
 
         // กำหนดพิกัด Geolocation สำหรับ EUDR และแผนที่
         const loc = mockLocations[i % mockLocations.length];
@@ -582,6 +586,171 @@ function generateMockOrders() {
             eudrStatus: loc.eudrStatus,
             googleMapsUrl: `https://www.google.com/maps?q=${loc.lat},${loc.lng}`
         };
+
+        // --- เพิ่มข้อมูลตามสเปกทางการล่าสุด (BPM Full 8-Step Lifecycle Specification) ---
+        // Header Fields
+        o.applicationNo = o.applicationNo || `APP-2026-${String(9820 + i)}`;
+        o.applicationDate = o.orderDate || "2026/09/28";
+        o.applicant = o.applicant || "Sompong K. (Operations Coordinator)";
+        o.applicantDept = o.applicantDept || "Operations Department";
+        o.requestor = o.requestor || "Natrutdin Y. (Regional Sales Director)";
+        o.requestorDept = o.requestorDept || "Sales & Supply Chain";
+        o.company = o.company || "Green River Panels (Thailand) Co., Ltd.";
+        o.importance = o.importance || "Normal";
+        o.justification = o.justification || "Export contract fulfilment and scheduled biomass dispatch";
+
+        // Step 1: Sale Department & Planning
+        o.customerCode = o.customerCode || `0${2540 + (i % 20)}`;
+        o.fromCountry = o.fromCountry || (i % 3 === 0 ? "US" : (i % 3 === 1 ? "JP" : "NL"));
+        o.address = o.address || "99/1 Moo 2, Asian Highway 2, Hat Yai, Songkhla 90110";
+        o.contactPerson = o.contactPerson || "Mr. Thomason / International Trading Lead";
+        o.emailTel = o.emailTel || "sales@greenriverholding.com / +66 74 890 123";
+        o.customerPoNo = o.customerPoNo || o.poNo || `PO-ABC-2026-00${(i % 9) + 1}`;
+        o.piNo = o.piNo || `PO-ABC-2026-00${(i % 9) + 1}`;
+        o.productCode = o.productCode || (i % 2 === 0 ? "WP-001" : "WP-002");
+        o.productName = o.productName || "Wood Pellets (Bio-Fuel)";
+        o.productType = o.productType || "1. 0.6mm±1mm, 2. 0.8mm±1mm";
+        o.shipToLocation = o.shipToLocation || o.destination || "Port of Japan";
+        o.deliveryDateReq = o.requestedDeliveryDate;
+        o.deliveryDateTarget = o.deliveryDateTarget || o.requestedDeliveryDate;
+        o.certRequirement = o.certRequirement || "SBP, GGL, FSC-100%";
+        o.otherCertificate = o.otherCertificate || "ENplus A1 Standard";
+        o.customerReq = o.customerReq || "Rubberwood, Pellet Diameter 0.6mm±1mm, Moisture ≤10%, Ash ≤3%, Calorie ≥4,000 kcal/kg, Density ≥600 kg/m³, Fines ≤1%, Bulk Shipment, COA, Inspection";
+        o.specialReq = o.specialReq || "ต้องแจ้งลูกค้าหากคุณภาพของสินค้าไม่เป็นไปตามข้อกำหนด, Moisture ≤8%, ตรวจทุก Batch, ส่ง COA ก่อนโหลด, Weather Protection";
+
+        // Planning
+        o.planPiNo = o.piNo;
+        o.planMoNo = o.moNo || `MP202600${String(10 + (i % 90))}`;
+        o.planDateStart = o.planStartDate || "2026/09/28";
+        o.planDateFinish = o.planEndDate || "2026/09/30";
+        o.planBatchNo = o.planBatchNo || `SBP-xx-YY-02-${String(3000 + i)}`;
+        o.planProdDesc = o.planProdDesc || "Rubber wood pellets";
+        o.planCertScheme = o.planCertScheme || "SBP, GGL";
+        o.planProductCode = o.planProductCode || "Bwp.12-08";
+        o.planVolume = o.planVolume || o.orderQuantity || "5,000 MT";
+
+        // Step 2: RA Regulatory & Requirements
+        o.step2 = Object.assign({
+            name: "Regulatory (RA)",
+            status: "APPROVED",
+            regCertStatus: "APPROVED & VALID (Valid through 2028-12-31)",
+            certStatus: "APPROVED & VALID (Valid through 2028-12-31)",
+            licenseExpiry: "2027-09-30 (Active until late next year)",
+            specReq: "EN 10204 3.1 Material Certification, ASME B16.34 Pressure Class 2500, and 100% Non-Destructive Hydrostatic Testing at 525 bar for 15 minutes.",
+            labelReq: "QR-Code Barcode Label (100x150 mm) containing PO No., Serial Range, Batch No., ISO Compliance Mark, and Direct CoA URL Download link.",
+            packagingReq: "VCI Anti-Corrosion Vacuum Sealed Polybags, individual shock-proof foam casing, packed in heavy-duty ISPM-15 heat-treated Wooden Crates (max 50 units/crate) with ShockWatch & TiltWatch indicator stickers.",
+            customerRegulatory: "RoHS 3 (EU 2015/863) & REACH Compliance, Pressure Equipment Directive (PED 2014/68/EU) Category III Module H, and Thai Industrial Standards (TISI / มอก.) Certification for high-pressure fluid power equipment.",
+            transportExpiry: "2027-03-31 (Active transport permit; renewal required 30 days prior to expiration)",
+            infoSupplier: "As Attachment (Verified Supplier Dossier)"
+        }, o.step2 || {});
+
+        // Step 3: Production Woods Material Planning & Factory Execution
+        o.step3 = Object.assign({
+            name: "Production Woods material planning",
+            planned: parseInt(String(o.orderQuantity || "5000").replace(/[^0-9]/g, '')) || 20000,
+            actual: Math.round((parseInt(String(o.orderQuantity || "5000").replace(/[^0-9]/g, '')) || 20000) * 0.82),
+            unit: "Ton",
+            yield: "90,000 Ton",
+            totalUptime: "5760 mins.",
+            totalDowntime: "40 mins.",
+            startDate: o.planDateStart,
+            startTime: "02:00",
+            finishDate: o.planDateFinish,
+            finishTime: "07:00",
+            materialCode: "BWP-11-08 / BWP-12-08",
+            plantSupervisor: "Operations Lead",
+            rawMaterialReq: "Log amount: 12,000 Ton | Slab amount: 5,000 Ton | Sawdust amount: 3,000 Ton",
+            productionIssue: "It couldn’t be pressed into solid bar because raw materials were too dry (moisture adjusted).",
+            fac1StatusUtil: "Downtime: 40 mins | Cause: Raw material dry | Fuels: 1,200 L | Electricity: 85,000 kWh",
+            fac2StatusUtil: "Downtime: 0 mins | Cause: None | Fuels: 950 L | Electricity: 78,000 kWh",
+            feedLines: ["Hammer mill", "Flaker 3", "Flaker 4"]
+        }, o.step3 || {});
+
+        // Step 4: QC In-line 5 Checkpoints
+        o.step4_qc = {
+            batchNo: o.step3.batchNo || "1-4",
+            testDate: o.step3.finishDate || "2026/10/10",
+            paramLogsSlab: "Cleanliness (%): Refer wood spec | Moisture content (≤ 70%): 60%",
+            paramSawdust: "Moisture content (≤ 60%): 64%",
+            paramChipper: "Moisture content (≤ 60%): 64%",
+            paramAfterDryer: "Moisture content (≤12 - 14 %): 14%",
+            paramAfterMagnetic: "Diameter and length: Verified | Moisture content (≤12 - 14 %): 14%",
+            status: "5 Checkpoints In-Line Verified (Zero Dev)"
+        };
+
+        // Step 5: QA Laboratory Results & Final COA
+        o.step5_qa = {
+            testDate: o.step3.finishDate || "2026/10/10",
+            sawdustMoisture: "Moisture: 47%",
+            paramChipper: "Chips length (30±10): 30 mm | width (25±5): 25.5 mm | Thickness (≤8): 8 mm",
+            paramHammerMill: "Length (25±15): 30 mm | width (25±5): 25.5 mm | Thickness (≤8): 8 mm",
+            paramMagneticPellets: "Diameter (8±1 mm): 8 mm | Length (25±15mm): 26 mm | Moisture (<10%): 7% | Bulk density (>600kg/m3): 600 kg/m3 | Fines below (>1.0%): 1.0% | Ash content (<2%): 1.5% | Mechanical durability (>97.5%): 97.5%",
+            nonCompliance: "GGL, SBP (None - Fully Compliant)",
+            bulkWarehouses: "Moisture content (20±10%): 27% | Bulk density (>600kg/m3): 650 | Fines below (> 1.0): 1.0%",
+            coaReferenced: "COA: Customer’s requirements | Referenced TPC test report: TPC-2026-WP-098",
+            analyst: "Somchai P. / Lead QC Inspector",
+            coaFile: `COA-202610-LF2-0${String(3918 + i)}.pdf`
+        };
+
+        // Step 6: Storage & Warehouse
+        o.step6_storage = Object.assign({
+            packingDailyReport: `PDR-202610-A0${(i % 5) + 1}`,
+            packingDateStart: "2026-10-20",
+            packingDateFinish: "2026-12-30",
+            packingMtdQties: "4,850 MT",
+            bigBagLabelNo: "factory 1 : BB-GRP1-2026-001 | factory 2 : BB-GRP2-2026-002",
+            selectionDateFrom: "2026-10-20",
+            selectionDateTo: "2026-12-30",
+            material: "BWP-11-08 / BWP-12-08",
+            storageLocation: (i % 2 === 0 ? "Warehouse 1" : "Warehouse 2"),
+            openingStock: "1000 Ton (ยอดยกมา)",
+            totalReceiptQties: "500 Ton (จำนวนที่รับเข้า)",
+            totalIssueQties: "300 Ton (จำนวนที่จ่ายออก)",
+            closingStock: "1200 Ton (สินค้าคงเหลือยกไป)",
+            inventoryController: "Warehouse Manager"
+        }, o.step5 || {});
+
+        // Step 7: RA Gather Info (Compliance Dossier Checklists)
+        o.step7_ra_dossier = {
+            gglFitFip: [
+                { name: "Cover letter", checked: true },
+                { name: "Transaction Statement", checked: true },
+                { name: "Transaction Certificate from CU", checked: true },
+                { name: "Transport Documents from Shipping", checked: true },
+                { name: "Certificate of Cleanliness from Shipping", checked: true },
+                { name: "GeoJSON", checked: true },
+                { name: "Non Compliance Document : GGL, SBP", checked: true }
+            ],
+            gglSde: [
+                { name: "Cover Letter", checked: true },
+                { name: "Transaction Statement", checked: true },
+                { name: "Transaction Certificate", checked: true },
+                { name: "Transport Documents", checked: true },
+                { name: "Certificate of Cleanliness", checked: true },
+                { name: "EUDR Data Sheet", checked: true },
+                { name: "GeoJSON (Refer Email)", checked: true }
+            ],
+            sbpEudr: [
+                { name: "Refer 1. (PDF)", checked: true },
+                { name: "EUDR Data Sheet", checked: true },
+                { name: "GeoJSON (Refer Email)", checked: true }
+            ]
+        };
+
+        // Step 8: Shipment & Shipping
+        o.step8_shipping = Object.assign({
+            saNumber: `SA-202610-0${String(3918 + i)}-ISO`,
+            customerName: o.customer || "Bnbm company (ABC Biomass)",
+            pod: o.destination || "ANTWERP (or Port of Japan)",
+            shippingLine: o.step6?.shippingLine || (i % 2 === 0 ? "EVG" : "MAERSK"),
+            bookingNo: o.step6?.bookingNo || "09050012456",
+            transitTime: o.step6?.transitTime || "30 days",
+            loadingDate: `${yr}/09/30`,
+            finishedDate: `${yr}/07/09`,
+            etd: o.step6?.etd || `${yr}/${m}/${day}`,
+            eta: o.step6?.eta || `${yr}/${String(Math.min(12, parseInt(m) + 1)).padStart(2, '0')}/${day}`,
+            atd: `${yr}/11/10`
+        }, o.step6 || {});
     });
 
     return baseOrders;
@@ -633,6 +802,8 @@ function loadDashboardData() {
             totalDowntimeMins: 4000,
             closingStockTotal: "3,500 Ton"
         };
+        window.globalSummary = globalSummary;
+        window.globalData = globalData;
 
         renderDashboard(globalData);
     } catch (error) {
