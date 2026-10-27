@@ -10,6 +10,9 @@ function renderCadastralView() {
   ensureCadastralPlotsInitialized();
 
   if (window.Components && typeof window.Components.renderCadastralView === "function") {
+    if (!$("#cadastralViewContainer").length && $("#cadastralView").length) {
+      $("#cadastralView").html('<div id="cadastralViewContainer"></div>');
+    }
     $("#cadastralViewContainer").html(
       window.Components.renderCadastralView(window.cadastralPlots, window.activeCadastralPlotId)
     );

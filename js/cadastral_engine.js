@@ -352,11 +352,11 @@ function deleteActiveCadastralPlot() {
       const nextPlot = remainingPlots[0] || null;
       window.activeCadastralPlotId = nextPlot ? nextPlot.id : null;
 
-      if (window.Components && typeof window.Components.renderCadastralView === "function") {
-        $("#cadastralView").html(window.Components.renderCadastralView(remainingPlots, window.activeCadastralPlotId));
+      if (!$("#cadastralViewContainer").length && $("#cadastralView").length) {
+        $("#cadastralView").html('<div id="cadastralViewContainer"></div>');
       }
-      if (nextPlot && typeof drawCadastralPlot === "function") {
-        setTimeout(() => { drawCadastralPlot(nextPlot.id); }, 150);
+      if (typeof renderCadastralView === "function") {
+        renderCadastralView();
       }
 
       if (typeof showSwalSuccess === "function") {
