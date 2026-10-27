@@ -96,6 +96,7 @@ function drawCadastralPlot(plotId) {
   if (!plot || !plot.coordinates || plot.coordinates.length < 3) return;
 
   window.activeCadastralPlotId = plotId;
+  updateSiblingPlotPillHighlight(plotId);
 
   if (window.cadastralPolygonLayer) {
     window.cadastralMapInstance.removeLayer(window.cadastralPolygonLayer);
@@ -187,6 +188,7 @@ function drawAllPlotsForMo(moNo) {
 
   const colors = ["#10b981", "#6366f1", "#f59e0b", "#06b6d4", "#ec4899", "#8b5cf6"];
   const group = L.featureGroup();
+  window.cadastralMoPolygons = {};
 
   plots.forEach((p, idx) => {
     const col = colors[idx % colors.length];
@@ -198,6 +200,11 @@ function drawAllPlotsForMo(moNo) {
       fillOpacity: 0.25
     });
 
+    poly._origColor = col;
+    window.cadastralMoPolygons = window.cadastralMoPolygons || {};
+    window.cadastralMoPolygons[p.id] = poly;
+    poly.on("click", () => { selectCadastralPlot(p.id); });
+
     poly.bindPopup(`
       <div class="text-xs p-1 font-sans">
         <div class="font-bold text-slate-900 border-b pb-1 mb-1.5 flex items-center">
@@ -206,7 +213,7 @@ function drawAllPlotsForMo(moNo) {
         <p class="text-slate-600 mb-1"><strong>คำสั่งซื้อ:</strong> <span class="text-indigo-700 font-bold">${p.linkedMoNo}</span> (แปลงที่ ${idx + 1}/${plots.length})</p>
         <p class="text-slate-600 mb-1"><strong>เนื้อที่:</strong> ${p.thaiArea.rai} ไร่ ${p.thaiArea.ngan} งาน ${p.thaiArea.sqWah} ตร.ว.</p>
         <div class="mt-2 text-center">
-          <button onclick="drawCadastralPlot('${p.id}')" class="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-bold hover:bg-slate-800">
+          <button onclick="selectCadastralPlot('${p.id}')" class="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[10px] font-bold hover:bg-indigo-700 shadow-xs">
             ดูเจาะจงแปลงนี้
           </button>
         </div>
@@ -227,50 +234,28 @@ function drawAllPlotsForMo(moNo) {
 }
 
 function toggleCadastralFullscreen() {
-  const $wrapper = $("#cadastralMapBoxWrapper");
-  const $viewport = $("#cadastralMapViewport");
+  const $wrapper = $("#cadastralMapBoxWrapper"), $viewport = $("#cadastralMapViewport");
   const wrapperEl = document.getElementById("cadastralMapBoxWrapper");
-
   if (!$wrapper.length || !$viewport.length) return;
-
   isCadastralFullscreen = !isCadastralFullscreen;
 
   if (isCadastralFullscreen) {
-    $wrapper
-      .addClass("fixed inset-0 z-[99999] w-screen h-screen rounded-none p-4 bg-slate-950 m-0")
-      .removeClass("w-full rounded-3xl");
-    $viewport
-      .removeClass("h-[580px]")
-      .addClass("flex-1 h-full min-h-[85vh]");
-
+    $wrapper.addClass("fixed inset-0 z-[99999] w-screen h-screen rounded-none p-4 bg-slate-950 m-0").removeClass("w-full rounded-3xl");
+    $viewport.removeClass("h-[580px]").addClass("flex-1 h-full min-h-[85vh]");
     $("#cadastralFullscreenText").text("ย่อหน้าจอ");
     $("#cadastralFullscreenIcon").removeClass("fa-expand text-emerald-300").addClass("fa-compress text-rose-400");
-    $("#cadastralFullscreenFloatingInfo").removeClass("hidden");
     $("body").addClass("overflow-hidden");
-
-    if (wrapperEl && wrapperEl.requestFullscreen && !document.fullscreenElement) {
-      wrapperEl.requestFullscreen().catch(() => {});
-    }
+    if (wrapperEl && wrapperEl.requestFullscreen && !document.fullscreenElement) wrapperEl.requestFullscreen().catch(() => {});
   } else {
-    $wrapper
-      .removeClass("fixed inset-0 z-50 w-screen h-screen rounded-none p-4 bg-slate-950 m-0")
-      .addClass("w-full rounded-3xl");
-    $viewport
-      .addClass("h-[580px]")
-      .removeClass("flex-1 h-full min-h-[85vh]");
-
+    $wrapper.removeClass("fixed inset-0 z-[99999] w-screen h-screen rounded-none p-4 bg-slate-950 m-0").addClass("w-full rounded-3xl");
+    $viewport.addClass("h-[580px]").removeClass("flex-1 h-full min-h-[85vh]");
     $("#cadastralFullscreenText").text("เต็มจอ");
     $("#cadastralFullscreenIcon").removeClass("fa-compress text-rose-400").addClass("fa-expand text-emerald-300");
-    $("#cadastralFullscreenFloatingInfo").addClass("hidden");
     $("body").removeClass("overflow-hidden");
-
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
-    }
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }
 
   if (window.cadastralMapInstance) {
-    window.cadastralMapInstance.invalidateSize();
     setTimeout(() => {
       if (window.cadastralMapInstance) {
         window.cadastralMapInstance.invalidateSize();
@@ -293,74 +278,102 @@ function toggleCadastralCornerPins() {
   }
 }
 
-function onCadastralPlotSelectChange(plotId) {
+// ไฮไลต์ปุ่ม Pill ของแปลงที่เลือกในกล่อง Sibling Plots
+function updateSiblingPlotPillHighlight(plotId) {
+  $(".sibling-plot-pill").each(function () {
+    const pid = $(this).attr("data-plot-id");
+    if (pid === plotId) {
+      $(this).removeClass("bg-white hover:bg-indigo-100 text-slate-700 border-slate-200")
+             .addClass("bg-indigo-600 text-white shadow-xs font-bold ring-2 ring-indigo-300");
+    } else {
+      $(this).removeClass("bg-indigo-600 text-white shadow-xs font-bold ring-2 ring-indigo-300")
+             .addClass("bg-white hover:bg-indigo-100 text-slate-700 border border-slate-200");
+    }
+  });
+}
+
+// อัปเดตข้อมูลในการ์ดและตารางพิกัดมุมแปลงแบบไดนามิก
+function updateCadastralDetailsCards(plot) {
+  if (!plot) return;
+  const isTh = (typeof currentLang !== "undefined" && currentLang === "th");
+  $("#cadastralMapStatusText").text(plot.name);
+  if (plot.thaiArea) {
+    const aText = isTh ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว.` : `${plot.thaiArea.rai} Rai ${plot.thaiArea.ngan} Ngan ${plot.thaiArea.sqWah} Sq.w.`;
+    $("#activePlotThaiArea").text(aText);
+    $("#activePlotSqMeters").text(`${plot.thaiArea.sqMeters} ${isTh ? 'ตร.ม.' : 'Sq.m.'}`);
+    $("#activePlotHectares").text(`${plot.thaiArea.hectares} ${isTh ? 'เฮกตาร์ (Ha)' : 'Hectares (Ha)'}`);
+  }
+  $("#activePlotSourceFile").text(plot.fileName || plot.fileType || "-");
+  $("#activePlotUploadedAt").text(plot.uploadedAt || "-");
+  $("#activePlotVertexCount").text(`${plot.vertices ? plot.vertices.length : 0} ${isTh ? 'จุดมุมแปลง' : 'Vertices'}`);
+
+  if (plot.vertices && plot.vertices.length > 0) {
+    let rHtml = "";
+    plot.vertices.forEach((v, vIdx) => {
+      rHtml += `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100 text-xs">
+        <td class="py-1.5 px-3 font-bold text-center text-slate-700">#${v.no || (vIdx + 1)}</td>
+        <td class="py-1.5 px-3 font-mono text-emerald-700 font-medium">${Number(v.lat).toFixed(6)}</td>
+        <td class="py-1.5 px-3 font-mono text-indigo-700 font-medium">${Number(v.lng).toFixed(6)}</td>
+      </tr>`;
+    });
+    $("#cadastralVertexTableBody").html(rHtml);
+  }
+}
+
+// เลือกแปลงที่ดิน: ไฮไลต์ปุ่ม, ซิงก์ Dropdown, โฟกัสแผนที่, และอัปเดตการ์ดข้อมูล
+function selectCadastralPlot(plotId) {
   if (!plotId) return;
   window.activeCadastralPlotId = plotId;
-  renderCadastralView();
+  const plot = (window.cadastralPlots || []).find(p => p.id === plotId);
+  if (!plot) return;
+
+  // 1. ไฮไลต์ปุ่ม Pill ทันที
+  updateSiblingPlotPillHighlight(plotId);
+
+  // 2. ซิงก์ตัวเลือกใน Dropdown หลัก
+  $("#cadastralPlotSelect").val(plotId);
+
+  // 3. ไฮไลต์บนแผนที่
+  if (window.cadastralMoPolygons && window.cadastralMoPolygons[plotId]) {
+    Object.keys(window.cadastralMoPolygons).forEach(id => {
+      const lyr = window.cadastralMoPolygons[id];
+      if (lyr && lyr._origColor) lyr.setStyle({ color: lyr._origColor, weight: 3.5, fillOpacity: 0.25 });
+    });
+    const targetPoly = window.cadastralMoPolygons[plotId];
+    targetPoly.setStyle({ color: "#f59e0b", weight: 6, fillOpacity: 0.65 });
+    targetPoly.bringToFront();
+    targetPoly.openPopup();
+    if (window.cadastralMapInstance) {
+      window.cadastralMapInstance.panTo(targetPoly.getBounds().getCenter(), { animate: true });
+    }
+  } else {
+    drawCadastralPlot(plotId);
+  }
+
+  // 4. อัปเดตรายละเอียดการ์ดและตารางมุมแปลง
+  updateCadastralDetailsCards(plot);
+}
+
+function onCadastralPlotSelectChange(plotId) {
+  if (!plotId) return;
+  selectCadastralPlot(plotId);
 }
 
 function handleKmlMarkerClick(plotId) {
   const plot = (window.cadastralPlots || []).find(p => p.id === plotId);
   if (!plot) return;
-
-  const $popup = $("#markerDetailPopup");
-  const $content = $("#markerDetailPopupContent");
-
-  $content.html(`
-    <div class="space-y-2">
-      <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 px-2 py-0.5 rounded-full font-bold">
-          <i class="fa-solid fa-draw-polygon mr-1"></i> [${plot.fileType}] แปลงไม้ยางพารา
-        </span>
-        <button onclick="$('#markerDetailPopup').addClass('hidden')" class="text-slate-400 hover:text-white text-xs">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+  $("#markerDetailPopupContent").html(`
+    <div class="space-y-2 text-xs">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-1">
+        <span class="text-[10px] text-emerald-300 font-bold">[${plot.fileType}] ${plot.name}</span>
+        <button onclick="$('#markerDetailPopup').addClass('hidden')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <div>
-        <h4 class="text-sm font-bold text-white">${plot.name}</h4>
-        <p class="text-xs text-slate-300 mt-0.5">${plot.description || 'พิกัดแปลงนำเข้าตามเกณฑ์ EUDR'}</p>
-        ${plot.linkedMoNo ? `
-          <div class="mt-1 inline-block bg-indigo-500/30 text-indigo-200 border border-indigo-400/50 text-[10px] font-bold px-2 py-0.5 rounded-md">
-            <i class="fa-solid fa-link mr-1"></i> ผูกกับคำสั่งซื้อ: ${plot.linkedMoNo}
-          </div>
-        ` : ''}
-      </div>
-
-      <div class="grid grid-cols-2 gap-2 text-xs bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
-        <div>
-          <span class="text-[10px] text-slate-400 block">เนื้อที่คำนวณได้:</span>
-          <strong class="text-emerald-400">${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน</strong>
-        </div>
-        <div>
-          <span class="text-[10px] text-slate-400 block">จุดพิกัดมุมแปลง:</span>
-          <strong class="text-indigo-400">${plot.vertices ? plot.vertices.length : 0} มุม</strong>
-        </div>
-      </div>
-
-      <div class="pt-2 flex items-center space-x-2">
-        <button 
-          type="button" 
-          onclick="openPlotInCadastralView('${plot.id}')"
-          class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center shadow-lg hover:scale-[1.02] active:scale-95"
-        >
-          <i class="fa-solid fa-vector-square mr-1.5 text-emerald-200"></i> ดูเส้นรูปแปลงจริง
-        </button>
-        ${plot.linkedMoNo ? `
-          <button 
-            type="button" 
-            onclick="viewOrderInDashboard('${plot.linkedMoNo}')"
-            class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center shadow-lg hover:scale-[1.02] active:scale-95"
-            title="ดูคำสั่งซื้อใน Dashboard"
-          >
-            <i class="fa-solid fa-chart-pie"></i>
-          </button>
-        ` : ''}
-      </div>
+      <p class="text-slate-300 text-[11px]">${plot.description || 'พิกัดแปลงนำเข้า EUDR'}</p>
+      <div class="text-emerald-400 font-bold">${plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน` : ''}</div>
+      <button type="button" onclick="openPlotInCadastralView('${plot.id}')" class="w-full py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold">ดูเส้นรูปแปลงจริง</button>
     </div>
   `);
-
-  $popup.removeClass("hidden");
+  $("#markerDetailPopup").removeClass("hidden");
 }
 
 function openPlotInCadastralView(plotId) {

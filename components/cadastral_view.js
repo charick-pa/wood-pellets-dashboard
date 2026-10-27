@@ -89,11 +89,11 @@ Object.assign(window.Components, {
                             <input type="file" id="cadastralDirectFileInput" accept=".kml,.geojson,.json" class="hidden" onchange="handleDirectCadastralFileSelect(event)" />
 
 
-                            <button type="button" onclick="exportActivePlotKml()" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap">
+                            <button type="button" onclick="openCadastralExportDialog('KML')" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap">
                                 <i class="fa-solid fa-earth-americas mr-1.5 text-white"></i> ${isTh ? 'ส่งออก KML' : 'Export KML'}
                             </button>
 
-                            <button type="button" onclick="exportActivePlotGeoJson()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap">
+                            <button type="button" onclick="openCadastralExportDialog('GEOJSON')" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap">
                                 <i class="fa-solid fa-file-arrow-down mr-1.5 text-white"></i> ${isTh ? 'ส่งออก GeoJSON' : 'Export GeoJSON'}
                             </button>
 
@@ -238,7 +238,7 @@ Object.assign(window.Components, {
                                         </div>
                                         <div class="flex flex-wrap gap-1 max-h-24 overflow-y-auto pt-0.5">
                                             ${siblingPlots.map((sp, sIdx) => `
-                                                <button type="button" onclick="drawCadastralPlot('${sp.id}')" class="px-2 py-0.5 text-[10px] rounded-md font-semibold transition-all ${sp.id === activePlot.id ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white hover:bg-indigo-100 text-slate-700 border border-slate-200'}">
+                                                <button type="button" data-plot-id="${sp.id}" onclick="selectCadastralPlot('${sp.id}')" class="sibling-plot-pill px-2 py-0.5 text-[10px] rounded-md font-semibold transition-all ${sp.id === activePlot.id ? 'bg-indigo-600 text-white shadow-xs font-bold ring-2 ring-indigo-300' : 'bg-white hover:bg-indigo-100 text-slate-700 border border-slate-200'}">
                                                     Plot ${sIdx + 1} (${sp.thaiArea ? sp.thaiArea.rai : 0} R.)
                                                 </button>
                                             `).join('')}
@@ -254,8 +254,8 @@ Object.assign(window.Components, {
                             </div>
                         </div>
                         <div class="pt-3 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
-                            <div class="flex justify-between"><span>${isTh ? 'ไฟล์ต้นทาง:' : 'Source File:'}</span><span class="font-mono text-slate-700 truncate max-w-[170px]" title="${activePlot ? activePlot.fileName : '-'}">${activePlot ? activePlot.fileName : '-'}</span></div>
-                            <div class="flex justify-between"><span>${isTh ? 'วันที่นำเข้า:' : 'Uploaded At:'}</span><span class="text-slate-700">${activePlot ? activePlot.uploadedAt : '-'}</span></div>
+                            <div class="flex justify-between"><span>${isTh ? 'ไฟล์ต้นทาง:' : 'Source File:'}</span><span id="activePlotSourceFile" class="font-mono text-slate-700 truncate max-w-[170px]" title="${activePlot ? activePlot.fileName : '-'}">${activePlot ? activePlot.fileName : '-'}</span></div>
+                            <div class="flex justify-between"><span>${isTh ? 'วันที่นำเข้า:' : 'Uploaded At:'}</span><span id="activePlotUploadedAt" class="text-slate-700">${activePlot ? activePlot.uploadedAt : '-'}</span></div>
                         </div>
                     </div>
 
@@ -270,10 +270,10 @@ Object.assign(window.Components, {
                             </div>
                             <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-md mt-3">
                                 <span class="text-[11px] text-emerald-100 font-medium">${isTh ? 'เนื้อที่ตามมาตราวัดไทย:' : 'Thai Area Unit:'}</span>
-                                <div class="text-2xl font-bold mt-0.5 tracking-tight">${activePlot && activePlot.thaiArea ? (isTh ? `${activePlot.thaiArea.rai} ไร่ ${activePlot.thaiArea.ngan} งาน ${activePlot.thaiArea.sqWah} ตร.ว.` : `${activePlot.thaiArea.rai} Rai ${activePlot.thaiArea.ngan} Ngan ${activePlot.thaiArea.sqWah} Sq.w.`) : '-'}</div>
+                                <div id="activePlotThaiArea" class="text-2xl font-bold mt-0.5 tracking-tight">${activePlot && activePlot.thaiArea ? (isTh ? `${activePlot.thaiArea.rai} ไร่ ${activePlot.thaiArea.ngan} งาน ${activePlot.thaiArea.sqWah} ตร.ว.` : `${activePlot.thaiArea.rai} Rai ${activePlot.thaiArea.ngan} Ngan ${activePlot.thaiArea.sqWah} Sq.w.`) : '-'}</div>
                                 <div class="mt-2.5 pt-2 border-t border-emerald-400/40 flex items-center justify-between text-xs text-emerald-100">
-                                    <span>${activePlot && activePlot.thaiArea ? activePlot.thaiArea.sqMeters : '0'} ${isTh ? 'ตร.ม.' : 'Sq.m.'}</span>
-                                    <span>${activePlot && activePlot.thaiArea ? activePlot.thaiArea.hectares : '0'} ${isTh ? 'เฮกตาร์ (Ha)' : 'Hectares (Ha)'}</span>
+                                    <span id="activePlotSqMeters">${activePlot && activePlot.thaiArea ? activePlot.thaiArea.sqMeters : '0'} ${isTh ? 'ตร.ม.' : 'Sq.m.'}</span>
+                                    <span id="activePlotHectares">${activePlot && activePlot.thaiArea ? activePlot.thaiArea.hectares : '0'} ${isTh ? 'เฮกตาร์ (Ha)' : 'Hectares (Ha)'}</span>
                                 </div>
                             </div>
                         </div>
@@ -292,7 +292,7 @@ Object.assign(window.Components, {
                         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900 flex items-center"><i class="fa-solid fa-table-cells text-indigo-600 mr-1.5"></i>${isTh ? 'พิกัดมุมแปลง EUDR' : 'Polygon Corner Vertices'}</h4>
-                                <span class="text-[10px] text-slate-400">${activePlot && activePlot.vertices ? activePlot.vertices.length : 0} ${isTh ? 'จุดมุมแปลง' : 'Vertices'}</span>
+                                <span id="activePlotVertexCount" class="text-[10px] text-slate-400">${activePlot && activePlot.vertices ? activePlot.vertices.length : 0} ${isTh ? 'จุดมุมแปลง' : 'Vertices'}</span>
                             </div>
                             <button type="button" onclick="copyActivePlotCoordinates()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all flex items-center border border-slate-200 shadow-2xs whitespace-nowrap">
                                 <i class="fa-regular fa-copy mr-1 text-indigo-600"></i> ${isTh ? 'คัดลอกพิกัด' : 'Copy Coordinates'}

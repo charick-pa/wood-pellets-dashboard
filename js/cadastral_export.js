@@ -75,114 +75,236 @@ function getMultiPlotSummaryForMo(moNo) {
   };
 }
 
-// ส่งออกทุกแปลงที่ผูกกับ MO นี้เป็น GeoJSON เดียวกัน (EUDR TracesNT Multi-Feature)
-function exportAllPlotsForMoGeoJson(moNo) {
-  const plots = getPlotsByMoNo(moNo);
-  if (!plots || plots.length === 0) {
-    showSwalWarning("No Linked Plots", `No cadastral plots are currently linked to Manufacturing Order ${moNo}.`);
-    return;
-  }
-
-  const features = plots.map(plot => {
-    const geoJsonRing = plot.coordinates.map(p => [p[1], p[0]]);
-    geoJsonRing.push(geoJsonRing[0]);
+// 3. ตัวแปลง FeatureCollection สำหรับ GeoJSON (รองรับ 1 แปลง หรือ หลายแปลง)
+function buildGeoJsonFeatureCollection(plots) {
+  const features = (plots || []).map((plot) => {
+    const geoJsonRing = (plot.coordinates || []).map((p) => [p[1], p[0]]);
+    if (geoJsonRing.length > 0) geoJsonRing.push(geoJsonRing[0]);
     return {
       type: "Feature",
       properties: {
         plot_id: plot.id,
         plot_name: plot.name,
         linked_mo_no: plot.linkedMoNo || "",
-        source_file: plot.fileName,
-        thai_area: `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว.`,
-        area_sqm: plot.areaSqMeters,
+        source_file: plot.fileName || "",
+        thai_area: plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว.` : "",
+        area_sqm: plot.areaSqMeters || 0,
+        hectares: plot.thaiArea ? parseFloat(plot.thaiArea.hectares) : 0,
         eudr_status: "VERIFIED"
       },
       geometry: { type: "Polygon", coordinates: [geoJsonRing] }
     };
   });
-
-  const geoJson = { type: "FeatureCollection", features: features };
-  const blob = new Blob([JSON.stringify(geoJson, null, 2)], { type: "application/geo+json" });
-  downloadBlobFile(blob, `${moNo}_All_${plots.length}_Plots_EUDR.geojson`);
+  return { type: "FeatureCollection", features: features };
 }
 
-// 3. ส่งออกแปลงปัจจุบันเป็นไฟล์ GeoJSON
-function exportActivePlotGeoJson() {
-  const plot = (window.cadastralPlots || []).find(p => p.id === window.activeCadastralPlotId);
-  if (!plot) {
-    showSwalWarning("No Plot Selected", "Please select a parcel to export as GeoJSON.");
-    return;
-  }
+// 4. ตัวแปลง Document KML 2.2 สำหรับ Google Earth (รองรับ 1 แปลง หรือ หลายแปลง)
+function buildKmlDocument(plots, docTitle) {
+  const placemarks = (plots || []).map((plot) => {
+    const coords = (plot.coordinates || []).map((p) => `${p[1].toFixed(6)},${p[0].toFixed(6)},0`);
+    if (plot.coordinates && plot.coordinates.length > 0) {
+      coords.push(`${plot.coordinates[0][1].toFixed(6)},${plot.coordinates[0][0].toFixed(6)},0`);
+    }
+    const thaiAreaStr = plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว. (${plot.thaiArea.sqMeters} ตร.ม.)` : "";
+    return `    <Placemark>
+      <name>${plot.name}</name>
+      <description><![CDATA[
+        <h3>${plot.name}</h3>
+        <p><strong>MO:</strong> ${plot.linkedMoNo || 'แปลงทั่วไป'}</p>
+        <p><strong>เนื้อที่:</strong> ${thaiAreaStr}</p>
+        <p><strong>สถานะ:</strong> EUDR Traceability & SBP Biomass Verified</p>
+      ]]></description>
+      <styleUrl>#plotStyle</styleUrl>
+      <Polygon>
+        <extrude>1</extrude><altitudeMode>clampToGround</altitudeMode>
+        <outerBoundaryIs><LinearRing><coordinates>${coords.join("\n            ")}</coordinates></LinearRing></outerBoundaryIs>
+      </Polygon>
+    </Placemark>`;
+  }).join("\n");
 
-  const geoJsonRing = plot.coordinates.map(p => [p[1], p[0]]);
-  geoJsonRing.push(geoJsonRing[0]);
-
-  const geoJson = {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        properties: {
-          plot_id: plot.id,
-          plot_name: plot.name,
-          linked_mo_no: plot.linkedMoNo || "",
-          source_file: plot.fileName,
-          thai_area: `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว.`,
-          area_sqm: plot.areaSqMeters,
-          hectares: parseFloat(plot.thaiArea.hectares),
-          eudr_status: "VERIFIED"
-        },
-        geometry: { type: "Polygon", coordinates: [geoJsonRing] }
-      }
-    ]
-  };
-
-  const blob = new Blob([JSON.stringify(geoJson, null, 2)], { type: "application/geo+json" });
-  downloadBlobFile(blob, `${plot.name.replace(/[\s\/\\]+/g, "_")}_EUDR.geojson`);
-}
-
-// 4. ส่งออกแปลงปัจจุบันเป็นไฟล์ Google Earth KML (.kml)
-function exportActivePlotKml() {
-  const plot = (window.cadastralPlots || []).find(p => p.id === window.activeCadastralPlotId);
-  if (!plot) {
-    showSwalWarning("No Plot Selected", "Please select a parcel to export as KML.");
-    return;
-  }
-
-  const kmlCoordsArr = plot.coordinates.map(p => `${p[1].toFixed(6)},${p[0].toFixed(6)},0`);
-  if (plot.coordinates.length > 0) {
-    kmlCoordsArr.push(`${plot.coordinates[0][1].toFixed(6)},${plot.coordinates[0][0].toFixed(6)},0`);
-  }
-  const kmlCoordsString = kmlCoordsArr.join("\n            ");
-  const thaiAreaStr = `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว. (${plot.thaiArea.sqMeters} ตร.ม.)`;
-
-  const kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
-    <name>${plot.name}</name>
-    <description><![CDATA[
-      <h3>${plot.name}</h3>
-      <p><strong>คำสั่งซื้อที่ผูกไว้ (Linked MO No.):</strong> ${plot.linkedMoNo || 'แปลงทั่วไป'}</p>
-      <p><strong>เนื้อที่คำนวณได้:</strong> ${thaiAreaStr}</p>
-      <p><strong>สถานะความสอดคล้อง:</strong> EUDR Traceability & SBP Biomass Compliant</p>
-    ]]></description>
+    <name>${docTitle || 'GreenRiver_Cadastral_Plots'}</name>
     <Style id="plotStyle">
       <LineStyle><color>ff10b981</color><width>3.5</width></LineStyle>
       <PolyStyle><color>4034d399</color><fill>1</fill><outline>1</outline></PolyStyle>
     </Style>
-    <Placemark>
-      <name>${plot.name}</name>
-      <styleUrl>#plotStyle</styleUrl>
-      <Polygon>
-        <extrude>1</extrude><altitudeMode>clampToGround</altitudeMode>
-        <outerBoundaryIs><LinearRing><coordinates>${kmlCoordsString}</coordinates></LinearRing></outerBoundaryIs>
-      </Polygon>
-    </Placemark>
+${placemarks}
   </Document>
 </kml>`;
+}
 
-  const blob = new Blob([kmlContent], { type: "application/vnd.google-earth.kml+xml" });
-  downloadBlobFile(blob, `${plot.name.replace(/[\s\/\\]+/g, "_")}_GoogleEarth.kml`);
+// ดึงรายการแปลงที่ผ่านการกรองในหน้า Cadastral View
+function getFilteredCadastralPlots() {
+  const all = window.cadastralPlots || [];
+  const keyword = ($("#filterCadastralPlotInput").val() || "").trim().toLowerCase();
+  if (!keyword) return all;
+  return all.filter((p) => {
+    const text = `${p.name} ${p.linkedMoNo || ''} ${p.id || ''}`.toLowerCase();
+    return text.includes(keyword);
+  });
+}
+
+// 5. กล่องโต้ตอบเลือกขอบเขตและรูปแบบการส่งออก (Export Modal Wizard: Active / MO / Filtered / All)
+function openCadastralExportDialog(defaultFormat) {
+  if (typeof ensureCadastralPlotsInitialized === "function") ensureCadastralPlotsInitialized();
+  const allPlots = window.cadastralPlots || [];
+  if (allPlots.length === 0) {
+    if (typeof showSwalWarning === "function") showSwalWarning("No Plots", "No cadastral parcels available to export.");
+    return;
+  }
+
+  const isTh = (typeof currentLang !== "undefined" && currentLang === "th");
+  const activePlot = allPlots.find((p) => p.id === window.activeCadastralPlotId) || allPlots[0];
+  const activeMo = activePlot && activePlot.linkedMoNo ? activePlot.linkedMoNo : "";
+  const moPlots = activeMo ? getPlotsByMoNo(activeMo) : [];
+  const filteredPlots = getFilteredCadastralPlots();
+
+  let selectedFormat = (defaultFormat || "KML").toUpperCase();
+  if (selectedFormat !== "KML" && selectedFormat !== "GEOJSON") selectedFormat = "KML";
+
+  const modalHtml = `
+    <div class="text-left text-xs space-y-3.5">
+      <div>
+        <label class="block font-bold text-slate-700 mb-1.5">${isTh ? '1. เลือกรูปแบบไฟล์ (Export Format):' : '1. Select Export Format:'}</label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="flex items-center p-2 rounded-xl border cursor-pointer ${selectedFormat === 'KML' ? 'bg-amber-50 border-amber-400 text-amber-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700'}">
+            <input type="radio" name="swalExportFormat" value="KML" ${selectedFormat === 'KML' ? 'checked' : ''} class="mr-2">
+            <span><i class="fa-solid fa-earth-americas text-amber-600 mr-1"></i>Google Earth (.KML)</span>
+          </label>
+          <label class="flex items-center p-2 rounded-xl border cursor-pointer ${selectedFormat === 'GEOJSON' ? 'bg-indigo-50 border-indigo-400 text-indigo-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700'}">
+            <input type="radio" name="swalExportFormat" value="GEOJSON" ${selectedFormat === 'GEOJSON' ? 'checked' : ''} class="mr-2">
+            <span><i class="fa-solid fa-file-code text-indigo-600 mr-1"></i>EUDR (.geojson)</span>
+          </label>
+        </div>
+      </div>
+      <div>
+        <label class="block font-bold text-slate-700 mb-1.5">${isTh ? '2. เลือกขอบเขตข้อมูล (Export Scope):' : '2. Select Export Scope:'}</label>
+        <div class="space-y-1.5">
+          <label class="flex items-start p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer">
+            <input type="radio" name="swalExportScope" value="active" checked class="mt-0.5 mr-2">
+            <div class="flex-1 min-w-0">
+              <span class="font-bold text-slate-800 block">${isTh ? '📌 เฉพาะแปลงปัจจุบัน (Current Plot)' : '📌 Current Active Plot'}</span>
+              <span class="text-[11px] text-slate-500 truncate block">${activePlot.name} (1 แปลง)</span>
+            </div>
+          </label>
+          <label class="flex items-start p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer ${moPlots.length === 0 ? 'opacity-50 pointer-events-none' : ''}">
+            <input type="radio" name="swalExportScope" value="mo" ${moPlots.length === 0 ? 'disabled' : ''} class="mt-0.5 mr-2">
+            <div class="flex-1 min-w-0">
+              <span class="font-bold text-slate-800 block">${isTh ? '📦 ทุกแปลงในคำสั่งซื้อนี้ (All Plots in this MO)' : '📦 All Plots for this MO'}</span>
+              <span class="text-[11px] text-slate-500 truncate block">${activeMo ? `${activeMo} (${moPlots.length} แปลง)` : (isTh ? 'ไม่มีคำสั่งซื้อที่ผูกไว้' : 'No linked MO')}</span>
+            </div>
+          </label>
+          <label class="flex items-start p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer">
+            <input type="radio" name="swalExportScope" value="filtered" class="mt-0.5 mr-2">
+            <div class="flex-1 min-w-0">
+              <span class="font-bold text-slate-800 block">${isTh ? '🔍 แปลงตามตัวกรองค้นหา (Filtered Plots)' : '🔍 Filtered Plots'}</span>
+              <span class="text-[11px] text-slate-500 block">${isTh ? `ผลการค้นหาปัจจุบัน (${filteredPlots.length} แปลง)` : `Current filtered (${filteredPlots.length} plots)`}</span>
+            </div>
+          </label>
+          <label class="flex items-start p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer">
+            <input type="radio" name="swalExportScope" value="all" class="mt-0.5 mr-2">
+            <div class="flex-1 min-w-0">
+              <span class="font-bold text-slate-800 block">${isTh ? '🌐 แปลงทั้งหมดในระบบ (All Plots in System)' : '🌐 All System Plots'}</span>
+              <span class="text-[11px] text-slate-500 block">${isTh ? `แปลงทั้งหมด (${allPlots.length} แปลง)` : `All registered parcels (${allPlots.length} plots)`}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+  `;
+
+  Swal.fire({
+    title: isTh ? 'ส่งออกข้อมูลแปลงที่ดิน (Export Options)' : 'Export Cadastral Boundaries',
+    html: modalHtml,
+    showCancelButton: true,
+    confirmButtonColor: '#059669',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: isTh ? '<i class="fa-solid fa-download mr-1"></i> ดาวน์โหลด' : '<i class="fa-solid fa-download mr-1"></i> Download',
+    cancelButtonText: isTh ? 'ยกเลิก' : 'Cancel',
+    width: '450px',
+    preConfirm: () => {
+      const scope = $('input[name="swalExportScope"]:checked').val() || 'active';
+      const format = $('input[name="swalExportFormat"]:checked').val() || 'KML';
+      return { scope, format };
+    }
+  }).then((result) => {
+    if (result.isConfirmed && result.value) {
+      executeCadastralExport(result.value.scope, result.value.format);
+    }
+  });
+}
+
+// 6. ดำเนินการส่งออกไฟล์ตามขอบเขตและรูปแบบที่เลือก
+function executeCadastralExport(scope, format) {
+  if (typeof ensureCadastralPlotsInitialized === "function") ensureCadastralPlotsInitialized();
+  const allPlots = window.cadastralPlots || [];
+  const activePlot = allPlots.find((p) => p.id === window.activeCadastralPlotId) || allPlots[0];
+  const isTh = (typeof currentLang !== "undefined" && currentLang === "th");
+
+  let targetPlots = [];
+  let filePrefix = "Cadastral";
+
+  if (scope === "active") {
+    if (!activePlot) {
+      if (typeof showSwalWarning === "function") showSwalWarning("No Plot", isTh ? "ไม่พบแปลงที่เลือก" : "No active parcel found.");
+      return;
+    }
+    targetPlots = [activePlot];
+    filePrefix = activePlot.name.replace(/[\s\/\\]+/g, "_");
+  } else if (scope === "mo") {
+    const moNo = activePlot && activePlot.linkedMoNo ? activePlot.linkedMoNo : "";
+    targetPlots = moNo ? getPlotsByMoNo(moNo) : (activePlot ? [activePlot] : []);
+    if (targetPlots.length === 0) {
+      if (typeof showSwalWarning === "function") showSwalWarning("No Linked Plots", isTh ? "ไม่พบแปลงที่ผูกกับ MO นี้" : "No plots linked to this MO.");
+      return;
+    }
+    filePrefix = `${(moNo || 'Unlinked')}_All_${targetPlots.length}_Plots`;
+  } else if (scope === "filtered") {
+    targetPlots = getFilteredCadastralPlots();
+    filePrefix = `Filtered_${targetPlots.length}_Plots`;
+  } else {
+    targetPlots = allPlots;
+    filePrefix = `GreenRiver_All_${targetPlots.length}_Plots`;
+  }
+
+  if (targetPlots.length === 0) {
+    if (typeof showSwalWarning === "function") showSwalWarning("Empty Data", isTh ? "ไม่มีแปลงที่ดินสำหรับส่งออก" : "No plots available to export.");
+    return;
+  }
+
+  const fmt = (format || "KML").toUpperCase();
+  if (fmt === "GEOJSON") {
+    const geoJson = buildGeoJsonFeatureCollection(targetPlots);
+    const blob = new Blob([JSON.stringify(geoJson, null, 2)], { type: "application/geo+json" });
+    downloadBlobFile(blob, `${filePrefix}_EUDR.geojson`);
+  } else {
+    const kml = buildKmlDocument(targetPlots, filePrefix);
+    const blob = new Blob([kml], { type: "application/vnd.google-earth.kml+xml" });
+    downloadBlobFile(blob, `${filePrefix}_GoogleEarth.kml`);
+  }
+
+  if (typeof showSwalSuccess === "function") {
+    showSwalSuccess(
+      isTh ? "ส่งออกไฟล์สำเร็จ" : "Export Completed",
+      isTh ? `ส่งออกข้อมูล ${targetPlots.length} แปลงในรูปแบบ ${fmt} สำเร็จเรียบร้อยแล้ว` : `Exported ${targetPlots.length} parcels as ${fmt} successfully.`
+    );
+  }
+}
+
+// ฟังก์ชัน Backward-Compatible สำหรับการเรียกใช้งานเดิม
+function exportActivePlotGeoJson() { executeCadastralExport("active", "GEOJSON"); }
+function exportActivePlotKml() { executeCadastralExport("active", "KML"); }
+function exportAllPlotsForMoGeoJson(moNo) {
+  const plots = getPlotsByMoNo(moNo);
+  if (!plots || plots.length === 0) {
+    if (typeof showSwalWarning === "function") showSwalWarning("No Linked Plots", `No cadastral plots linked to MO ${moNo}.`);
+    return;
+  }
+  const geoJson = buildGeoJsonFeatureCollection(plots);
+  const blob = new Blob([JSON.stringify(geoJson, null, 2)], { type: "application/geo+json" });
+  downloadBlobFile(blob, `${moNo}_All_${plots.length}_Plots_EUDR.geojson`);
 }
 
 function downloadBlobFile(blob, filename) {
@@ -196,96 +318,39 @@ function downloadBlobFile(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
-// 5. สร้างรายการพิกัดรวมสำหรับแผนที่ GIS (เชื่อมโยง 1 MO หลายแปลงจาก Cadastral)
+// 7. สร้างรายการพิกัดรวมสำหรับแผนที่ GIS (เชื่อมโยง 1 MO หลายแปลงจาก Cadastral)
 function buildGisMapItems(orders) {
   if (typeof ensureCadastralPlotsInitialized === "function") ensureCadastralPlotsInitialized();
   const dataset = orders || (typeof globalData !== "undefined" ? globalData : []);
   const items = [];
   const processedPlotIds = new Set();
 
+  const toGisItem = (key, cardId, orderNo, moNo, cust, qty, pId, pName, pIdx, total, isCad, lat, lng, coords, tArea, aShort, fType, fName, pObj, oObj) => ({
+    key, cardId: cardId.replace(/[^a-zA-Z0-9_-]/g, "_"), orderNo, moNo, customer: cust, orderQuantity: qty,
+    plotId: pId, plotName: pName, plotIndex: pIdx, totalPlotsInMo: total, isCadastralPlot: isCad, lat, lng,
+    coordinates: coords, thaiAreaStr: tArea, areaShort: aShort, fileType: fType, fileName: fName, plotObj: pObj, orderObj: oObj
+  });
+
   dataset.forEach((item) => {
     const mo = (item.moNo || "").trim();
-    const linkedPlots = typeof getPlotsByMoNo === "function" ? getPlotsByMoNo(mo) : [];
-
-    if (linkedPlots && linkedPlots.length > 0) {
-      linkedPlots.forEach((plot, pIdx) => {
-        processedPlotIds.add(plot.id);
-        const centroid = plot.centroid || (plot.coordinates && plot.coordinates[0]) || [7.0089, 100.4767];
-        items.push({
-          key: `${item.orderNo}__${plot.id}`,
-          cardId: `loc-card-${item.orderNo}-${plot.id}`.replace(/[^a-zA-Z0-9_-]/g, "_"),
-          orderNo: item.orderNo,
-          moNo: item.moNo,
-          customer: item.customer,
-          orderQuantity: item.orderQuantity,
-          plotId: plot.id,
-          plotName: plot.name,
-          plotIndex: pIdx + 1,
-          totalPlotsInMo: linkedPlots.length,
-          isCadastralPlot: true,
-          lat: centroid[0],
-          lng: centroid[1],
-          coordinates: plot.coordinates,
-          thaiAreaStr: plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว.` : (item.location?.areaRai || "-"),
-          areaShort: plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน` : (item.location?.areaRai || "-"),
-          fileType: plot.fileType || "KML",
-          fileName: plot.fileName || "",
-          plotObj: plot,
-          orderObj: item
-        });
+    const linked = typeof getPlotsByMoNo === "function" ? getPlotsByMoNo(mo) : [];
+    if (linked.length > 0) {
+      linked.forEach((p, idx) => {
+        processedPlotIds.add(p.id);
+        const c = p.centroid || (p.coordinates && p.coordinates[0]) || [7.0089, 100.4767];
+        const tArea = p.thaiArea ? `${p.thaiArea.rai} ไร่ ${p.thaiArea.ngan} งาน ${p.thaiArea.sqWah} ตร.ว.` : (item.location?.areaRai || "-");
+        items.push(toGisItem(`${item.orderNo}__${p.id}`, `loc-card-${item.orderNo}-${p.id}`, item.orderNo, item.moNo, item.customer, item.orderQuantity, p.id, p.name, idx + 1, linked.length, true, c[0], c[1], p.coordinates, tArea, p.thaiArea ? `${p.thaiArea.rai} ไร่ ${p.thaiArea.ngan} งาน` : (item.location?.areaRai || "-"), p.fileType || "KML", p.fileName || "", p, item));
       });
     } else {
       const loc = item.location || { lat: 7.0089, lng: 100.4767, placeName: "แปลงสวนไม้ยางพารา", plotId: "PLOT-01" };
-      items.push({
-        key: item.orderNo,
-        cardId: `loc-card-${item.orderNo}`.replace(/[^a-zA-Z0-9_-]/g, "_"),
-        orderNo: item.orderNo,
-        moNo: item.moNo,
-        customer: item.customer,
-        orderQuantity: item.orderQuantity,
-        plotId: loc.plotId || "-",
-        plotName: loc.placeName || "แปลงสวนไม้ยางพารา",
-        plotIndex: 1,
-        totalPlotsInMo: 1,
-        isCadastralPlot: false,
-        lat: loc.lat,
-        lng: loc.lng,
-        coordinates: null,
-        thaiAreaStr: loc.areaRai || "-",
-        areaShort: loc.areaRai || "-",
-        fileType: "GPS",
-        fileName: "",
-        orderObj: item
-      });
+      items.push(toGisItem(item.orderNo, `loc-card-${item.orderNo}`, item.orderNo, item.moNo, item.customer, item.orderQuantity, loc.plotId || "-", loc.placeName || "แปลงสวนไม้ยางพารา", 1, 1, false, loc.lat, loc.lng, null, loc.areaRai || "-", loc.areaRai || "-", "GPS", "", null, item));
     }
   });
 
-  // แปลงนำเข้าเพิ่มเติมที่ยังไม่ตรงกับ Order ในชุดข้อมูล
-  (window.cadastralPlots || []).forEach((plot) => {
-    if (!processedPlotIds.has(plot.id)) {
-      const centroid = plot.centroid || (plot.coordinates && plot.coordinates[0]) || [7.0089, 100.4767];
-      items.push({
-        key: `plot__${plot.id}`,
-        cardId: `loc-card-custom-${plot.id}`.replace(/[^a-zA-Z0-9_-]/g, "_"),
-        orderNo: plot.linkedMoNo || "แปลงทั่วไป",
-        moNo: plot.linkedMoNo || "-",
-        customer: "แปลงที่ดินนำเข้า (EUDR Cadastral)",
-        orderQuantity: "-",
-        plotId: plot.id,
-        plotName: plot.name,
-        plotIndex: 1,
-        totalPlotsInMo: 1,
-        isCadastralPlot: true,
-        lat: centroid[0],
-        lng: centroid[1],
-        coordinates: plot.coordinates,
-        thaiAreaStr: plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน` : "-",
-        areaShort: plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน` : "-",
-        fileType: plot.fileType || "KML",
-        fileName: plot.fileName || "",
-        plotObj: plot,
-        orderObj: null
-      });
+  (window.cadastralPlots || []).forEach((p) => {
+    if (!processedPlotIds.has(p.id)) {
+      const c = p.centroid || (p.coordinates && p.coordinates[0]) || [7.0089, 100.4767];
+      items.push(toGisItem(`plot__${p.id}`, `loc-card-custom-${p.id}`, p.linkedMoNo || "แปลงทั่วไป", p.linkedMoNo || "-", "แปลงที่ดินนำเข้า (EUDR Cadastral)", "-", p.id, p.name, 1, 1, true, c[0], c[1], p.coordinates, p.thaiArea ? `${p.thaiArea.rai} ไร่ ${p.thaiArea.ngan} งาน` : "-", p.thaiArea ? `${p.thaiArea.rai} ไร่ ${p.thaiArea.ngan} งาน` : "-", p.fileType || "KML", p.fileName || "", p, null));
     }
   });
 
@@ -299,80 +364,5 @@ function jumpToCadastralPlot(plotId) {
   }
   if (typeof switchView === "function") {
     switchView("cadastral");
-  }
-}
-
-
-// 5. สั่งพิมพ์เอกสารรับรองแปลงที่ดิน EUDR (A4 Official Plot Certificate)
-function printCadastralPlotCertificate() {
-  const plots = window.cadastralPlots || [];
-  const plot = plots.find(p => p.id === window.activeCadastralPlotId) || plots[0];
-  if (!plot) {
-    if (typeof showSwalWarning === "function") showSwalWarning("No Plot Selected", "Please select a cadastral plot first.");
-    return;
-  }
-
-  const vRows = (plot.vertices || []).slice(0, 16).map((v, i) =>
-    `<tr><td style="text-align:center;font-weight:bold;color:#475569;">#${v.no || i + 1}</td><td style="font-family:monospace;color:#047857;">${Number(v.lat).toFixed(6)}</td><td style="font-family:monospace;color:#4338ca;">${Number(v.lng).toFixed(6)}</td><td style="color:#64748b;font-size:8.5px;">WGS84 (EPSG:4326)</td></tr>`
-  ).join("");
-
-  const ellipsis = (plot.vertices && plot.vertices.length > 16)
-    ? `<tr><td colspan="4" style="text-align:center;color:#94a3b8;font-size:8px;">... and ${(plot.vertices.length - 16)} more vertices (full polygon in GeoJSON) ...</td></tr>` : "";
-
-  const thaiAreaStr = plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว. (${plot.thaiArea.hectares} Ha)` : `${((plot.areaSqMeters || 0) / 10000).toFixed(2)} Ha`;
-  const printDate = new Date().toLocaleDateString("en-GB", { year: 'numeric', month: 'short', day: 'numeric' });
-
-  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>EUDR_Plot_Certificate_${plot.id}</title>
-  <style>
-    @page { size: A4 portrait; margin: 10mm 12mm; }
-    * { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    body { font-family: 'Leelawadee UI', 'Tahoma', 'Sarabun', 'Segoe UI', sans-serif; background: #fff; color: #0f172a; font-size: 10px; line-height: 1.35; margin: 0; padding: 4px; }
-    .header { border-bottom: 2.5px solid #065f46; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; }
-    .comp { font-size: 13px; font-weight: 800; color: #065f46; letter-spacing: 0.5px; }
-    .title { font-size: 16px; font-weight: 900; color: #0f172a; margin: 2px 0; text-transform: uppercase; }
-    .sub { font-size: 9.5px; color: #475569; }
-    .badge { display: inline-block; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 3px 8px; border-radius: 9999px; font-weight: 700; font-size: 9px; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
-    .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 7px 10px; font-size: 9.5px; }
-    .lbl { color: #64748b; font-size: 8.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
-    .val { font-size: 11px; font-weight: 800; color: #0f172a; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    th, td { border: 1px solid #cbd5e1; padding: 4px 8px; font-size: 9px; }
-    th { background: #f1f5f9; font-weight: 700; color: #1e293b; text-align: left; }
-    .statement { margin-top: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px 10px; font-size: 8.5px; color: #166534; line-height: 1.4; }
-    .sign-row { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 10px; }
-    .sign-box { width: 44%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 4px; font-size: 9px; color: #334155; }
-  </style></head><body>
-  <div class="header">
-    <div>
-      <div class="comp">GREEN RIVER PANELS (THAILAND) CO., LTD</div>
-      <div class="title">EUDR Cadastral Plot Certificate</div>
-      <div class="sub">EU Deforestation Regulation (EU) 2023/1115 &bull; Due Diligence Statement (DDS)</div>
-    </div>
-    <div style="text-align:right;">
-      <span class="badge">&bull; EU FOREST OBSERVATORY VERIFIED</span>
-      <div style="font-size:9px; color:#64748b; margin-top:4px;">Date: ${printDate}</div>
-      <div style="font-size:9px; font-family:monospace; font-weight:700; color:#0f172a;">REF: DDS-2026-TH-00412</div>
-    </div>
-  </div>
-  <div class="grid">
-    <div class="card"><div class="lbl">Cadastral Parcel Identification</div><div class="val">${plot.name}</div><div style="color:#64748b;font-size:9px;">Plot Code: ${plot.id} &bull; Source: ${plot.fileName || plot.fileType}</div></div>
-    <div class="card"><div class="lbl">Supply Chain Linkage</div><div class="val">MO: ${plot.linkedMoNo || 'Unlinked'}</div><div style="color:#64748b;font-size:9px;">Commodity: Hevea Brasiliensis (Wood Pellets)</div></div>
-    <div class="card"><div class="lbl">Registered Land Area (Thai & Metric)</div><div class="val" style="color:#047857;">${thaiAreaStr}</div><div style="color:#64748b;font-size:9px;">Area: ${Number(plot.areaSqMeters || 0).toLocaleString()} Sq.Meters</div></div>
-    <div class="card"><div class="lbl">Geolocation Reference Point</div><div class="val" style="color:#4338ca;font-family:monospace;">${plot.centroid ? Number(plot.centroid[0]).toFixed(6) + ', ' + Number(plot.centroid[1]).toFixed(6) : '-'}</div><div style="color:#64748b;font-size:9px;">Datum: WGS84 &bull; Vertices: ${plot.vertices ? plot.vertices.length : 0} Points</div></div>
-  </div>
-  <div style="font-weight:700;font-size:10px;color:#0f172a;margin-top:10px;text-transform:uppercase;">Polygon Boundary Coordinates</div>
-  <table><thead><tr><th style="width:40px;text-align:center;">Point</th><th>Latitude</th><th>Longitude</th><th>Coordinate System</th></tr></thead>
-  <tbody>${vRows}${ellipsis}</tbody></table>
-  <div class="statement">
-    <strong>EUDR Statutory Compliance Statement:</strong> This parcel has undergone multi-temporal satellite deforestation verification via Copernicus Sentinel-2 imagery (2020-2026). It is certified that no deforestation or forest degradation has occurred after December 31, 2020. The timber biomass originates from legally titled agricultural land in full compliance with the laws of Thailand.
-  </div>
-  <div class="sign-row">
-    <div class="sign-box">Prepared by: GIS & Raw Material Specialist<br><span style="font-size:8px;color:#64748b;">Green River Panels Sustainable Supply Chain</span></div>
-    <div class="sign-box">Authorized by: Regulatory Affairs (RA) & Sustainability Director<br><span style="font-size:8px;color:#64748b;">EUDR Verification & TracesNT Due Diligence Officer</span></div>
-  </div></body></html>`;
-
-  if (typeof printViaHiddenIframe === "function") {
-    printViaHiddenIframe(html, `EUDR_Plot_Certificate_${plot.id}`);
   }
 }
