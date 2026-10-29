@@ -76,10 +76,16 @@ function getMultiPlotSummaryForMo(moNo) {
 }
 
 // 3. ตัวแปลง FeatureCollection สำหรับ GeoJSON (รองรับ 1 แปลง หรือ หลายแปลง)
+function escapeXml(s) {
+  if (s === null || s === undefined) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 function buildGeoJsonFeatureCollection(plots) {
   const features = (plots || []).map((plot) => {
     const geoJsonRing = (plot.coordinates || []).map((p) => [p[1], p[0]]);
     if (geoJsonRing.length > 0) geoJsonRing.push(geoJsonRing[0]);
+    const attrs = plot.attributes || {};
     return {
       type: "Feature",
       properties: {
@@ -90,7 +96,8 @@ function buildGeoJsonFeatureCollection(plots) {
         thai_area: plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว.` : "",
         area_sqm: plot.areaSqMeters || 0,
         hectares: plot.thaiArea ? parseFloat(plot.thaiArea.hectares) : 0,
-        eudr_status: "VERIFIED"
+        eudr_status: "VERIFIED",
+        ...attrs
       },
       geometry: { type: "Polygon", coordinates: [geoJsonRing] }
     };
@@ -106,14 +113,18 @@ function buildKmlDocument(plots, docTitle) {
       coords.push(`${plot.coordinates[0][1].toFixed(6)},${plot.coordinates[0][0].toFixed(6)},0`);
     }
     const thaiAreaStr = plot.thaiArea ? `${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว. (${plot.thaiArea.sqMeters} ตร.ม.)` : "";
+    const attrs = plot.attributes || {};
+    const extLines = Object.keys(attrs).map(k => `        <Data name="${escapeXml(k)}"><value>${escapeXml(attrs[k])}</value></Data>`).join("\n");
+    const extBlock = extLines ? `\n      <ExtendedData>\n${extLines}\n      </ExtendedData>` : "";
+
     return `    <Placemark>
-      <name>${plot.name}</name>
+      <name>${escapeXml(plot.name)}</name>
       <description><![CDATA[
         <h3>${plot.name}</h3>
         <p><strong>MO:</strong> ${plot.linkedMoNo || 'แปลงทั่วไป'}</p>
         <p><strong>เนื้อที่:</strong> ${thaiAreaStr}</p>
         <p><strong>สถานะ:</strong> EUDR Traceability & SBP Biomass Verified</p>
-      ]]></description>
+      ]]></description>${extBlock}
       <styleUrl>#plotStyle</styleUrl>
       <Polygon>
         <extrude>1</extrude><altitudeMode>clampToGround</altitudeMode>
@@ -125,7 +136,7 @@ function buildKmlDocument(plots, docTitle) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
-    <name>${docTitle || 'GreenRiver_Cadastral_Plots'}</name>
+    <name>${escapeXml(docTitle || 'GreenRiver_Cadastral_Plots')}</name>
     <Style id="plotStyle">
       <LineStyle><color>ff10b981</color><width>3.5</width></LineStyle>
       <PolyStyle><color>4034d399</color><fill>1</fill><outline>1</outline></PolyStyle>

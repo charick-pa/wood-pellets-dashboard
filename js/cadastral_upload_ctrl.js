@@ -226,7 +226,7 @@ function processUploadedCadastralFile(file, sourceView, targetMoChoice, checkDup
         } else if (targetMoChoice === "NONE") {
           p.linkedMoNo = null;
         } else {
-          p.linkedMoNo = detectMoFromText(p.name) || autoFileMo || null;
+          p.linkedMoNo = p.linkedMoNo || detectMoFromText(p.name) || autoFileMo || null;
         }
       });
 

@@ -83,31 +83,18 @@ Object.assign(window.Components, {
                                 </select>
                             </div>
 
-                            <button type="button" onclick="document.getElementById('cadastralDirectFileInput').click()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap">
-                                <i class="fa-solid fa-file-arrow-up mr-1.5 text-white"></i> ${isTh ? 'นำเข้า KML / GeoJSON' : 'Import KML / GeoJSON'}
-                            </button>
+                            <button type="button" onclick="document.getElementById('cadastralDirectFileInput').click()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap"> <i class="fa-solid fa-file-arrow-up mr-1.5 text-white"></i> ${isTh ? 'นำเข้า KML / GeoJSON' : 'Import KML / GeoJSON'} </button>
                             <input type="file" id="cadastralDirectFileInput" accept=".kml,.geojson,.json" class="hidden" onchange="handleDirectCadastralFileSelect(event)" />
 
+                            <button type="button" onclick="openCadastralExportDialog('KML')" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap"> <i class="fa-solid fa-earth-americas mr-1.5 text-white"></i> ${isTh ? 'ส่งออก KML' : 'Export KML'} </button>
 
-                            <button type="button" onclick="openCadastralExportDialog('KML')" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap">
-                                <i class="fa-solid fa-earth-americas mr-1.5 text-white"></i> ${isTh ? 'ส่งออก KML' : 'Export KML'}
-                            </button>
+                            <button type="button" onclick="openCadastralExportDialog('GEOJSON')" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap"> <i class="fa-solid fa-file-arrow-down mr-1.5 text-white"></i> ${isTh ? 'ส่งออก GeoJSON' : 'Export GeoJSON'} </button>
 
-                            <button type="button" onclick="openCadastralExportDialog('GEOJSON')" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap">
-                                <i class="fa-solid fa-file-arrow-down mr-1.5 text-white"></i> ${isTh ? 'ส่งออก GeoJSON' : 'Export GeoJSON'}
-                            </button>
+                            <button type="button" onclick="printCadastralPlotCertificate()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap"> <i class="fa-solid fa-stamp mr-1.5 text-white"></i> ${isTh ? 'พิมพ์ใบรับรอง EUDR' : 'Print EUDR Cert'} </button>
 
-                            <button type="button" onclick="printCadastralPlotCertificate()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center shadow-md whitespace-nowrap">
-                                <i class="fa-solid fa-stamp mr-1.5 text-white"></i> ${isTh ? 'พิมพ์ใบรับรอง EUDR' : 'Print EUDR Cert'}
-                            </button>
+                            <button type="button" onclick="cleanDuplicateCadastralPlots()" class="px-2.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all flex items-center border border-slate-200 whitespace-nowrap"> <i class="fa-solid fa-broom text-amber-600 mr-1.5"></i> ${isTh ? 'ตรวจแปลงซ้ำ' : 'Check Duplicates'} </button>
 
-                            <button type="button" onclick="cleanDuplicateCadastralPlots()" class="px-2.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all flex items-center border border-slate-200 whitespace-nowrap">
-                                <i class="fa-solid fa-broom text-amber-600 mr-1.5"></i> ${isTh ? 'ตรวจแปลงซ้ำ' : 'Check Duplicates'}
-                            </button>
-
-                            <button type="button" onclick="loadDemoCadastralPlots()" class="px-2.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all flex items-center border border-slate-200 whitespace-nowrap">
-                                <i class="fa-solid fa-flask text-indigo-600 mr-1.5"></i> ${isTh ? 'ตัวอย่างสาธิต' : 'Demo Sample'}
-                            </button>
+                            <button type="button" onclick="loadDemoCadastralPlots()" class="px-2.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all flex items-center border border-slate-200 whitespace-nowrap"> <i class="fa-solid fa-flask text-indigo-600 mr-1.5"></i> ${isTh ? 'ตัวอย่างสาธิต' : 'Demo Sample'} </button>
                         </div>
                     </div>
 
@@ -124,9 +111,7 @@ Object.assign(window.Components, {
                                 </select>
                             </div>
                             ${activePlot ? `
-                            <button type="button" onclick="deleteActiveCadastralPlot()" class="px-2.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-bold transition-all flex items-center shadow-2xs whitespace-nowrap shrink-0" title="${isTh ? 'ลบแปลงที่ดินนี้ออกจากระบบ' : 'Delete this parcel from system'}">
-                                <i class="fa-solid fa-trash-can mr-1.5 text-rose-600"></i> ${isTh ? 'ลบแปลงนี้' : 'Delete Plot'}
-                            </button>
+                            <button type="button" onclick="deleteActiveCadastralPlot()" class="px-2.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-bold transition-all flex items-center shadow-2xs whitespace-nowrap shrink-0" title="${isTh ? 'ลบแปลงที่ดินนี้ออกจากระบบ' : 'Delete this parcel from system'}"> <i class="fa-solid fa-trash-can mr-1.5 text-rose-600"></i> ${isTh ? 'ลบแปลงนี้' : 'Delete Plot'} </button>
                             ` : ''}
                         </div>
                         <div class="flex items-center gap-2.5 shrink-0">
@@ -156,9 +141,7 @@ Object.assign(window.Components, {
                                         <i class="fa-solid fa-link mr-1"></i>${activePlot.linkedMoNo}${siblingPlots.length > 1 ? (isTh ? ` (${siblingPlots.length} แปลง)` : ` (${siblingPlots.length} Plots)`) : ''}
                                     </span>
                                     ${siblingPlots.length > 1 ? `
-                                        <button type="button" onclick="drawAllPlotsForMo('${activePlot.linkedMoNo}')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[10px] font-bold shadow-xs transition-all flex items-center whitespace-nowrap">
-                                            <i class="fa-solid fa-shapes mr-1"></i> ${isTh ? `แสดงทุกแปลง (${siblingPlots.length})` : `Show All ${siblingPlots.length} Plots`}
-                                        </button>
+                                        <button type="button" onclick="drawAllPlotsForMo('${activePlot.linkedMoNo}')" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[10px] font-bold shadow-xs transition-all flex items-center whitespace-nowrap"> <i class="fa-solid fa-shapes mr-1"></i> ${isTh ? `แสดงทุกแปลง (${siblingPlots.length})` : `Show All ${siblingPlots.length} Plots`} </button>
                                     ` : ''}
                                 `;
                             })() : ''}
@@ -166,17 +149,11 @@ Object.assign(window.Components, {
 
                         <!-- ตัวสลับเลเยอร์แผนที่ + ปุ่มซูมครอบแปลง + ปุ่มหมุดมุม + ปุ่มเต็มจอ -->
                         <div class="flex items-center space-x-2">
-                            <button type="button" id="btnCadastralSatellite" onclick="setCadastralTileLayer('satellite')" class="px-2.5 py-1 text-xs rounded-lg font-bold transition-all bg-emerald-600 text-white shadow-xs whitespace-nowrap">
-                                <i class="fa-solid fa-satellite mr-1"></i> ${isTh ? 'ภาพถ่ายดาวเทียม' : 'Satellite'}
-                            </button>
-                            <button type="button" id="btnCadastralStreet" onclick="setCadastralTileLayer('street')" class="px-2.5 py-1 text-xs rounded-lg font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">
-                                <i class="fa-solid fa-road mr-1"></i> ${isTh ? 'แผนที่ถนน' : 'Street Map'}
-                            </button>
+                            <button type="button" id="btnCadastralSatellite" onclick="setCadastralTileLayer('satellite')" class="px-2.5 py-1 text-xs rounded-lg font-bold transition-all bg-emerald-600 text-white shadow-xs whitespace-nowrap"> <i class="fa-solid fa-satellite mr-1"></i> ${isTh ? 'ภาพถ่ายดาวเทียม' : 'Satellite'} </button>
+                            <button type="button" id="btnCadastralStreet" onclick="setCadastralTileLayer('street')" class="px-2.5 py-1 text-xs rounded-lg font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap"> <i class="fa-solid fa-road mr-1"></i> ${isTh ? 'แผนที่ถนน' : 'Street Map'} </button>
                             <button type="button" onclick="fitCadastralBounds()" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs" title="Fit Bounds"><i class="fa-solid fa-crosshairs"></i></button>
                             <button type="button" id="btnToggleCornerPins" onclick="toggleCadastralCornerPins()" class="px-2.5 py-1 text-xs rounded-lg font-semibold transition-all bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 whitespace-nowrap" title="Corner Pins"><i class="fa-solid fa-location-pin mr-1"></i> ${isTh ? 'หมุดมุมแปลง' : 'Corner Pins'}</button>
-                            <button type="button" id="btnCadastralFullscreen" onclick="toggleCadastralFullscreen()" class="px-2.5 py-1 text-xs rounded-lg font-bold transition-all bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 shadow-xs flex items-center whitespace-nowrap">
-                                <i id="cadastralFullscreenIcon" class="fa-solid fa-expand text-xs mr-1 text-emerald-300"></i><span id="cadastralFullscreenText">${isTh ? 'เต็มจอ' : 'Fullscreen'}</span>
-                            </button>
+                            <button type="button" id="btnCadastralFullscreen" onclick="toggleCadastralFullscreen()" class="px-2.5 py-1 text-xs rounded-lg font-bold transition-all bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 shadow-xs flex items-center whitespace-nowrap"> <i id="cadastralFullscreenIcon" class="fa-solid fa-expand text-xs mr-1 text-emerald-300"></i><span id="cadastralFullscreenText">${isTh ? 'เต็มจอ' : 'Fullscreen'}</span> </button>
                         </div>
                     </div>
 
@@ -238,14 +215,10 @@ Object.assign(window.Components, {
                                         </div>
                                         <div class="flex flex-wrap gap-1 max-h-24 overflow-y-auto pt-0.5">
                                             ${siblingPlots.map((sp, sIdx) => `
-                                                <button type="button" data-plot-id="${sp.id}" onclick="selectCadastralPlot('${sp.id}')" class="sibling-plot-pill px-2 py-0.5 text-[10px] rounded-md font-semibold transition-all ${sp.id === activePlot.id ? 'bg-indigo-600 text-white shadow-xs font-bold ring-2 ring-indigo-300' : 'bg-white hover:bg-indigo-100 text-slate-700 border border-slate-200'}">
-                                                    Plot ${sIdx + 1} (${sp.thaiArea ? sp.thaiArea.rai : 0} R.)
-                                                </button>
+                                                <button type="button" data-plot-id="${sp.id}" onclick="selectCadastralPlot('${sp.id}')" class="sibling-plot-pill px-2 py-0.5 text-[10px] rounded-md font-semibold transition-all ${sp.id === activePlot.id ? 'bg-indigo-600 text-white shadow-xs font-bold ring-2 ring-indigo-300' : 'bg-white hover:bg-indigo-100 text-slate-700 border border-slate-200'}"> Plot ${sIdx + 1} (${sp.thaiArea ? sp.thaiArea.rai : 0} R.) </button>
                                             `).join('')}
                                         </div>
-                                        <button type="button" onclick="drawAllPlotsForMo('${activePlot.linkedMoNo}')" class="w-full mt-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-xs flex items-center justify-center whitespace-nowrap">
-                                            <i class="fa-solid fa-layer-group mr-1.5"></i> ${isTh ? `วาดทุกแปลง (${siblingPlots.length} แปลง)` : `Draw All ${siblingPlots.length} Plots on Map`}
-                                        </button>
+                                        <button type="button" onclick="drawAllPlotsForMo('${activePlot.linkedMoNo}')" class="w-full mt-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition-all shadow-xs flex items-center justify-center whitespace-nowrap"> <i class="fa-solid fa-layer-group mr-1.5"></i> ${isTh ? `วาดทุกแปลง (${siblingPlots.length} แปลง)` : `Draw All ${siblingPlots.length} Plots on Map`} </button>
                                     </div>
                                     ` : ''}
                                     `;
@@ -294,9 +267,7 @@ Object.assign(window.Components, {
                                 <h4 class="text-xs font-bold text-slate-900 flex items-center"><i class="fa-solid fa-table-cells text-indigo-600 mr-1.5"></i>${isTh ? 'พิกัดมุมแปลง EUDR' : 'Polygon Corner Vertices'}</h4>
                                 <span id="activePlotVertexCount" class="text-[10px] text-slate-400">${activePlot && activePlot.vertices ? activePlot.vertices.length : 0} ${isTh ? 'จุดมุมแปลง' : 'Vertices'}</span>
                             </div>
-                            <button type="button" onclick="copyActivePlotCoordinates()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all flex items-center border border-slate-200 shadow-2xs whitespace-nowrap">
-                                <i class="fa-regular fa-copy mr-1 text-indigo-600"></i> ${isTh ? 'คัดลอกพิกัด' : 'Copy Coordinates'}
-                            </button>
+                            <button type="button" onclick="copyActivePlotCoordinates()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all flex items-center border border-slate-200 shadow-2xs whitespace-nowrap"> <i class="fa-regular fa-copy mr-1 text-indigo-600"></i> ${isTh ? 'คัดลอกพิกัด' : 'Copy Coordinates'} </button>
                         </div>
                         <div class="flex-1 overflow-y-auto pt-2">
                             <table class="w-full text-left border-collapse">
@@ -312,11 +283,87 @@ Object.assign(window.Components, {
                         </div>
                     </div>
                 </div>
+
+                <!-- 3. ข้อมูลแบบประเมินความยั่งยืน & คุณลักษณะแปลง EUDR (ExtendedData) -->
+                ${(() => {
+                    const attrs = (activePlot && activePlot.attributes && typeof activePlot.attributes === "object") ? activePlot.attributes : {};
+                    const attrKeys = Object.keys(attrs);
+                    const hasAttrs = attrKeys.length > 0;
+                    const jsonStr = JSON.stringify(attrs, null, 2);
+
+                    return `
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                            <div>
+                                <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center">
+                                    <i class="fa-solid fa-clipboard-question text-emerald-600 mr-2"></i>
+                                    ${isTh ? 'ข้อมูลแบบประเมินความยั่งยืน & คุณลักษณะแปลง (EUDR Questionnaire / ExtendedData)' : 'EUDR Sustainability Questionnaire & ExtendedData'}
+                                </h3>
+                                <span class="text-[10px] text-slate-400">
+                                    ${hasAttrs ? (isTh ? `พบข้อมูลคุณลักษณะ ${attrKeys.length} รายการจากไฟล์นำเข้า` : `${attrKeys.length} ExtendedData attributes parsed`) : (isTh ? 'ไม่มีข้อมูล ExtendedData เพิ่มเติมในไฟล์นี้' : 'No ExtendedData attributes in this parcel')}
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                                <input type="text" oninput="filterCadastralAttributes(this.value)" placeholder="${isTh ? '🔍 กรองคำถาม/คุณลักษณะ...' : '🔍 Filter attributes...'}" class="w-44 px-2.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-500" />
+                                <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl">
+                                    <button type="button" onclick="switchCadastralAttrView('table')" id="btnCadastralAttrTable" class="px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all shadow-xs bg-emerald-600 text-white cursor-pointer"><i class="fa-solid fa-table-list mr-1"></i> ${isTh ? 'ดูแบบตาราง' : 'Table View'}</button>
+                                    <button type="button" onclick="switchCadastralAttrView('json')" id="btnCadastralAttrJson" class="px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900 cursor-pointer"><i class="fa-solid fa-code mr-1"></i> ${isTh ? 'ดูแบบ JSON' : 'JSON View'}</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="cadastralAttrTableView" class="space-y-2">
+                            ${hasAttrs ? `
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-[10px] text-slate-500 font-bold uppercase border-b border-slate-200 sticky top-0">
+                                            <th class="py-1.5 px-3 w-10 text-center">#</th>
+                                            <th class="py-1.5 px-3">${isTh ? 'หัวข้อคำถาม / คุณลักษณะ' : 'Question / Attribute'}</th>
+                                            <th class="py-1.5 px-3 w-40 text-center">${isTh ? 'ค่าที่บันทึก' : 'Value'}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cadastralAttrTableBody" class="divide-y divide-slate-100">
+                                        ${attrKeys.map((k, idx) => {
+                                            const val = attrs[k];
+                                            let badge = "bg-slate-100 text-slate-800";
+                                            let icon = "";
+                                            if (val === "Y" || val === "Yes" || val === true) {
+                                                badge = "bg-emerald-100 text-emerald-800 font-bold border border-emerald-300";
+                                                icon = '<i class="fa-solid fa-check mr-1 text-emerald-600"></i>';
+                                            } else if (val === "N" || val === "No" || val === false) {
+                                                badge = "bg-rose-50 text-rose-700 font-bold border border-rose-200";
+                                                icon = '<i class="fa-solid fa-xmark mr-1 text-rose-500"></i>';
+                                            }
+                                            return `
+                                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                                <td class="py-1.5 px-3 text-center text-[10px] text-slate-400 font-mono">${idx + 1}</td>
+                                                <td class="py-1.5 px-3 font-medium text-slate-800">${k}</td>
+                                                <td class="py-1.5 px-3 text-center"><span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] ${badge}">${icon}${val}</span></td>
+                                            </tr>`;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            ` : `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center text-slate-400 text-xs"><i class="fa-solid fa-circle-info text-slate-400 mr-1.5"></i>${isTh ? 'แปลงนี้ไม่มีข้อมูล ExtendedData เพิ่มเติม' : 'No ExtendedData attributes.'}</div>`}
+                        </div>
+
+                        <div id="cadastralAttrJsonView" class="hidden space-y-2">
+                            <div class="bg-slate-900 text-emerald-400 p-4 rounded-2xl font-mono text-[11px] overflow-x-auto shadow-inner leading-relaxed">
+                                <pre class="whitespace-pre-wrap">${jsonStr}</pre>
+                            </div>
+                            <div class="text-[11px] text-slate-500 flex items-center justify-between pt-1">
+                                <span><i class="fa-solid fa-database text-indigo-500 mr-1"></i> ${isTh ? 'โครงสร้างนี้สามารถเก็บลงคอลัมน์ JSON ของฐานข้อมูลได้ทันที' : 'Stored in SQL JSON column'}</span>
+                                <button type="button" onclick="navigator.clipboard.writeText(JSON.stringify(window.cadastralPlots.find(p=>p.id===window.activeCadastralPlotId)?.attributes||{}, null, 2)); if(typeof showSwalSuccess==='function') showSwalSuccess('Copied', 'JSON copied to clipboard!');" class="text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer"> <i class="fa-regular fa-copy mr-1"></i> ${isTh ? 'คัดลอก JSON' : 'Copy JSON'} </button>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                })()}
             </div>
         `;
     }
 });
-
 
 // ฟังก์ชันอัปเดตตัวเลือก MO ในหน้าแปลงที่ดินแบบไดนามิกเมื่อข้อมูลเปลี่ยน (mockdata หรือ DB)
 function updateCadastralMoOptions(data) {
@@ -331,3 +378,18 @@ function updateCadastralMoOptions(data) {
     html += `<option value="NONE">${isTh ? '-- แปลงทั่วไป (ยังไม่ผูก MO) --' : '-- Unlinked / General Plot --'}</option>`;
     $select.html(html);
 }
+
+window.switchCadastralAttrView = function(m) {
+    const isJ = m === 'json';
+    $('#cadastralAttrTableView').toggleClass('hidden', isJ);
+    $('#cadastralAttrJsonView').toggleClass('hidden', !isJ);
+    $('#btnCadastralAttrJson').toggleClass('bg-emerald-600 text-white', isJ).toggleClass('text-slate-600 hover:text-slate-900', !isJ);
+    $('#btnCadastralAttrTable').toggleClass('bg-emerald-600 text-white', !isJ).toggleClass('text-slate-600 hover:text-slate-900', isJ);
+};
+
+window.filterCadastralAttributes = function(q) {
+    q = (q || '').toLowerCase();
+    $('#cadastralAttrTableBody tr').each(function() {
+        $(this).toggle(!q || $(this).text().toLowerCase().includes(q));
+    });
+};

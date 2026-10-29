@@ -126,9 +126,8 @@ function drawCadastralPlot(plotId) {
       </div>
       <p class="text-slate-600 mb-1"><strong>เนื้อที่:</strong> ${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว.</p>
       <p class="text-slate-500 text-[11px]">(${plot.thaiArea.sqMeters} ตร.ม. / ${plot.thaiArea.hectares} Ha)</p>
-      <div class="mt-2 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-        EUDR Geolocation Traceability Passed
-      </div>
+      <div class="mt-2 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">EUDR Geolocation Traceability Passed</div>
+      ${plot.attributes && Object.keys(plot.attributes).length > 0 ? `<div class="mt-1 text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded flex items-center justify-between"><span><i class="fa-solid fa-clipboard-question mr-1"></i>ExtendedData:</span><strong>${Object.keys(plot.attributes).length} Attributes</strong></div>` : ''}
     </div>
   `);
 
