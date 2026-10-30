@@ -30,6 +30,8 @@ const translations = {
     kpi_qa_sub: "ผ่านเกณฑ์มาตรฐาน ISO 9001",
     kpi_moisture: "ควบคุมความชื้นเฉลี่ย",
     kpi_moisture_sub: "ได้มาตรฐาน ENplus A1 / ISO 17225-2",
+    kpi_eudr: "การรับรองมาตรฐาน EUDR",
+    kpi_eudr_sub: "เอกสาร DDS ตรวจสอบย้อนกลับสมบูรณ์",
 
     // Pipeline (8-Step Full Lifecycle: Sale->RA->Production->QC->QA->Storage->RA Verification->Shipment)
     pipeline_title: "ภาพรวมสถานะขั้นตอนการทำงาน (8 ขั้นตอน)",
@@ -81,7 +83,7 @@ const translations = {
     // Query Page
     query_title: "สืบค้นรายการคำสั่งซื้อทั้งหมด (Order Master Query)",
     query_subtitle: "ค้นหา กรองข้อมูล และส่งออกรายงาน (20 แถว/หน้า)",
-    search_mo_order_placeholder: "ค้นหาด้วย Order No, MO No, PO No, ชื่อลูกค้า, หรือ Destination...",
+    search_mo_order_placeholder: "ค้นหา Order No, MO, PO, ลูกค้า, เลขที่โฉนด (Land Title No.), แปลง...",
     filter_step: "เลือกขั้นตอน (Step)",
     filter_status: "เลือกสถานะ",
     all_steps: "ทุกขั้นตอน (All Steps)",
@@ -117,7 +119,7 @@ const translations = {
     // Search
     result_count: "แสดง {count} รายการ",
     no_data: "ไม่พบข้อมูลที่ค้นหา",
-    search_placeholder: "ค้นหาด้วย Order No, ชื่อลูกค้า, หรือ POD...",
+    search_placeholder: "ค้นหา Order No, ลูกค้า, MO, เลขที่โฉนด (Land Title), หรือ POD...",
 
     // Common
     etd_label: "ETD",
@@ -153,6 +155,8 @@ const translations = {
     kpi_qa_sub: "Passed ISO 9001 standard",
     kpi_moisture: "Avg Moisture Control",
     kpi_moisture_sub: "Compliant with ENplus A1 / ISO 17225-2",
+    kpi_eudr: "EUDR Compliance Rate",
+    kpi_eudr_sub: "DDS Traceability Verified",
 
     // Pipeline (8-Step Full Lifecycle)
     pipeline_title: "8-Step Lifecycle Workflow Overview",
@@ -204,7 +208,7 @@ const translations = {
     // Query Page
     query_title: "Order Master Query & Search",
     query_subtitle: "Search, filter, and export customized data reports (20 rows/page)",
-    search_mo_order_placeholder: "Search by Order No, MO No, PO No, Customer, Destination...",
+    search_mo_order_placeholder: "Search Order No, MO, PO, Customer, Land Title No., Plot...",
     filter_step: "Select Step",
     filter_status: "Select Status",
     all_steps: "All Steps",
@@ -240,7 +244,7 @@ const translations = {
     // Search
     result_count: "Showing {count} items",
     no_data: "No data found",
-    search_placeholder: "Search by Order No, Customer, or POD...",
+    search_placeholder: "Search Order No, Customer, MO, Land Title No., or POD...",
 
     // Common
     etd_label: "ETD",

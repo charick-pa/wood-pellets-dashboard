@@ -16,50 +16,44 @@ function switchView(viewName) {
     .addClass("hidden")
     .removeClass("page-fade-in");
 
-  // รีเซ็ตสไตล์ปุ่ม Nav ทั้งหมด
-  $("#navDashboardBtn, #navQueryBtn, #navMapBtn, #navCadastralBtn")
-    .removeClass("bg-white text-indigo-700 text-emerald-700 shadow-sm font-bold")
-    .addClass("text-slate-600 font-semibold");
-  $("#navDashboardBtn i").removeClass("text-indigo-600");
-  $("#navMapBtn i").removeClass("text-rose-600").addClass("text-rose-500");
-  $("#navCadastralBtn i").removeClass("text-emerald-700").addClass("text-emerald-600");
+  // รีเซ็ตสไตล์ปุ่ม Nav ทั้งด้านบนและ Bottom Dock
+  $("#navDashboardBtn, #navQueryBtn, #navMapBtn, #navCadastralBtn, #dockDashboardBtn, #dockQueryBtn, #dockMapBtn, #dockCadastralBtn")
+    .removeClass("glass-pill-active bg-white text-indigo-700 text-emerald-700 shadow-sm font-bold")
+    .addClass("text-slate-600 font-semibold hover:text-slate-900");
+  $("#navDashboardBtn i, #navQueryBtn i, #dockDashboardBtn i, #dockQueryBtn i").removeClass("text-emerald-600 text-indigo-600").addClass("text-slate-400");
+  $("#navMapBtn i, #dockMapBtn i").removeClass("text-rose-600 text-emerald-600").addClass("text-slate-400");
+  $("#navCadastralBtn i, #dockCadastralBtn i").removeClass("text-emerald-700 text-emerald-600").addClass("text-slate-400");
 
   if (viewName === "dashboard") {
     $("#dashboardView").removeClass("hidden").addClass("page-fade-in");
-    $("#navDashboardBtn")
-      .addClass("bg-white text-indigo-700 shadow-sm font-bold")
-      .removeClass("text-slate-600 font-semibold");
-    $("#navDashboardBtn i").addClass("text-indigo-600");
-    if (typeof renderDashboard === "function") {
-      renderDashboard(typeof globalData !== "undefined" ? globalData : []);
-    }
+    $("#navDashboardBtn, #dockDashboardBtn").addClass("glass-pill-active font-bold").removeClass("text-slate-600");
+    $("#navDashboardBtn i, #dockDashboardBtn i").removeClass("text-slate-400").addClass("text-emerald-600");
+    if (typeof renderDashboard === "function") renderDashboard(typeof globalData !== "undefined" ? globalData : []);
   } else if (viewName === "query") {
     $("#queryView").removeClass("hidden").addClass("page-fade-in");
-    $("#navQueryBtn")
-      .addClass("bg-white text-indigo-700 shadow-sm font-bold")
-      .removeClass("text-slate-600 font-semibold");
-    if (typeof renderOrderQueryView === "function") {
-      renderOrderQueryView();
-    }
+    $("#navQueryBtn, #dockQueryBtn").addClass("glass-pill-active font-bold").removeClass("text-slate-600");
+    $("#navQueryBtn i, #dockQueryBtn i").removeClass("text-slate-400").addClass("text-emerald-600");
+    if (typeof renderOrderQueryView === "function") renderOrderQueryView();
   } else if (viewName === "map") {
     $("#mapView").removeClass("hidden").addClass("page-fade-in");
-    $("#navMapBtn")
-      .addClass("bg-white text-indigo-700 shadow-sm font-bold")
-      .removeClass("text-slate-600 font-semibold");
-    $("#navMapBtn i").removeClass("text-rose-500").addClass("text-rose-600");
-    if (typeof renderMapOverview === "function") {
-      renderMapOverview();
-    }
+    $("#navMapBtn, #dockMapBtn").addClass("glass-pill-active font-bold").removeClass("text-slate-600");
+    $("#navMapBtn i, #dockMapBtn i").removeClass("text-slate-400").addClass("text-rose-500");
+    if (typeof renderMapOverview === "function") renderMapOverview();
   } else if (viewName === "cadastral") {
     $("#cadastralView").removeClass("hidden").addClass("page-fade-in");
-    $("#navCadastralBtn")
-      .addClass("bg-white text-emerald-700 shadow-sm font-bold")
-      .removeClass("text-slate-600 font-semibold");
-    $("#navCadastralBtn i").removeClass("text-emerald-600").addClass("text-emerald-700");
-    if (typeof renderCadastralView === "function") {
-      renderCadastralView();
-    }
+    $("#navCadastralBtn, #dockCadastralBtn").addClass("glass-pill-active font-bold").removeClass("text-slate-600");
+    $("#navCadastralBtn i, #dockCadastralBtn i").removeClass("text-slate-400").addClass("text-emerald-600");
+    if (typeof renderCadastralView === "function") renderCadastralView();
   }
+
+  // รีสตาร์ตแอนิเมชัน stagger-in ให้การ์ดค่อยๆ ลอยขึ้นมาใหม่อย่างนุ่มนวลช้าๆ
+  var $activeView = $("#" + viewName + "View");
+  $activeView.find(".stagger-in").each(function () {
+    var el = this;
+    el.style.animation = "none";
+    void el.offsetHeight;
+    el.style.animation = "";
+  });
 }
 
 // เริ่มต้นระบบเมื่อ Document พร้อม
@@ -82,6 +76,13 @@ $(document).ready(function () {
   // ดึงตัวเลือก Filter ทั้งหมดจาก mockdata ตั้งแต่ต้น (และพร้อมสลับไปดึงจากฐานข้อมูลจริงทันทีเมื่อเชื่อมต่อ)
   if (typeof populateQueryFilters === "function") {
     populateQueryFilters(typeof globalData !== "undefined" ? globalData : []);
+  }
+
+  // รองรับการเปิดวิวผ่าน URL Query หรือ Hash เช่น ?view=query หรือ #map
+  var urlParams = new URLSearchParams(window.location.search);
+  var targetView = urlParams.get("view") || (window.location.hash || "").replace("#", "").toLowerCase();
+  if (["query", "map", "cadastral"].indexOf(targetView) !== -1) {
+    switchView(targetView);
   }
 
   // ปิด Modal เมื่อคลิกพื้นหลัง

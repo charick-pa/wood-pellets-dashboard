@@ -45,13 +45,12 @@ function handleSelectOrder(orderNo) {
   currentSelectedOrderNo = orderNo;
   updateProductionProgressCard(selectedItem);
 
-  if (window.Components?.renderKPICards) {
-    const rawSummary = window.globalSummary || {};
-    $("#kpiCardsContainer").html(window.Components.renderKPICards(rawSummary, selectedItem));
-  }
-  if (window.Components?.renderPipeline) $("#pipelineContainer").html(window.Components.renderPipeline(selectedItem));
-  if (window.Components?.renderWoodPelletsQuickBar) $("#woodPelletsQuickBarContainer").html(window.Components.renderWoodPelletsQuickBar(selectedItem));
-  if (window.Components?.renderProduction) $("#prodSection").html(window.Components.renderProduction(selectedItem));
+  const C = window.Components, sm = window.globalSummary || {};
+  if (C?.renderKPICards) $("#kpiCardsContainer").html(C.renderKPICards(sm, selectedItem));
+  if (C?.renderDashboardCharts) $("#dashboardChartsContainer").html(C.renderDashboardCharts(sm, selectedItem));
+  if (C?.renderPipeline) $("#pipelineContainer").html(C.renderPipeline(selectedItem));
+  if (C?.renderWoodPelletsQuickBar) $("#woodPelletsQuickBarContainer").html(C.renderWoodPelletsQuickBar(selectedItem));
+  if (C?.renderProduction) $("#prodSection").html(C.renderProduction(selectedItem));
 
   renderDashboardTable();
 }
@@ -87,6 +86,7 @@ function renderDashboard(data) {
   }
 
   if (window.Components?.renderKPICards) $("#kpiCardsContainer").html(window.Components.renderKPICards(safeSummary, activeItem));
+  if (window.Components?.renderDashboardCharts) $("#dashboardChartsContainer").html(window.Components.renderDashboardCharts(safeSummary, activeItem));
   if (window.Components?.renderPipeline) $("#pipelineContainer").html(window.Components.renderPipeline(activeItem));
   if (window.Components?.renderWoodPelletsQuickBar) $("#woodPelletsQuickBarContainer").html(window.Components.renderWoodPelletsQuickBar(activeItem));
   if (window.Components?.renderProduction) $("#prodSection").html(window.Components.renderProduction(activeItem));
@@ -128,15 +128,12 @@ function renderDashboardTable() {
 
 function goToDashboardPage(page) {
   const totalPages = Math.max(1, Math.ceil(dashboardFilteredData.length / dashboardTablePageSize));
-  if (page < 1 || page > totalPages) return;
-  dashboardTablePage = page;
-  renderDashboardTable();
+  if (page >= 1 && page <= totalPages) { dashboardTablePage = page; renderDashboardTable(); }
 }
 
 function handleDashboardPageSizeChange() {
   dashboardTablePageSize = parseInt($("#dashboardPageSizeSelect").val()) || 10;
-  dashboardTablePage = 1;
-  renderDashboardTable();
+  dashboardTablePage = 1; renderDashboardTable();
 }
 
 let currentDashboardTimeRange = "all";
@@ -156,32 +153,44 @@ function applyCombinedDashboardFilter() {
   const val = ($("#searchInput").val() || "").toLowerCase().trim();
   const dataset = typeof globalData !== "undefined" ? globalData : [];
 
-  let filtered = dataset.filter((item) =>
-    item.orderNo.toLowerCase().includes(val) ||
-    (item.customer && item.customer.toLowerCase().includes(val)) ||
-    (item.moNo && item.moNo.toLowerCase().includes(val))
-  );
+  let filtered = dataset.filter((item) => {
+    if (!val) return true;
+    if (item.orderNo.toLowerCase().includes(val) ||
+        (item.customer && item.customer.toLowerCase().includes(val)) ||
+        (item.moNo && item.moNo.toLowerCase().includes(val)) ||
+        (item.destination && item.destination.toLowerCase().includes(val)) ||
+        (item.poNo && item.poNo.toLowerCase().includes(val))) return true;
 
-  const now = new Date();
-  const curY = now.getFullYear();
-  const curM = String(now.getMonth() + 1).padStart(2, "0");
-  const ymSlash = `${curY}/${curM}`;
-  const ymDash = `${curY}-${curM}`;
+    if (window.cadastralPlots && window.cadastralPlots.length > 0) {
+      const itemMo = (item.moNo || "").toLowerCase();
+      for (let i = 0; i < window.cadastralPlots.length; i++) {
+        const p = window.cadastralPlots[i];
+        if (p.linkedMoNo && p.linkedMoNo.toLowerCase() === itemMo) {
+          if ((p.name && p.name.toLowerCase().includes(val)) || (p.fileName && p.fileName.toLowerCase().includes(val))) return true;
+          if (p.attributes) {
+            for (const [k, v] of Object.entries(p.attributes)) {
+              if (String(k).toLowerCase().includes(val) || String(v).toLowerCase().includes(val)) return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+  });
 
-  if (currentDashboardTimeRange === "today") {
-    filtered = filtered.slice(0, Math.min(filtered.length, 3));
-  } else if (currentDashboardTimeRange === "week") {
-    filtered = filtered.slice(0, Math.min(filtered.length, 6));
-  } else if (currentDashboardTimeRange === "month") {
+  const now = new Date(), curY = now.getFullYear(), curM = String(now.getMonth() + 1).padStart(2, "0");
+  const ymSlash = `${curY}/${curM}`, ymDash = `${curY}-${curM}`;
+
+  if (currentDashboardTimeRange === "today") filtered = filtered.slice(0, Math.min(filtered.length, 3));
+  else if (currentDashboardTimeRange === "week") filtered = filtered.slice(0, Math.min(filtered.length, 6));
+  else if (currentDashboardTimeRange === "month") {
     filtered = filtered.filter(item => {
-      const etd = item.step6?.etd || "";
-      const date = item.orderDate || item.requestedDeliveryDate || "";
+      const etd = item.step6?.etd || "", date = item.orderDate || item.requestedDeliveryDate || "";
       return etd.includes(ymSlash) || etd.includes(ymDash) || date.includes(ymSlash) || date.includes(ymDash) || !etd;
     });
     if (filtered.length === 0) filtered = dataset.slice(0, Math.min(dataset.length, 8));
   } else if (currentDashboardTimeRange === "all") {
-    const yStr = String(curY);
-    const yrFiltered = filtered.filter(item => (item.orderDate || "").includes(yStr) || (item.step6?.etd || "").includes(yStr));
+    const yrFiltered = filtered.filter(item => (item.orderDate || "").includes(String(curY)) || (item.step6?.etd || "").includes(String(curY)));
     if (yrFiltered.length > 0) filtered = yrFiltered;
   }
 
@@ -369,16 +378,16 @@ function exportToPDF() {
 }
 
 function printViaHiddenIframe(htmlContent, title) {
-  let printIframe = document.getElementById("bpmPrintIframe");
-  if (!printIframe) {
-    printIframe = document.createElement("iframe");
-    printIframe.id = "bpmPrintIframe";
-    printIframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;";
-    document.body.appendChild(printIframe);
+  let iframe = document.getElementById("bpmPrintIframe");
+  if (!iframe) {
+    iframe = document.createElement("iframe");
+    iframe.id = "bpmPrintIframe";
+    iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;";
+    document.body.appendChild(iframe);
   }
-  const doc = printIframe.contentWindow.document;
-  doc.open(); doc.write(htmlContent); doc.close();
-  setTimeout(() => { printIframe.contentWindow.focus(); printIframe.contentWindow.print(); }, 300);
+  const d = iframe.contentWindow.document;
+  d.open(); d.write(htmlContent); d.close();
+  setTimeout(() => { iframe.contentWindow.focus(); iframe.contentWindow.print(); }, 300);
 }
 
 // นำทางจากฟอร์ม BPM ไปยังหน้าแปลงที่ดินเพื่อแสดงทุกแปลงของ MO นั้นพร้อมกันบนแผนที่

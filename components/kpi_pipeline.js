@@ -1,3 +1,9 @@
+window.activeKpiCardIndex = window.activeKpiCardIndex || 2;
+window.selectKpiCard = function (idx) {
+    window.activeKpiCardIndex = idx;
+    $('.kpi-card').removeClass('kpi-active');
+    $('#kpiCard' + idx).addClass('kpi-active');
+};
 /**
  * Component: KPI Cards, Wood Pellets Quick Summary Bar & 8-Step Pipeline
  * Green River Panels Wood Pellets Operations Dashboard
@@ -9,6 +15,7 @@ Object.assign(window.Components, {
     renderKPICards: function (summaryData, activeItem) {
         const t = (typeof translations !== "undefined" && translations[currentLang]) || {};
         const isTh = (typeof currentLang !== "undefined" && currentLang === "th");
+        const activeIdx = window.activeKpiCardIndex || 2;
         const _kpiNow = new Date();
         const _kpiYear = _kpiNow.getFullYear();
         const _kpiMonth = isTh ? ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."][_kpiNow.getMonth()] : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][_kpiNow.getMonth()];
@@ -34,8 +41,12 @@ Object.assign(window.Components, {
         const orderRef = targetItem.orderNo || "Order Ref";
         
         // คำนวณสัดส่วนความถูกต้อง EUDR DDS จากออเดอร์ทั้งหมด
-        const approvedEudr = allOrders.filter(x => (x.step2?.status || "").toUpperCase() === "APPROVED").length;
-        const eudrPercent = allOrders.length > 0 ? Math.round((approvedEudr / allOrders.length) * 100) : 100;
+        const dataset = (typeof dashboardFilteredData !== "undefined" && Array.isArray(dashboardFilteredData) && dashboardFilteredData.length > 0)
+            ? dashboardFilteredData : allOrders;
+        const totalOrders = summaryData?.activeOrders || dataset.length || 48;
+        const eudrApprovedOrders = dataset.filter(x => (x.step2?.status || "").toUpperCase() === "APPROVED" || Number(x.currentStep) >= 2).length || totalOrders;
+        const eudrPercent = totalOrders > 0 ? Math.round((eudrApprovedOrders / totalOrders) * 100) : 100;
+        const eudrPending = Math.max(0, totalOrders - eudrApprovedOrders);
         const ddsRef = `DDS-2026-TH-${targetItem.moNo ? targetItem.moNo.replace(/[^0-9]/g, '').slice(-5) : '00412'}`;
 
         // ค่าผลผลิต (Yield) และใบรับรองจริงของออเดอร์
@@ -44,7 +55,7 @@ Object.assign(window.Components, {
 
         return `
             <!-- Executive Operations Alert Bar (Dynamic Live Ops Brief) -->
-            <div class="mb-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-sm border border-indigo-900/40 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+            <div class="mb-4 bg-slate-900/85 backdrop-blur-xl text-white px-5 py-3 rounded-3xl shadow-lg border border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
                 <div class="flex items-center space-x-2.5 min-w-0">
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-400 text-slate-950 shrink-0">
                         <span class="w-1.5 h-1.5 rounded-full bg-slate-950 animate-ping mr-1.5"></span>LIVE OPS BRIEF
@@ -63,28 +74,27 @@ Object.assign(window.Components, {
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Card 1: Active Orders with Inline SVG Sparkline -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                <div id="kpiCard1" onclick="selectKpiCard(1)" class="glass-card glass-card-interactive kpi-card ${activeIdx === 1 ? 'kpi-active' : ''} stagger-in delay-2 p-5 rounded-3xl flex flex-col justify-between">
                     <div class="flex items-start justify-between">
                         <div>
                             <div class="flex items-center space-x-1.5">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">${t.kpi_active || 'ยอดรวมคำสั่งซื้อ'}</p>
-                                <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">+12.5%</span>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider kpi-label">${t.kpi_active || 'ยอดรวมคำสั่งซื้อ'}</p>
+                                <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 kpi-badge">+12.5%</span>
                             </div>
                             <h3 class="text-2xl font-black text-slate-900 mt-1">${summaryData.activeOrders}</h3>
                         </div>
                         <div class="flex flex-col items-end">
-                            <div class="bg-blue-50 text-blue-600 p-2.5 rounded-xl mb-1">
+                            <div class="bg-blue-50 text-blue-600 p-2.5 rounded-xl mb-1 kpi-icon-box">
                                 <i class="fa-solid fa-cart-shopping text-base"></i>
                             </div>
-                            <!-- Inline SVG Trend Sparkline -->
                             <svg class="w-14 h-6 text-emerald-500" viewBox="0 0 80 32" fill="none">
                                 <path d="M0,26 Q20,22 35,14 T55,12 T80,4 L80,32 L0,32 Z" fill="#10b981" fill-opacity="0.15"/>
                                 <path d="M0,26 Q20,22 35,14 T55,12 T80,4" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" fill="none"/>
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-3 pt-2.5 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-slate-50/80 p-2 rounded-xl border border-slate-100">
+                    <div class="mt-3 pt-2.5 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs kpi-border-t">
+                        <div class="bg-white/60 backdrop-blur-md p-2 rounded-2xl border border-white/60 shadow-2xs kpi-sub-card">
                             <span class="text-[10px] text-slate-400 font-medium block"><i class="fa-solid fa-calendar-day text-indigo-500 mr-1"></i>${isTh ? `รายเดือน (${_kpiMonth})` : `Monthly (${_kpiMonth})`}</span>
                             <div class="flex items-baseline space-x-1 mt-0.5">
                                 <strong class="text-sm font-bold text-indigo-600">${summaryData.monthlyOrders || 8}</strong>
@@ -92,7 +102,7 @@ Object.assign(window.Components, {
                             </div>
                             <span class="text-[10px] text-slate-500 block font-mono mt-0.5">${summaryData.monthlyTons || '125,000'} T</span>
                         </div>
-                        <div class="bg-slate-50/80 p-2 rounded-xl border border-slate-100">
+                        <div class="bg-white/60 backdrop-blur-md p-2 rounded-2xl border border-white/60 shadow-2xs kpi-sub-card">
                             <span class="text-[10px] text-slate-400 font-medium block"><i class="fa-solid fa-calendar text-emerald-500 mr-1"></i>${isTh ? `รายปี (${_kpiYear})` : `Yearly (${_kpiYear})`}</span>
                             <div class="flex items-baseline space-x-1 mt-0.5">
                                 <strong class="text-sm font-bold text-emerald-600">${summaryData.yearlyOrders || summaryData.activeOrders}</strong>
@@ -103,41 +113,41 @@ Object.assign(window.Components, {
                     </div>
                 </div>
 
-                <!-- Card 2: Production Progress -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                <!-- Card 2: Production Progress (Signature Emerald Glass Card when Active) -->
+                <div id="kpiCard2" onclick="selectKpiCard(2)" class="glass-card glass-card-interactive kpi-card ${activeIdx === 2 ? 'kpi-active' : ''} stagger-in delay-3 p-5 rounded-3xl flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center space-x-1.5">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">${t.kpi_prod || 'ความคืบหน้าการผลิต'}</p>
-                                <span class="text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.2 rounded">Live Batch</span>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider kpi-label">${t.kpi_prod || 'ความคืบหน้าการผลิต'}</p>
+                                <span class="text-[9px] font-bold bg-white/20 text-emerald-700 border border-emerald-300 px-2 py-0.5 rounded-full kpi-badge">Live Batch</span>
                             </div>
-                            <div class="bg-amber-50 text-amber-600 p-2.5 rounded-xl">
+                            <div class="bg-emerald-50 text-emerald-600 p-2.5 rounded-xl shadow-2xs kpi-icon-box">
                                 <i class="fa-solid fa-gears text-base"></i>
                             </div>
                         </div>
                         <h3 id="production-progress-text" class="text-2xl font-black text-slate-900">${progress}%</h3>
-                        <div class="w-full bg-slate-100 rounded-full h-2.5 mt-3 overflow-hidden shadow-inner">
-                            <div id="production-progress-bar" class="${progressBarColor} h-2.5 rounded-full transition-all duration-500 shadow-sm" style="width: ${progress}%"></div>
+                        <div class="w-full bg-black/15 rounded-full h-2.5 mt-3 overflow-hidden shadow-inner kpi-progress-track">
+                            <div id="production-progress-bar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500 shadow-sm kpi-progress-bar" style="width: ${progress}%"></div>
                         </div>
                     </div>
-                    <p id="production-progress-sub" class="text-[11px] text-slate-500 font-medium mt-3 truncate bg-slate-50 p-1.5 rounded-lg border border-slate-100">
-                        <i class="fa-solid fa-industry text-indigo-500 mr-1"></i>${orderInfo}
+                    <p id="production-progress-sub" class="text-[11px] text-slate-600 font-medium mt-3 truncate bg-black/10 backdrop-blur-md p-2 rounded-xl border border-black/10 kpi-sub-card">
+                        <i class="fa-solid fa-industry text-emerald-600 mr-1"></i>${orderInfo}
                     </p>
                 </div>
 
                 <!-- Card 3: Pending Shipments with Inline SVG Sparkline -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                <div id="kpiCard3" onclick="selectKpiCard(3)" class="glass-card glass-card-interactive kpi-card ${activeIdx === 3 ? 'kpi-active' : ''} stagger-in delay-4 p-5 rounded-3xl flex flex-col justify-between">
                     <div class="flex items-start justify-between">
                         <div>
                             <div class="flex items-center space-x-1.5">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">${t.kpi_ship || (isTh ? 'จัดส่งแล้ว' : 'Shipped')}</p>
-                                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">${targetItem.statusBadge || 'On Schedule'}</span>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider kpi-label">${t.kpi_ship || (isTh ? 'จัดส่งแล้ว' : 'Shipped')}</p>
+                                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200 kpi-badge">${targetItem.statusBadge || 'On Schedule'}</span>
                             </div>
                             <h3 class="text-2xl font-black text-slate-900 mt-1">${summaryData.pendingShipments || '41'}</h3>
                             <p class="text-xs text-indigo-600 font-medium mt-1">${t.etd_label || 'ETD'}: <span class="font-bold font-mono text-indigo-700">${etdDate}</span></p>
                         </div>
                         <div class="flex flex-col items-end">
-                            <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-xl mb-1">
+                            <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-xl mb-1 kpi-icon-box">
                                 <i class="fa-solid fa-truck-fast text-base"></i>
                             </div>
                             <svg class="w-14 h-6 text-indigo-500" viewBox="0 0 80 32" fill="none">
@@ -146,38 +156,38 @@ Object.assign(window.Components, {
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+                    <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between kpi-border-t">
                         <span class="truncate mr-2">${isTh ? 'ท่าเรือส่งออก:' : 'Port:'} <strong class="text-slate-800">${destPort}</strong></span>
                         <span class="text-emerald-600 font-semibold shrink-0">${targetItem.step6?.shippingLine ? `${targetItem.step6.shippingLine} Booked` : 'Vessel Booked'}</span>
                     </div>
                 </div>
 
-                <!-- Card 4: Wood Pellets Moisture & Quality Control (Option 2) -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                <!-- Card 4: EUDR Compliance & Traceability Rate -->
+                <div id="kpiCard4" onclick="selectKpiCard(4)" class="glass-card glass-card-interactive kpi-card ${activeIdx === 4 ? 'kpi-active' : ''} stagger-in delay-5 p-5 rounded-3xl flex flex-col justify-between">
                     <div class="flex items-start justify-between">
                         <div>
                             <div class="flex items-center space-x-1.5">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">${t.kpi_moisture || (isTh ? 'ควบคุมความชื้นเฉลี่ย' : 'Avg Moisture Control')}</p>
-                                <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">${isTh ? 'เกณฑ์ < 8%' : 'Target < 8%'}</span>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider kpi-label">${t.kpi_eudr || (isTh ? 'การรับรองมาตรฐาน EUDR' : 'EUDR Compliance')}</p>
+                                <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 kpi-badge">${eudrApprovedOrders}/${totalOrders} ${isTh ? 'อนุมัติแล้ว' : 'Verified'}</span>
                             </div>
-                            <h3 class="text-2xl font-black text-cyan-700 mt-1">${summaryData.avgMoisture || '6.8%'}</h3>
+                            <h3 class="text-2xl font-black text-emerald-600 mt-1">${eudrPercent}%</h3>
                         </div>
                         <div class="flex flex-col items-end">
-                            <div class="bg-cyan-50 text-cyan-600 p-2.5 rounded-xl mb-1">
-                                <i class="fa-solid fa-droplet text-base"></i>
+                            <div class="bg-emerald-50 text-emerald-600 p-2.5 rounded-xl mb-1 shadow-2xs kpi-icon-box">
+                                <i class="fa-solid fa-shield-halved text-base"></i>
                             </div>
-                            <!-- Inline SVG Trend Sparkline for Moisture Stability -->
-                            <svg class="w-14 h-6 text-cyan-500" viewBox="0 0 80 32" fill="none">
-                                <path d="M0,18 Q20,14 35,16 T55,15 T80,14 L80,32 L0,32 Z" fill="#06b6d4" fill-opacity="0.15"/>
-                                <path d="M0,18 Q20,14 35,16 T55,15 T80,14" stroke="#06b6d4" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                            <svg class="w-14 h-6 text-emerald-500" viewBox="0 0 80 32" fill="none">
+                                <path d="M0,24 Q25,18 40,14 T65,8 T80,4 L80,32 L0,32 Z" fill="#10b981" fill-opacity="0.15"/>
+                                <path d="M0,24 Q25,18 40,14 T65,8 T80,4" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" fill="none"/>
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-3 pt-2.5 border-t border-slate-100">
-                        <p class="text-xs text-slate-600 font-medium flex items-center">
-                            <i class="fa-solid fa-circle-check text-emerald-500 mr-1.5"></i> ${t.kpi_moisture_sub || (isTh ? 'ได้มาตรฐาน ENplus A1 / ISO 17225-2' : 'Compliant with ENplus A1 / ISO 17225-2')}
+                    <div class="mt-3 pt-2.5 border-t border-slate-100 kpi-border-t">
+                        <p class="text-xs text-slate-700 font-medium flex items-center truncate">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mr-1.5 shrink-0"></i>
+                            <span>${isTh ? `พร้อมยื่น DDS: ${eudrApprovedOrders} ออเดอร์ ${eudrPending > 0 ? `(${t.kpi_wait_audit || 'รอตรวจ'} ${eudrPending})` : '(ครบถ้วน)'}` : `DDS Ready: ${eudrApprovedOrders} Orders ${eudrPending > 0 ? `(${eudrPending} Pending)` : '(Complete)'}`}</span>
                         </p>
-                        <p class="text-[10px] text-slate-500 mt-0.5">${isTh ? 'อัตราผลผลิต Yield รวม: 94.2% • ขนาด Ø 6.0 mm' : 'Plant Yield: 94.2% • Pellet Size Ø 6.0 mm'}</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5 truncate">${isTh ? 'ปลอดการตัดไม้ทำลายป่า 100% (Zero Deforestation)' : 'Zero Deforestation • Satellite Geolocation 100%'}</p>
                     </div>
                 </div>
             </div>
@@ -199,7 +209,7 @@ Object.assign(window.Components, {
         const barTitle = isTh ? "พารามิเตอร์การผลิตและสต็อกเฉพาะทาง:" : "Specialized Production & Stock Parameters:";
 
         return `
-            <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200">
+            <div class="glass-card p-5 rounded-3xl border border-white/70 shadow-xs">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
                     <div class="flex flex-wrap items-center gap-2 min-w-0">
                         <span class="bg-amber-500 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded uppercase tracking-wider shrink-0">WOOD PELLETS BPM</span>
@@ -214,7 +224,7 @@ Object.assign(window.Components, {
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
                     <!-- Widget 1: Wood Pellet Specs & Certs -->
-                    <div class="bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/80 hover:border-blue-300 transition-colors">
+                    <div class="bg-white/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 hover:border-blue-300 hover:shadow-sm transition-all duration-300">
                         <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium">
                             <span>${isTh ? 'สเปก & ใบรับรอง' : 'Specs & Certificates'}</span>
                             <i class="fa-solid fa-certificate text-blue-600"></i>
@@ -228,7 +238,7 @@ Object.assign(window.Components, {
                     </div>
 
                     <!-- Widget 2: Moisture Control -->
-                    <div class="bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/80 hover:border-cyan-300 transition-colors">
+                    <div class="bg-white/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 hover:border-cyan-300 hover:shadow-sm transition-all duration-300">
                         <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium">
                             <span>${isTh ? 'ควบคุมความชื้น' : 'Moisture Control'}</span>
                             <i class="fa-solid fa-droplet text-cyan-600"></i>
@@ -243,7 +253,7 @@ Object.assign(window.Components, {
                     </div>
 
                     <!-- Widget 3: Yield & Machine Downtime -->
-                    <div class="bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/80 hover:border-amber-300 transition-colors">
+                    <div class="bg-white/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 hover:border-amber-300 hover:shadow-sm transition-all duration-300">
                         <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium">
                             <span>${isTh ? 'ประสิทธิภาพ & Downtime' : 'Yield & Downtime'}</span>
                             <i class="fa-solid fa-chart-line text-amber-600"></i>
@@ -255,7 +265,7 @@ Object.assign(window.Components, {
                     </div>
 
                     <!-- Widget 4: Warehouse Stock Movement -->
-                    <div class="bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/80 hover:border-indigo-300 transition-colors">
+                    <div class="bg-white/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 hover:border-indigo-300 hover:shadow-sm transition-all duration-300">
                         <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium">
                             <span>${isTh ? `สต็อก (${wh.location || 'WH 1'})` : `Stock (${wh.location || 'WH 1'})`}</span>
                             <i class="fa-solid fa-warehouse text-indigo-600"></i>
@@ -277,7 +287,7 @@ Object.assign(window.Components, {
 
         const currentStep = item.currentStep || 1;
         const promptStatus = (item.ResultPrompt || "Approved").trim().toUpperCase();
-        const arrow = `<div class="hidden lg:flex items-center justify-center text-slate-300 px-1"><i class="fa-solid fa-arrow-right text-sm"></i></div>`;
+        const arrow = `<div class="hidden lg:flex items-center justify-center text-slate-300 shrink-0"><i class="fa-solid fa-angle-right text-[11px]"></i></div>`;
 
         const stepThemes = {
             1: { badge: "bg-blue-600 text-white", card: "bg-blue-50/60 border-blue-200 text-blue-900", text: "text-blue-700" },
@@ -305,7 +315,7 @@ Object.assign(window.Components, {
         const isRejected = promptStatus === "REJECTED" || promptStatus === "REJECT";
         const isWithdrawn = promptStatus === "WITHDRAW" || promptStatus === "WITHDRAWN";
 
-        let html = '<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">';
+        let html = '<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-1.5 xl:gap-2 w-full">';
         steps.forEach((s, index) => {
             let badgeBg, cardStyle, textCol;
             let displayStatus = s.status;
@@ -338,7 +348,7 @@ Object.assign(window.Components, {
             }
 
             html += `
-                <div class="flex-1 ${cardStyle} p-3 rounded-xl border text-center relative transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm">
+                <div class="flex-1 min-w-0 ${cardStyle} px-2 py-2.5 rounded-2xl border text-center relative backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
                     <span class="absolute -top-3 left-1/2 -translate-x-1/2 ${badgeBg} text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm">${s.step}</span>
                     <p class="text-[11px] font-semibold mt-1 ${s.id === currentStep && !isRejected && !isWithdrawn ? 'text-rose-900 font-bold' : 'text-slate-700'}">${s.title}</p>
                     <p class="text-xs ${textCol} mt-1 truncate font-medium">${s.val}</p>

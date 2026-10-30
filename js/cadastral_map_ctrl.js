@@ -320,6 +320,12 @@ function updateCadastralDetailsCards(plot) {
     });
     $("#cadastralVertexTableBody").html(rHtml);
   }
+  if (plot.linkedMoNo) {
+    $("#activePlotMoSelect").val(plot.linkedMoNo);
+  }
+  if (typeof updateCadastralAttributesCard === "function") {
+    updateCadastralAttributesCard(plot);
+  }
 }
 
 // เลือกแปลงที่ดิน: ไฮไลต์ปุ่ม, ซิงก์ Dropdown, โฟกัสแผนที่, และอัปเดตการ์ดข้อมูล

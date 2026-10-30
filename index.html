@@ -138,11 +138,233 @@
       }
 
       .page-fade-in {
-        animation: fadeInSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: fadeInSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
 
       .modal-pop-in {
         animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+            /* ===================================================
+         True VisionOS Glassmorphism & Staggered Slow Slide-in
+         =================================================== */
+      @keyframes glassSlideUpStagger {
+        0% {
+          opacity: 0;
+          transform: translateY(32px) scale(0.97);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .stagger-in {
+        animation: glassSlideUpStagger 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      .delay-1 { animation-delay: 0.05s; }
+      .delay-2 { animation-delay: 0.12s; }
+      .delay-3 { animation-delay: 0.20s; }
+      .delay-4 { animation-delay: 0.28s; }
+      .delay-5 { animation-delay: 0.36s; }
+      .delay-6 { animation-delay: 0.44s; }
+      .delay-7 { animation-delay: 0.52s; }
+      .delay-8 { animation-delay: 0.60s; }
+
+      .glass-stage {
+        background: rgba(235, 222, 210, 0.26) !important;
+        backdrop-filter: blur(36px) saturate(160%) !important;
+        -webkit-backdrop-filter: blur(36px) saturate(160%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.65) !important;
+        box-shadow: inset 0 1px 2px 0 rgba(255, 255, 255, 0.85),
+                    0 35px 70px -15px rgba(45, 30, 15, 0.18),
+                    0 10px 25px -5px rgba(0, 0, 0, 0.05) !important;
+        border-radius: 36px !important;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.46) !important;
+        backdrop-filter: blur(24px) saturate(170%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.75) !important;
+        box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+                    0 15px 35px -10px rgba(60, 45, 30, 0.08),
+                    0 4px 8px -2px rgba(0, 0, 0, 0.03) !important;
+        border-radius: 24px !important;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease !important;
+      }
+      .glass-card-interactive {
+        background: rgba(255, 255, 255, 0.46) !important;
+        backdrop-filter: blur(24px) saturate(170%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.75) !important;
+        box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+                    0 15px 35px -10px rgba(60, 45, 30, 0.08),
+                    0 4px 8px -2px rgba(0, 0, 0, 0.03) !important;
+        border-radius: 24px !important;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease !important;
+      }
+      .glass-card-interactive:hover {
+        transform: translateY(-6px) scale(1.008) !important;
+        background: rgba(255, 255, 255, 0.68) !important;
+        border-color: rgba(255, 255, 255, 0.95) !important;
+        box-shadow: inset 0 1px 2px 0 rgba(255, 255, 255, 1),
+                    0 28px 50px -12px rgba(16, 185, 129, 0.25),
+                    0 8px 18px -4px rgba(0, 0, 0, 0.05) !important;
+      }
+      .glass-card.kpi-card.kpi-active,
+      .glass-card-emerald, 
+      .kpi-card.kpi-active {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.92) 0%, rgba(5, 150, 105, 0.95) 50%, rgba(4, 120, 87, 0.98) 100%) !important;
+        backdrop-filter: blur(24px) saturate(170%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(170%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.6),
+                    0 20px 40px -10px rgba(5, 150, 105, 0.45) !important;
+        border-radius: 24px !important;
+        color: white !important;
+      }
+      .kpi-card {
+        cursor: pointer;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.35s ease, border-color 0.3s ease !important;
+      }
+      .kpi-card:hover {
+        transform: translateY(-4px) !important;
+      }
+      .glass-card.kpi-card.kpi-active:hover,
+      .glass-card-emerald:hover, 
+      .kpi-card.kpi-active:hover {
+        transform: translateY(-6px) scale(1.008) !important;
+        box-shadow: inset 0 1px 2px 0 rgba(255, 255, 255, 0.8),
+                    0 28px 50px -10px rgba(5, 150, 105, 0.55) !important;
+      }
+      .kpi-card.kpi-active h3,
+      .kpi-card.kpi-active p,
+      .kpi-card.kpi-active span,
+      .kpi-card.kpi-active strong {
+        color: #ffffff !important;
+      }
+      .kpi-card.kpi-active .kpi-label {
+        color: rgba(209, 250, 229, 0.95) !important;
+      }
+      .kpi-card.kpi-active .kpi-icon-box {
+        background: rgba(255, 255, 255, 0.22) !important;
+        color: #ffffff !important;
+      }
+      .kpi-card.kpi-active .kpi-badge {
+        background: rgba(255, 255, 255, 0.22) !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+      }
+      .kpi-card.kpi-active .kpi-sub-card {
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+      }
+      .kpi-card.kpi-active .kpi-sub-card span,
+      .kpi-card.kpi-active .kpi-sub-card strong {
+        color: #ffffff !important;
+      }
+      .kpi-card.kpi-active .kpi-progress-track {
+        background: rgba(0, 0, 0, 0.28) !important;
+      }
+      .kpi-card.kpi-active .kpi-progress-bar {
+        background: #ffffff !important;
+      }
+      .kpi-card.kpi-active svg path[stroke] {
+        stroke: #ffffff !important;
+      }
+      .kpi-card.kpi-active svg path[fill] {
+        fill: #ffffff !important;
+        fill-opacity: 0.25 !important;
+      }
+      .kpi-card.kpi-active .kpi-border-t {
+        border-color: rgba(255, 255, 255, 0.22) !important;
+      }
+      .glass-header {
+        background: rgba(255, 255, 255, 0.55) !important;
+        backdrop-filter: blur(28px) saturate(170%) !important;
+        -webkit-backdrop-filter: blur(28px) saturate(170%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        box-shadow: inset 0 1px 2px 0 rgba(255, 255, 255, 0.9),
+                    0 15px 35px -10px rgba(60, 45, 25, 0.09) !important;
+        border-radius: 28px !important;
+      }
+      .glass-dock {
+        background: rgba(255, 255, 255, 0.45) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+      }
+      .glass-pill {
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      }
+      .glass-pill-active {
+        background: rgba(255, 255, 255, 0.95) !important;
+        color: #047857 !important;
+        box-shadow: 0 2px 8px -1px rgba(16, 185, 129, 0.2), 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+        border: 1px solid rgba(16, 185, 129, 0.2) !important;
+      }
+
+      /* ===================================================
+         Floating Ambient Glow Animations (From Video Experience)
+         =================================================== */
+      @keyframes floatSlow1 {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(50px, 35px) scale(1.08); }
+        66% { transform: translate(-30px, 20px) scale(0.96); }
+      }
+      @keyframes floatSlow2 {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(-55px, -45px) scale(1.12); }
+        66% { transform: translate(35px, -25px) scale(0.92); }
+      }
+      @keyframes floatSlow3 {
+        0%, 100% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(40px, -40px) scale(1.1); }
+        66% { transform: translate(-45px, 20px) scale(0.95); }
+      }
+      @keyframes pulseGlow {
+        0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.45)); }
+        50% { opacity: 0.85; filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.85)); }
+      }
+
+      /* Ambient Background Glow Mesh with Smooth Floating Animation */
+      .ambient-glow-1 {
+        position: absolute;
+        width: 580px;
+        height: 580px;
+        top: -120px;
+        left: -120px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0) 70%);
+        border-radius: 50%;
+        filter: blur(70px);
+        pointer-events: none;
+        animation: floatSlow1 20s ease-in-out infinite;
+      }
+      .ambient-glow-2 {
+        position: absolute;
+        width: 650px;
+        height: 650px;
+        top: 25%;
+        right: -160px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+        border-radius: 50%;
+        filter: blur(80px);
+        pointer-events: none;
+        animation: floatSlow2 24s ease-in-out infinite;
+      }
+      .ambient-glow-3 {
+        position: absolute;
+        width: 520px;
+        height: 520px;
+        bottom: 8%;
+        left: 15%;
+        background: radial-gradient(circle, rgba(20, 184, 166, 0.14) 0%, rgba(20, 184, 166, 0) 70%);
+        border-radius: 50%;
+        filter: blur(70px);
+        pointer-events: none;
+        animation: floatSlow3 28s ease-in-out infinite;
       }
 
       /* GIS Map & Cadastral Map Fullscreen Support — ครอบคลุม 100% เต็มจอความกว้างและความสูง */
@@ -190,12 +412,18 @@
     </style>
   </head>
 
-  <body class="bg-slate-100 text-slate-800 antialiased">
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <body class="text-slate-800 antialiased min-h-screen relative overflow-x-hidden" style="background: url('./bg_glassy_loft.jpg') center center / cover no-repeat fixed, #d8cbba;">
+    <!-- Ambient Background Glow Mesh (Glassy Atmosphere) -->
+    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden" aria-hidden="true">
+      <div class="ambient-glow-1"></div>
+      <div class="ambient-glow-2"></div>
+      <div class="ambient-glow-3"></div>
+    </div>
+    <!-- Floating Header Capsule (From Video) -->
+    <header class="sticky top-3 z-50 max-w-7xl mx-auto px-4 sm:px-6 my-2">
+      <div class="glass-header px-4 sm:px-6 h-16 flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md">
+          <div class="bg-gradient-to-tr from-emerald-600 to-teal-500 text-white p-2.5 rounded-2xl shadow-md shadow-emerald-600/20">
             <i class="fa-solid fa-industry text-xl"></i>
           </div>
 
@@ -212,7 +440,7 @@
 
         <div class="flex items-center space-x-2 lg:space-x-3 shrink-0">
           <!-- Navigation View Tabs (Clean & Compact — ป้องกันตัวอักษรล้น) -->
-          <nav class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <nav class="flex items-center space-x-1 glass-dock p-1.5 rounded-2xl">
             <button
               id="navDashboardBtn"
               onclick="switchView('dashboard')"
@@ -266,12 +494,13 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 mb-10">
+      <div class="glass-stage p-6 sm:p-8 space-y-8">
       
       <!-- VIEW 1: Main Dashboard (Operations View) -->
       <div id="dashboardView" class="space-y-8">
         <!-- Quick Search & Time Range Filter for Dashboard -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="glass-card stagger-in delay-1 p-4 rounded-3xl border border-white/70 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="flex flex-wrap items-center gap-3">
             <div class="relative w-full sm:w-80">
               <input
@@ -279,7 +508,7 @@
                 id="searchInput"
                 onkeyup="filterDashboard()"
                 data-i18n-placeholder="search_placeholder"
-                placeholder="ค้นหาด้วย Order No หรือ ชื่อลูกค้า..."
+                placeholder="ค้นหา Order No, ลูกค้า, MO, เลขที่โฉนด (Land Title), หรือ POD..."
                 class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
               />
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
@@ -324,23 +553,26 @@
         <!-- KPI Cards -->
         <div id="kpiCardsContainer"></div>
 
+        <!-- Analytics & Operations Charts (Spline Trend & EUDR Quality Donut) -->
+        <div id="dashboardChartsContainer"></div>
+
         <!-- 8-Step Pipeline -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="glass-card stagger-in delay-5 p-6 rounded-3xl border border-white/70 shadow-xs">
           <h2 class="text-base font-bold text-slate-900 mb-6 flex items-center">
             <i class="fa-solid fa-diagram-project text-indigo-600 mr-2"></i>
             <span data-i18n="pipeline_title">8-Step Lifecycle Workflow Overview</span>
           </h2>
-          <div id="pipelineContainer"></div>
+          <div id="pipelineContainer" class="overflow-x-auto pt-5 pb-2"></div>
         </div>
 
         <!-- Wood Pellets Quick Summary Bar (BPM Operational Metrics) -->
         <div id="woodPelletsQuickBarContainer"></div>
 
         <!-- Production Section (Full Width) -->
-        <div id="prodSection" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"></div>
+        <div id="prodSection" class="glass-card stagger-in delay-6 p-6 rounded-3xl border border-white/70 shadow-xs"></div>
 
         <!-- Shipment Orders Section (Full Width at the bottom with 10 rows/page and pagination) -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="glass-card stagger-in delay-7 p-6 rounded-3xl border border-white/70 shadow-xs space-y-4">
           <div
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-200 gap-3"
           >
@@ -458,7 +690,7 @@
       <!-- VIEW 2: Order Query & Search (20 rows per page + pagination) -->
       <div id="queryView" class="hidden space-y-6">
         <!-- Filter & Search Toolbar Card -->
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="glass-card stagger-in delay-1 p-5 rounded-3xl border border-white/70 shadow-xs space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-100 gap-2">
             <div>
               <h2 class="text-base font-bold text-slate-900 flex items-center">
@@ -566,7 +798,7 @@
                 id="querySearchInput"
                 oninput="handleQuerySearch()"
                 data-i18n-placeholder="search_mo_order_placeholder"
-                placeholder="ค้นหา Order No, MO, PO, ลูกค้า..."
+                placeholder="ค้นหา Order No, MO, PO, ลูกค้า, เลขที่โฉนด (Land Title No.), แปลง..."
                 class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-colors"
               />
             </div>
@@ -640,7 +872,7 @@
         </div>
 
         <!-- Query Table Card -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="glass-card stagger-in delay-3 p-6 rounded-3xl border border-white/70 shadow-xs space-y-4">
           <div class="overflow-x-auto" id="queryExportableArea">
             <table class="w-full text-left border-collapse text-xs" id="queryTable">
               <thead>
@@ -678,10 +910,11 @@
         <!-- Cadastral View Content Container (Rendered dynamically) -->
         <div id="cadastralViewContainer"></div>
       </div>
+      </div>
     </main>
 
     <!-- Green River Panels Wood Pellets BPM Full Form Modal -->
-    <div id="bpmModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div id="bpmModal" class="fixed inset-0 z-50 hidden bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden modal-pop-in">
         <!-- Modal Top Bar -->
         <div id="bpmModalHeaderBar" class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
@@ -706,7 +939,7 @@
     </div>
 
     <!-- Green River Panels Wood Pellets EUDR Geolocation & Map Modal -->
-    <div id="mapModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div id="mapModal" class="fixed inset-0 z-50 hidden bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden modal-pop-in">
         <!-- Map Modal Top Bar -->
         <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
@@ -733,7 +966,7 @@
     </div>
 
     <!-- Modal สำหรับนำเข้าไฟล์ KML / GeoJSON พร้อมผูกกับ MO No. และป้องกันแปลงซ้ำ -->
-    <div id="cadastralImportModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div id="cadastralImportModal" class="fixed inset-0 z-50 hidden bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden modal-pop-in border border-slate-100">
         <!-- Modal Top Bar -->
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50/50">
@@ -849,6 +1082,7 @@
 
     <!-- 2. UI Components (Modularized: < 400 lines per file) -->
     <script src="./components/kpi_pipeline.js"></script>
+    <script src="./components/dashboard_charts.js"></script>
     <script src="./components/production_table.js"></script>
     <script src="./components/query_components.js"></script>
     <script src="./components/bpm_modal.js"></script>
@@ -870,5 +1104,26 @@
 
     <!-- 4. Core Router & Main App Lifecycle -->
     <script src="./app.js"></script>
+    <!-- Floating VisionOS Bottom Capsule Dock (Signature element from video) -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
+      <nav class="glass-dock p-1.5 rounded-full flex items-center space-x-1.5 border border-white/80 shadow-2xl backdrop-blur-2xl">
+        <button onclick="switchView('dashboard')" id="dockDashboardBtn" class="dock-pill px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center glass-pill-active">
+          <i class="fa-solid fa-chart-pie mr-2 text-emerald-600"></i>
+          <span data-i18n="nav_dashboard">แดชบอร์ด</span>
+        </button>
+        <button onclick="switchView('query')" id="dockQueryBtn" class="dock-pill px-4 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/60 transition-all flex items-center">
+          <i class="fa-solid fa-table-list mr-2 text-slate-400"></i>
+          <span data-i18n="nav_query">สืบค้นออเดอร์</span>
+        </button>
+        <button onclick="switchView('map')" id="dockMapBtn" class="dock-pill px-4 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/60 transition-all flex items-center">
+          <i class="fa-solid fa-map-location-dot mr-2 text-slate-400"></i>
+          <span data-i18n="nav_map">แผนที่จุด GIS</span>
+        </button>
+        <button onclick="switchView('cadastral')" id="dockCadastralBtn" class="dock-pill px-4 py-2 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/60 transition-all flex items-center">
+          <i class="fa-solid fa-draw-polygon mr-2 text-slate-400"></i>
+          <span data-i18n="nav_cadastral">รูปแปลงที่ดิน</span>
+        </button>
+      </nav>
+    </div>
   </body>
 </html>

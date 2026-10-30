@@ -147,14 +147,36 @@ function filterQueryTable() {
   const monthFilter = $("#queryMonthFilter").val();
 
   filteredQueryData = globalData.filter((item) => {
-    // 1. ตรวจสอบ Keyword
+    // 1. ตรวจสอบ Keyword (Order No, MO, Customer, Destination, Product และเลขที่โฉนด Land Title No./แปลง EUDR)
     if (keyword) {
       const matchOrder = (item.orderNo || "").toLowerCase().includes(keyword);
       const matchMo = (item.moNo || "").toLowerCase().includes(keyword);
       const matchCustomer = (item.customer || "").toLowerCase().includes(keyword);
       const matchDest = (item.destination || "").toLowerCase().includes(keyword);
       const matchProduct = (item.productName || item.productCode || "").toLowerCase().includes(keyword);
-      if (!matchOrder && !matchMo && !matchCustomer && !matchDest && !matchProduct) {
+      
+      let matchPlotOrDeed = false;
+      if (typeof window.cadastralPlots !== "undefined" && Array.isArray(window.cadastralPlots)) {
+        const itemMo = (item.moNo || "").trim().toLowerCase();
+        for (let i = 0; i < window.cadastralPlots.length; i++) {
+          const p = window.cadastralPlots[i];
+          if (p.linkedMoNo && p.linkedMoNo.trim().toLowerCase() === itemMo) {
+            if ((p.name || "").toLowerCase().includes(keyword) || (p.fileName || "").toLowerCase().includes(keyword)) {
+              matchPlotOrDeed = true; break;
+            }
+            if (p.attributes && typeof p.attributes === "object") {
+              for (const [k, v] of Object.entries(p.attributes)) {
+                if (String(k).toLowerCase().includes(keyword) || String(v).toLowerCase().includes(keyword)) {
+                  matchPlotOrDeed = true; break;
+                }
+              }
+            }
+            if (matchPlotOrDeed) break;
+          }
+        }
+      }
+
+      if (!matchOrder && !matchMo && !matchCustomer && !matchDest && !matchProduct && !matchPlotOrDeed) {
         return false;
       }
     }

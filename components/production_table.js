@@ -54,7 +54,7 @@ Object.assign(window.Components, {
             <!-- 4-Card Operational Matrix (Sale & Plan, Production Exec, QC/QA Quality, Storage/Shipment) -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                 <!-- Card 1: Sale & Planning (Step 1) -->
-                <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-200/70 space-y-2">
+                <div class="bg-white/70 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 space-y-2">
                     <div class="flex items-center justify-between text-[11px] font-bold text-blue-900 border-b border-slate-200/60 pb-1.5">
                         <span class="flex items-center"><i class="fa-solid fa-cart-shopping mr-1.5 text-blue-600"></i> ${(typeof currentLang !== "undefined" && currentLang === "th") ? '1. ฝ่ายขาย & วางแผน' : '1. Sale & Planning'}</span>
                         <span class="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded font-semibold">Step 1</span>
@@ -69,7 +69,7 @@ Object.assign(window.Components, {
                 </div>
 
                 <!-- Card 2: Production Execution (Step 3) -->
-                <div class="bg-amber-50/30 p-3 rounded-xl border border-amber-200/60 space-y-2">
+                <div class="bg-amber-50/40 backdrop-blur-md p-3.5 rounded-2xl border border-amber-200/60 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 space-y-2">
                     <div class="flex items-center justify-between text-[11px] font-bold text-amber-900 border-b border-amber-200/60 pb-1.5">
                         <span class="flex items-center"><i class="fa-solid fa-tree mr-1.5 text-amber-600"></i> ${(typeof currentLang !== "undefined" && currentLang === "th") ? '3. การผลิตจริง' : '3. Production Execution'}</span>
                         <span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-semibold">Step 3</span>
@@ -86,7 +86,7 @@ Object.assign(window.Components, {
                 </div>
 
                 <!-- Card 3: Quality In-Line & Lab (Step 4 & 5) -->
-                <div class="bg-orange-50/30 p-3 rounded-xl border border-orange-200/60 space-y-2">
+                <div class="bg-orange-50/40 backdrop-blur-md p-3.5 rounded-2xl border border-orange-200/60 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 space-y-2">
                     <div class="flex items-center justify-between text-[11px] font-bold text-orange-900 border-b border-orange-200/60 pb-1.5">
                         <span class="flex items-center"><i class="fa-solid fa-flask-vial mr-1.5 text-orange-600"></i> ${(typeof currentLang !== "undefined" && currentLang === "th") ? '4-5. คุณภาพ (QC & QA)' : '4-5. Quality (QC & QA)'}</span>
                         <span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-semibold">Passed</span>
@@ -101,7 +101,7 @@ Object.assign(window.Components, {
                 </div>
 
                 <!-- Card 4: Storage & Shipping (Step 6 & 8) -->
-                <div class="bg-teal-50/30 p-3 rounded-xl border border-teal-200/60 space-y-2">
+                <div class="bg-teal-50/40 backdrop-blur-md p-3.5 rounded-2xl border border-teal-200/60 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 space-y-2">
                     <div class="flex items-center justify-between text-[11px] font-bold text-teal-900 border-b border-teal-200/60 pb-1.5">
                         <span class="flex items-center"><i class="fa-solid fa-boxes-packing mr-1.5 text-teal-600"></i> ${(typeof currentLang !== "undefined" && currentLang === "th") ? '6,8. คลัง & ขนส่ง' : '6,8. Storage & Shipping'}</span>
                         <span class="text-[10px] bg-teal-100 text-teal-800 px-1.5 py-0.2 rounded font-semibold">Dispatched</span>
@@ -145,7 +145,7 @@ Object.assign(window.Components, {
     renderTableRow: function (item, isSelected = false, rowIndex = 1) {
         const t = (typeof translations !== "undefined" && translations[currentLang]) || {};
         const statusText = item.statusBadge === "On Schedule" ? (t.status_onschedule || 'ตามกำหนด') : (t.status_inproduction || 'กำลังผลิต');
-        const selectedClass = isSelected ? "bg-indigo-50/80 border-l-4 border-indigo-600 font-semibold" : "hover:bg-slate-50/85";
+        const selectedClass = isSelected ? "bg-emerald-50/70 border-l-4 border-emerald-500 font-semibold" : "hover:bg-emerald-50/30 transition-colors";
         const ship = item.step6 || {};
         const complaints = typeof getComplaintsForOrder === "function" ? getComplaintsForOrder(item.orderNo) : [];
         const complaintBadge = complaints.length > 0 

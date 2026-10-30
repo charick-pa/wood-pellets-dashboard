@@ -124,7 +124,7 @@ Object.assign(window.Components, {
                     id="${item.cardId}" 
                     data-gis-key="${item.key}"
                     onclick="focusGisItem('${item.key}')"
-                    class="p-3 bg-white hover:bg-indigo-50/70 border border-slate-200 rounded-xl cursor-pointer transition-all hover:border-indigo-300 shadow-2xs group relative"
+                    class="p-3 bg-white/75 backdrop-blur-md hover:bg-emerald-50/60 border border-white/80 rounded-2xl cursor-pointer transition-all hover:border-emerald-300 shadow-2xs group relative hover:-translate-y-0.5"
                 >
                     ${multiPlotBadge}
                     <div class="flex items-start justify-between gap-1">
@@ -155,7 +155,7 @@ Object.assign(window.Components, {
         return `
             <div class="space-y-6">
                 <!-- Header Card & Quick KPI Summary -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="glass-card stagger-in delay-1 p-6 rounded-3xl border border-white/70 shadow-xs space-y-4">
                     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-100">
                         <div>
                             <div class="flex items-center space-x-2 mb-1">
@@ -189,19 +189,19 @@ Object.assign(window.Components, {
 
                     <!-- 4 Quick Stats Badges -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="bg-white/60 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-2xs">
                             <span class="text-slate-400 text-[11px] block font-medium">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'จำนวนพิกัดในระบบ' : 'Total Coordinates'}</span>
                             <span class="text-lg font-black text-slate-900 mt-0.5 block">${totalPlots} ${(typeof currentLang !== "undefined" && currentLang === "th") ? 'จุดพิกัด' : 'Points'}</span>
                         </div>
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="bg-white/60 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-2xs">
                             <span class="text-slate-400 text-[11px] block font-medium">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'ปริมาณไม้ยางพารารวม' : 'Biomass Volume'}</span>
                             <span class="text-lg font-black text-amber-600 mt-0.5 block">${totalTon.toLocaleString()} ${(typeof currentLang !== "undefined" && currentLang === "th") ? 'ตัน' : 'Tons'}</span>
                         </div>
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="bg-white/60 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-2xs">
                             <span class="text-slate-400 text-[11px] block font-medium">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'พื้นที่แปลงสวนยาง' : 'Plantation Area'}</span>
                             <span class="text-lg font-black text-emerald-600 mt-0.5 block">${displayAreaRai}</span>
                         </div>
-                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="bg-white/60 backdrop-blur-md p-3.5 rounded-2xl border border-white/60 shadow-2xs">
                             <span class="text-slate-400 text-[11px] block font-medium">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'สถานะการรับรอง EUDR' : 'EUDR Compliance Status'}</span>
                             <span class="text-lg font-black text-indigo-600 mt-0.5 block">${(typeof currentLang !== "undefined" && currentLang === "th") ? '100% รับรองแล้ว' : '100% Verified'}</span>
                         </div>
@@ -211,7 +211,7 @@ Object.assign(window.Components, {
                 <!-- Main Interactive Map Canvas + Location Sidebar -->
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <!-- แผนที่ Leaflet GIS Map Canvas (3 ส่วน) -->
-                    <div id="gisMapBoxWrapper" class="lg:col-span-3 bg-slate-950 rounded-3xl p-4 shadow-xl border border-slate-800 relative overflow-hidden flex flex-col transition-all">
+                    <div id="gisMapBoxWrapper" class="lg:col-span-3 bg-slate-950 stagger-in delay-2 rounded-3xl p-4 shadow-xl border border-slate-800 relative overflow-hidden flex flex-col transition-all">
                         
                         <!-- Top Map Toolbar & Map Legend & Tile Switcher -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800 text-xs z-30 shrink-0">
@@ -315,7 +315,7 @@ Object.assign(window.Components, {
                     </div>
 
                     <!-- Sidebar: รายชื่อแปลงและโรงงานทั้งหมด (1 ส่วน) -->
-                    <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col h-[600px] lg:h-[685px]">
+                    <div class="glass-card stagger-in delay-4 p-5 rounded-3xl border border-white/70 shadow-xs flex flex-col h-[600px] lg:h-[685px]">
                         <div class="pb-3 border-b border-slate-100 space-y-2">
                             <h3 class="text-sm font-bold text-slate-900 flex items-center justify-between">
                                 <span class="flex items-center">

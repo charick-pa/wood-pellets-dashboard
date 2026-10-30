@@ -1,3 +1,33 @@
+
+window.buildCadastralAttrTableHtml = function(attrs, isTh) {
+    const keys = attrs && typeof attrs === "object" ? Object.keys(attrs) : [];
+    if (!keys.length) {
+        return `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center text-slate-400 text-xs"><i class="fa-solid fa-circle-info text-slate-400 mr-1.5"></i>${isTh ? 'แปลงนี้ไม่มีข้อมูล ExtendedData เพิ่มเติม' : 'No ExtendedData attributes.'}</div>`;
+    }
+    const rows = keys.map((k, idx) => {
+        const val = attrs[k];
+        let badge = "bg-slate-100 text-slate-800", icon = "";
+        if (val === "Y" || val === "Yes" || val === true) {
+            badge = "bg-emerald-100 text-emerald-800 font-bold border border-emerald-300";
+            icon = '<i class="fa-solid fa-check mr-1 text-emerald-600"></i>';
+        } else if (val === "N" || val === "No" || val === false) {
+            badge = "bg-rose-50 text-rose-700 font-bold border border-rose-200";
+            icon = '<i class="fa-solid fa-xmark mr-1 text-rose-500"></i>';
+        }
+        return `<tr class="hover:bg-slate-50/70 transition-colors"><td class="py-1.5 px-3 text-center text-[10px] text-slate-400 font-mono">${idx + 1}</td><td class="py-1.5 px-3 font-medium text-slate-800">${k}</td><td class="py-1.5 px-3 text-center"><span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] ${badge}">${icon}${val}</span></td></tr>`;
+    }).join('');
+    return `<div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs"><table class="w-full text-left border-collapse text-xs"><thead><tr class="bg-slate-50 text-[10px] text-slate-500 font-bold uppercase border-b border-slate-200 sticky top-0"><th class="py-1.5 px-3 w-10 text-center">#</th><th class="py-1.5 px-3">${isTh ? 'หัวข้อคำถาม / คุณลักษณะ' : 'Question / Attribute'}</th><th class="py-1.5 px-3 w-40 text-center">${isTh ? 'ค่าที่บันทึก' : 'Value'}</th></tr></thead><tbody id="cadastralAttrTableBody" class="divide-y divide-slate-100">${rows}</tbody></table></div>`;
+};
+
+window.updateCadastralAttributesCard = function(plot) {
+    if (!plot) return;
+    const isTh = (typeof currentLang !== "undefined" && currentLang === "th");
+    const attrs = (plot.attributes && typeof plot.attributes === "object") ? plot.attributes : {};
+    const count = Object.keys(attrs).length;
+    $("#cadastralAttrCountBadge").text(count > 0 ? (isTh ? `พบข้อมูลคุณลักษณะ ${count} รายการจากไฟล์นำเข้า` : `${count} ExtendedData attributes parsed`) : (isTh ? 'ไม่มีข้อมูล ExtendedData เพิ่มเติมในแปลงนี้' : 'No ExtendedData attributes in this parcel'));
+    $("#cadastralAttrTableView").html(window.buildCadastralAttrTableHtml(attrs, isTh));
+    $("#cadastralAttrJsonPre").text(JSON.stringify(attrs, null, 2));
+};
 /**
  * Component: Cadastral Boundary View (KML / GeoJSON Polygon View)
  * Includes Real-time Filters for Plots and MO Linkage, and Export KML / GeoJSON
@@ -59,7 +89,7 @@ Object.assign(window.Components, {
         return `
             <div class="space-y-6 page-fade-in">
                 <!-- Toolbar ด้านบน: Action Buttons, Upload & Filter (ผูก MO ทันที) -->
-                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                <div class="glass-card stagger-in delay-1 p-5 rounded-3xl border border-white/70 shadow-xs space-y-4">
                     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-slate-100">
                         <div class="flex items-center space-x-2">
                             <span class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
@@ -128,7 +158,7 @@ Object.assign(window.Components, {
                 </div>
 
                 <!-- 1. ผืนแผนที่ดาวเทียม Leaflet กว้างเต็มหน้าจอ (Full Width 100%) -->
-                <div id="cadastralMapBoxWrapper" class="w-full bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col space-y-3 transition-all duration-300">
+                <div id="cadastralMapBoxWrapper" class="w-full glass-card stagger-in delay-2 rounded-3xl p-5 border border-white/70 shadow-xs flex flex-col space-y-3 transition-all duration-300">
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100 flex-wrap gap-2">
                         <div class="flex items-center space-x-2">
                             <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -184,7 +214,7 @@ Object.assign(window.Components, {
                 <!-- 2. แผงข้อมูลรายละเอียดแปลงและพิกัดมุมแปลง (วางใต้แผนที่ กว้างเต็มหน้าจอ จัดเรียงเป็น 3 คอลัมน์) -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Col 1: คำสั่งซื้อที่ผูกไว้ (Linked MO No.) -->
-                    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between">
+                    <div class="glass-card stagger-in delay-3 p-5 rounded-3xl border border-white/70 shadow-xs space-y-3 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                                 <h4 class="text-xs font-bold text-slate-900 flex items-center"><i class="fa-solid fa-link text-indigo-600 mr-1.5"></i>${isTh ? 'คำสั่งซื้อที่ผูกไว้' : 'Linked MO No.'}</h4>
@@ -233,7 +263,7 @@ Object.assign(window.Components, {
                     </div>
 
                     <!-- Col 2: บัตรคำนวณขนาดพื้นที่ดินจริง -->
-                    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between">
+                    <div class="glass-card stagger-in delay-4 p-5 rounded-3xl border border-white/70 shadow-xs space-y-3 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                                 <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center">
@@ -261,7 +291,7 @@ Object.assign(window.Components, {
                     </div>
 
                     <!-- Col 3: ตารางแสดงพิกัดจุดตัดมุมแปลง (EUDR Vertices) -->
-                    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col h-[380px]">
+                    <div class="glass-card stagger-in delay-5 p-5 rounded-3xl border border-white/70 shadow-xs flex flex-col h-[380px]">
                         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900 flex items-center"><i class="fa-solid fa-table-cells text-indigo-600 mr-1.5"></i>${isTh ? 'พิกัดมุมแปลง EUDR' : 'Polygon Corner Vertices'}</h4>
@@ -292,14 +322,14 @@ Object.assign(window.Components, {
                     const jsonStr = JSON.stringify(attrs, null, 2);
 
                     return `
-                    <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="glass-card stagger-in delay-6 p-5 rounded-3xl border border-white/70 shadow-xs space-y-3">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
                             <div>
                                 <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center">
                                     <i class="fa-solid fa-clipboard-question text-emerald-600 mr-2"></i>
                                     ${isTh ? 'ข้อมูลแบบประเมินความยั่งยืน & คุณลักษณะแปลง (EUDR Questionnaire / ExtendedData)' : 'EUDR Sustainability Questionnaire & ExtendedData'}
                                 </h3>
-                                <span class="text-[10px] text-slate-400">
+                                <span id="cadastralAttrCountBadge" class="text-[10px] text-slate-400">
                                     ${hasAttrs ? (isTh ? `พบข้อมูลคุณลักษณะ ${attrKeys.length} รายการจากไฟล์นำเข้า` : `${attrKeys.length} ExtendedData attributes parsed`) : (isTh ? 'ไม่มีข้อมูล ExtendedData เพิ่มเติมในไฟล์นี้' : 'No ExtendedData attributes in this parcel')}
                                 </span>
                             </div>
@@ -313,44 +343,12 @@ Object.assign(window.Components, {
                         </div>
 
                         <div id="cadastralAttrTableView" class="space-y-2">
-                            ${hasAttrs ? `
-                            <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs">
-                                <table class="w-full text-left border-collapse text-xs">
-                                    <thead>
-                                        <tr class="bg-slate-50 text-[10px] text-slate-500 font-bold uppercase border-b border-slate-200 sticky top-0">
-                                            <th class="py-1.5 px-3 w-10 text-center">#</th>
-                                            <th class="py-1.5 px-3">${isTh ? 'หัวข้อคำถาม / คุณลักษณะ' : 'Question / Attribute'}</th>
-                                            <th class="py-1.5 px-3 w-40 text-center">${isTh ? 'ค่าที่บันทึก' : 'Value'}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="cadastralAttrTableBody" class="divide-y divide-slate-100">
-                                        ${attrKeys.map((k, idx) => {
-                                            const val = attrs[k];
-                                            let badge = "bg-slate-100 text-slate-800";
-                                            let icon = "";
-                                            if (val === "Y" || val === "Yes" || val === true) {
-                                                badge = "bg-emerald-100 text-emerald-800 font-bold border border-emerald-300";
-                                                icon = '<i class="fa-solid fa-check mr-1 text-emerald-600"></i>';
-                                            } else if (val === "N" || val === "No" || val === false) {
-                                                badge = "bg-rose-50 text-rose-700 font-bold border border-rose-200";
-                                                icon = '<i class="fa-solid fa-xmark mr-1 text-rose-500"></i>';
-                                            }
-                                            return `
-                                            <tr class="hover:bg-slate-50/70 transition-colors">
-                                                <td class="py-1.5 px-3 text-center text-[10px] text-slate-400 font-mono">${idx + 1}</td>
-                                                <td class="py-1.5 px-3 font-medium text-slate-800">${k}</td>
-                                                <td class="py-1.5 px-3 text-center"><span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] ${badge}">${icon}${val}</span></td>
-                                            </tr>`;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                            ` : `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center text-slate-400 text-xs"><i class="fa-solid fa-circle-info text-slate-400 mr-1.5"></i>${isTh ? 'แปลงนี้ไม่มีข้อมูล ExtendedData เพิ่มเติม' : 'No ExtendedData attributes.'}</div>`}
+                            ${window.buildCadastralAttrTableHtml(attrs, isTh)}
                         </div>
 
                         <div id="cadastralAttrJsonView" class="hidden space-y-2">
                             <div class="bg-slate-900 text-emerald-400 p-4 rounded-2xl font-mono text-[11px] overflow-x-auto shadow-inner leading-relaxed">
-                                <pre class="whitespace-pre-wrap">${jsonStr}</pre>
+                                <pre id="cadastralAttrJsonPre" class="whitespace-pre-wrap">${jsonStr}</pre>
                             </div>
                             <div class="text-[11px] text-slate-500 flex items-center justify-between pt-1">
                                 <span><i class="fa-solid fa-database text-indigo-500 mr-1"></i> ${isTh ? 'โครงสร้างนี้สามารถเก็บลงคอลัมน์ JSON ของฐานข้อมูลได้ทันที' : 'Stored in SQL JSON column'}</span>

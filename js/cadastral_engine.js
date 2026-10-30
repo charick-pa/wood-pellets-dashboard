@@ -22,6 +22,8 @@ const DEMO_EUDR_PLOTS = [
     uploadedAt: "2026-10-23 10:00",
     description: "สวนไม้ยางพาราแปลงหลักอายุ 22 ปี พร้อมตัดโค่น แปรรูปเป็น Wood Pellets ตามข้อกำหนด EUDR",
     attributes: {
+      "Land Title No.": "NS4J-Hatyai-10425",
+      "Title Deed No.": "10425 (น.ส. 4 จ.)",
       "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
       "Are male and female workers treated equally": "Y",
       "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
@@ -42,7 +44,7 @@ const DEMO_EUDR_PLOTS = [
     linkedMoNo: "MO-672649852",
     uploadedAt: "2026-10-23 10:02",
     description: "สวนไม้ยางพาราแปลงย่อยที่ 2 เชื่อมโยงคำสั่งซื้อเดียวกัน (MO-672649852)",
-    attributes: { "Area (rai)": "14", "Deforestation Risk": "Zero (Pre-2020 Baseline)", "Legality Ownership Verified": "Y" },
+    attributes: { "Land Title No.": "NS4J-Hatyai-10426", "Title Deed No.": "10426 (น.ส. 4 จ.)", "Area (rai)": "14", "Deforestation Risk": "Zero (Pre-2020 Baseline)", "Legality Ownership Verified": "Y" },
     coordinates: [[6.947, 100.374], [6.951, 100.381], [6.9485, 100.385], [6.944, 100.382], [6.9435, 100.3755]]
   },
   {
@@ -53,7 +55,7 @@ const DEMO_EUDR_PLOTS = [
     linkedMoNo: "MO-672649852",
     uploadedAt: "2026-10-23 10:05",
     description: "แปลงยางพาราสะเดา ได้รับการรับรอง SBP & GGL ผ่านการตรวจสอบพิกัด Geolocation",
-    attributes: { "Coop Member ID": "CP-SAD-0842", "Rubber Tree Age": "24 Years", "FSC/SBP Certified": "Y", "Area (rai)": "28" },
+    attributes: { "Land Title No.": "NS4J-Sadao-8891", "Title Deed No.": "8891 (น.ส. 4 จ.)", "Coop Member ID": "CP-SAD-0842", "Rubber Tree Age": "24 Years", "FSC/SBP Certified": "Y", "Area (rai)": "28" },
     coordinates: [[6.638, 100.421], [6.6435, 100.427], [6.641, 100.433], [6.635, 100.43], [6.634, 100.423]]
   },
   {

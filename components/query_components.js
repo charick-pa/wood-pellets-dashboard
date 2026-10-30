@@ -59,6 +59,16 @@ Object.assign(window.Components, {
                         </button>
                     </div>
                     ${item.location ? `<div class="text-[10px] text-slate-400 truncate max-w-[140px] mt-0.5 cursor-pointer hover:text-rose-600" onclick="openMapModal('${item.orderNo}')" title="${item.location.placeName}">📍 ${item.location.placeName.split('(')[0]}</div>` : ''}
+                    ${(() => {
+                        const plots = (typeof window.cadastralPlots !== "undefined" && Array.isArray(window.cadastralPlots))
+                            ? window.cadastralPlots.filter(p => p.linkedMoNo && p.linkedMoNo.trim().toUpperCase() === String(item.moNo || '').trim().toUpperCase())
+                            : [];
+                        if (plots.length === 0) return '';
+                        const firstPlot = plots[0];
+                        const deed = firstPlot.attributes?.['Land Title No.'] || firstPlot.attributes?.['Title Deed No.'] || firstPlot.attributes?.['Deed Title No'] || '';
+                        const plotLabel = deed ? `โฉนด: ${deed}` : (plots.length === 1 ? firstPlot.name.split('(')[0] : `${plots.length} แปลง EUDR`);
+                        return `<div class="mt-1"><button onclick="openPlotInCadastralView('${firstPlot.id}')" title="เปิดดูแปลงที่ดิน & แบบประเมิน EUDR: ${plots.map(p => p.name).join(', ')}" class="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors truncate max-w-[150px]"><i class="fa-solid fa-draw-polygon text-emerald-600 mr-1 text-[8.5px]"></i><span class="truncate">${plotLabel}</span></button></div>`;
+                    })()}
                 </td>
                 <td class="py-3 px-3">
                     <div class="font-semibold text-slate-800">${item.customer}</div>
@@ -102,6 +112,12 @@ Object.assign(window.Components, {
                         <button onclick="openMapModal('${item.orderNo}')" title="ดูพิกัดแปลง/โรงงานบนแผนที่ (GPS)" class="px-2 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center">
                             <i class="fa-solid fa-location-dot mr-1 text-[11px] text-rose-500"></i> GPS
                         </button>
+                        ${(() => {
+                            const plots = (typeof window.cadastralPlots !== "undefined" && Array.isArray(window.cadastralPlots))
+                                ? window.cadastralPlots.filter(p => p.linkedMoNo && p.linkedMoNo.trim().toUpperCase() === String(item.moNo || '').trim().toUpperCase())
+                                : [];
+                            return plots.length > 0 ? `<button onclick="openPlotInCadastralView('${plots[0].id}')" title="เปิดดูแปลงที่ดิน & แบบประเมิน EUDR" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center"><i class="fa-solid fa-draw-polygon mr-1 text-[11px] text-emerald-600"></i> EUDR</button>` : '';
+                        })()}
                         <button onclick="openBpmModal('${item.orderNo}')" title="${t.btn_view_bpm || 'ดูเอกสาร BPM'}" class="px-2.5 py-1 bg-white hover:bg-indigo-50 border border-slate-200 text-indigo-600 rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center">
                             <i class="fa-solid fa-file-invoice mr-1 text-[11px]"></i> BPM
                         </button>
