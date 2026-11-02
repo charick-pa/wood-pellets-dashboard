@@ -4,7 +4,8 @@
  * File size target: < 400 lines
  */
 
-const CADASTRAL_STORAGE_KEY = "greenriver_cadastral_plots_v1";
+const CADASTRAL_STORAGE_KEY = "greenriver_cadastral_plots_v2";
+const CADASTRAL_LEGACY_KEY = "greenriver_cadastral_plots_v1";
 
 // 1. บันทึกข้อมูลแปลงที่ดินทั้งหมดลง LocalStorage ถาวร
 function saveCadastralPlotsToStorage() {

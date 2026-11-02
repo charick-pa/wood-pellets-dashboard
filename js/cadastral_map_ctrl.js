@@ -158,6 +158,7 @@ function drawCadastralPlot(plotId) {
   }
 
   fitCadastralBounds();
+  if (typeof window.updateCadastralAttributesCard === "function") window.updateCadastralAttributesCard(plot);
 }
 
 function fitCadastralBounds() {
@@ -323,7 +324,9 @@ function updateCadastralDetailsCards(plot) {
   if (plot.linkedMoNo) {
     $("#activePlotMoSelect").val(plot.linkedMoNo);
   }
-  if (typeof updateCadastralAttributesCard === "function") {
+  if (typeof window.updateCadastralAttributesCard === "function") {
+    window.updateCadastralAttributesCard(plot);
+  } else if (typeof updateCadastralAttributesCard === "function") {
     updateCadastralAttributesCard(plot);
   }
 }

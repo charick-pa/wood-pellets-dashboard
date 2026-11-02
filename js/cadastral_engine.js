@@ -22,17 +22,12 @@ const DEMO_EUDR_PLOTS = [
     uploadedAt: "2026-10-23 10:00",
     description: "สวนไม้ยางพาราแปลงหลักอายุ 22 ปี พร้อมตัดโค่น แปรรูปเป็น Wood Pellets ตามข้อกำหนด EUDR",
     attributes: {
-      "Land Title No.": "NS4J-Hatyai-10425",
-      "Title Deed No.": "10425 (น.ส. 4 จ.)",
+      "Land Title No.": "NS4J-Hatyai-10425", "Title Deed No.": "10425 (น.ส. 4 จ.)",
+      "Deforestation Risk": "Zero Deforestation (Pre-2020 Baseline)", "Legality of Harvest": "Verified (กรมที่ดิน / ถูกต้อง 100%)",
       "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
-      "Are male and female workers treated equally": "Y",
-      "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
-      "Are workers aged 18 employed and required to do heavy work": "N",
-      "Are workers under 15 years of age employed at the site": "N",
-      "Area (rai)": "37",
-      "Certificate No.": "N",
-      "Do the foreign workers have social security": "N",
-      "Do the workers have social security": "Y"
+      "Are male and female workers treated equally": "Y", "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
+      "Are workers aged 18 employed and required to do heavy work": "N", "Are workers under 15 years of age employed at the site": "N",
+      "Area (rai)": "37", "Certificate No.": "FSC-C123456", "Do the foreign workers have social security": "N", "Do the workers have social security": "Y"
     },
     coordinates: [[6.942, 100.362], [6.9455, 100.368], [6.943, 100.3725], [6.9385, 100.37], [6.938, 100.3635]]
   },
@@ -44,7 +39,14 @@ const DEMO_EUDR_PLOTS = [
     linkedMoNo: "MO-672649852",
     uploadedAt: "2026-10-23 10:02",
     description: "สวนไม้ยางพาราแปลงย่อยที่ 2 เชื่อมโยงคำสั่งซื้อเดียวกัน (MO-672649852)",
-    attributes: { "Land Title No.": "NS4J-Hatyai-10426", "Title Deed No.": "10426 (น.ส. 4 จ.)", "Area (rai)": "14", "Deforestation Risk": "Zero (Pre-2020 Baseline)", "Legality Ownership Verified": "Y" },
+    attributes: {
+      "Land Title No.": "NS4J-Hatyai-10426", "Title Deed No.": "10426 (น.ส. 4 จ.)",
+      "Deforestation Risk": "Zero (Pre-2020 Baseline Verified)", "Legality of Harvest": "Verified (เอกสารสิทธิ์ น.ส. 4 จ.)",
+      "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
+      "Are male and female workers treated equally": "Y", "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
+      "Are workers aged 18 employed and required to do heavy work": "N", "Are workers under 15 years of age employed at the site": "N",
+      "Area (rai)": "14", "Certificate No.": "FSC-C123457", "Do the foreign workers have social security": "Y", "Do the workers have social security": "Y"
+    },
     coordinates: [[6.947, 100.374], [6.951, 100.381], [6.9485, 100.385], [6.944, 100.382], [6.9435, 100.3755]]
   },
   {
@@ -55,7 +57,15 @@ const DEMO_EUDR_PLOTS = [
     linkedMoNo: "MO-672649852",
     uploadedAt: "2026-10-23 10:05",
     description: "แปลงยางพาราสะเดา ได้รับการรับรอง SBP & GGL ผ่านการตรวจสอบพิกัด Geolocation",
-    attributes: { "Land Title No.": "NS4J-Sadao-8891", "Title Deed No.": "8891 (น.ส. 4 จ.)", "Coop Member ID": "CP-SAD-0842", "Rubber Tree Age": "24 Years", "FSC/SBP Certified": "Y", "Area (rai)": "28" },
+    attributes: {
+      "Land Title No.": "NS4J-Sadao-8891", "Title Deed No.": "8891 (น.ส. 4 จ.)", "Coop Member ID": "CP-SAD-0842", "Rubber Tree Age": "24 Years",
+      "Deforestation Risk": "Zero Deforestation (Verified by Satellite)", "Legality of Harvest": "Verified (กยท. ทะเบียนเกษตรกร)",
+      "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
+      "Are male and female workers treated equally": "Y", "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
+      "Are workers aged 18 employed and required to do heavy work": "N", "Are workers under 15 years of age employed at the site": "N",
+      "Area (rai)": "28", "FSC/SBP Certified": "Y", "Certificate No.": "SBP-04-8891",
+      "Do the foreign workers have social security": "Y", "Do the workers have social security": "Y"
+    },
     coordinates: [[6.638, 100.421], [6.6435, 100.427], [6.641, 100.433], [6.635, 100.43], [6.634, 100.423]]
   },
   {
@@ -66,7 +76,16 @@ const DEMO_EUDR_PLOTS = [
     linkedMoNo: "MO-202610-003",
     uploadedAt: "2026-10-23 10:10",
     description: "แปลงไม้ยางพารา จ.ตรัง มีเอกสารสิทธิ์โฉนดที่ดินถูกต้อง 100% สอดคล้องตาม EU Regulation 2023/1115",
-    attributes: { "Deed Title No": "NS-4J-Trang-4102", "EUDR Status": "Compliant", "Surveyor": "K. Anan S." },
+    attributes: {
+      "Land Title No.": "NS4J-Trang-4102", "Title Deed No.": "4102 (น.ส. 4 จ.)", "Rubber Tree Age": "26 Years",
+      "EUDR Status": "Compliant (Regulation 2023/1115)", "Deforestation Risk": "Zero Deforestation (Baseline Dec 31, 2020)",
+      "Legality of Harvest": "Verified (โฉนดที่ดิน น.ส. 4 จ.)",
+      "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
+      "Are male and female workers treated equally": "Y", "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
+      "Are workers aged 18 employed and required to do heavy work": "N", "Are workers under 15 years of age employed at the site": "N",
+      "Area (rai)": "42", "Certificate No.": "PEFC-2026-TR41", "Do the foreign workers have social security": "N",
+      "Do the workers have social security": "Y", "Surveyor": "K. Anan S. (EUDR Lead Auditor)"
+    },
     coordinates: [[7.685, 99.412], [7.691, 99.419], [7.689, 99.426], [7.682, 99.423], [7.681, 99.415]]
   }
 ];
@@ -132,7 +151,22 @@ function ensureCadastralPlotsInitialized() {
   if (!window.cadastralPlots || window.cadastralPlots.length === 0) {
     const saved = typeof loadCadastralPlotsFromStorage === "function" ? loadCadastralPlotsFromStorage() : null;
     if (saved && saved.length > 0) {
-      window.cadastralPlots = saved;
+      window.cadastralPlots = saved.map(p => {
+        const demo = DEMO_EUDR_PLOTS.find(d => d.id === p.id);
+        if (demo && (!p.attributes || Object.keys(p.attributes).length < 5)) {
+          p.attributes = Object.assign({}, demo.attributes, p.attributes || {});
+        } else if (!p.attributes) {
+          p.attributes = {};
+        }
+        return p;
+      });
+      const hasAnyAttrs = window.cadastralPlots.some(p => p.attributes && Object.keys(p.attributes).length > 0);
+      if (!hasAnyAttrs) {
+        window.cadastralPlots = DEMO_EUDR_PLOTS.map(r =>
+          createPlotObject(r.id, r.name, r.fileType, r.fileName, r.description, r.coordinates, r.linkedMoNo, r.uploadedAt, r.attributes)
+        );
+      }
+      if (typeof saveCadastralPlotsToStorage === "function") saveCadastralPlotsToStorage();
     } else {
       window.cadastralPlots = DEMO_EUDR_PLOTS.map(r =>
         createPlotObject(r.id, r.name, r.fileType, r.fileName, r.description, r.coordinates, r.linkedMoNo, r.uploadedAt, r.attributes)

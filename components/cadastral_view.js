@@ -334,7 +334,7 @@ Object.assign(window.Components, {
                                 </span>
                             </div>
                             <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                                <input type="text" oninput="filterCadastralAttributes(this.value)" placeholder="${isTh ? '🔍 กรองคำถาม/คุณลักษณะ...' : '🔍 Filter attributes...'}" class="w-44 px-2.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-500" />
+                                <input type="text" id="filterCadastralAttributesInput" oninput="filterCadastralAttributes(this.value)" placeholder="${isTh ? '🔍 กรองคำถาม/คุณลักษณะ...' : '🔍 Filter attributes...'}" class="w-44 px-2.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-emerald-500" />
                                 <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl">
                                     <button type="button" onclick="switchCadastralAttrView('table')" id="btnCadastralAttrTable" class="px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all shadow-xs bg-emerald-600 text-white cursor-pointer"><i class="fa-solid fa-table-list mr-1"></i> ${isTh ? 'ดูแบบตาราง' : 'Table View'}</button>
                                     <button type="button" onclick="switchCadastralAttrView('json')" id="btnCadastralAttrJson" class="px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all text-slate-600 hover:text-slate-900 cursor-pointer"><i class="fa-solid fa-code mr-1"></i> ${isTh ? 'ดูแบบ JSON' : 'JSON View'}</button>
