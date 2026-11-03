@@ -19,8 +19,11 @@ function buildEmailChannelLinks(to, cc, subjectRaw, bodyRaw) {
   const encTo = encodeURIComponent(safeTo);
   const encSubj = encodeURIComponent(subjectRaw);
   const encBodyFull = encodeURIComponent(bodyRaw);
-  // ป้องกันความยาว URL mailto: ทะลุขีดจำกัด ~2,000 ตัวอักษรของ Windows Desktop
-  const shortBodyRaw = encBodyFull.length > 1350 ? (bodyRaw.slice(0, 420) + "\n\n[...ดูรายละเอียดฉบับเต็มในระบบ Wood Pellets Dashboard]") : bodyRaw;
+  // แปลงเป็น ASCII bullet และ CRLF (\r\n = %0D%0A) ตามมาตรฐาน RFC 6068 สำหรับ Microsoft Outlook Desktop บน Windows
+  const cleanBody = bodyRaw.replace(/•/g, "-").replace(/\r?\n/g, "\r\n");
+  const shortBodyRaw = encodeURIComponent(cleanBody).length > 1350
+    ? (cleanBody.slice(0, 420) + "\r\n\r\n[...ดูรายละเอียดฉบับเต็มในระบบ Wood Pellets Dashboard]")
+    : cleanBody;
   let mailtoUrl = `mailto:${safeTo}?subject=${encSubj}&body=${encodeURIComponent(shortBodyRaw)}`;
   if (safeCc) mailtoUrl += `&cc=${encodeURIComponent(safeCc)}`;
 
@@ -234,7 +237,11 @@ function resumePendingComplaintEmail(orderNo, complaintId, fallbackIdx = -1) {
         $("#enforcedMailStatusText").html(`<i class="fa-solid fa-lock mr-1"></i> ${isTh ? "ปุ่มยืนยันถูกล็อกอยู่ — กรุณาคลิกเลือกช่องทางส่งอีเมลในข้อ 1 ก่อน" : "Locked — Please select an email channel in Step 1 first"}`);
       }
 
-      $("#btnMailChDesktop").on("click", () => { markMailClientOpenedInStorage(orderNo, c.id, idx); unlockStep2Button("Outlook App"); });
+      $("#btnMailChDesktop").on("click", () => {
+        markMailClientOpenedInStorage(orderNo, c.id, idx);
+        unlockStep2Button("Outlook App");
+        $("#enforcedMailStatusText").append(`<div class="text-[10px] text-amber-700 font-normal mt-1">💡 ${isTh ? "หากโปรแกรม Outlook ในเครื่องไม่เด้งขึ้น แสดงว่า Windows ยังไม่ได้ตั้งค่า Default App (mailto) — สามารถกดปุ่ม <b>Outlook Web</b> หรือ <b>Gmail</b> ด้านบนแทนได้ทันที" : "If Outlook Desktop didn't open, Windows has no default 'mailto' app set — click Outlook Web or Gmail above instead."}</div>`);
+      });
       $("#btnMailChM365").on("click", () => { markMailClientOpenedInStorage(orderNo, c.id, idx); unlockStep2Button("Outlook Web"); });
       $("#btnMailChGmail").on("click", () => { markMailClientOpenedInStorage(orderNo, c.id, idx); unlockStep2Button("Gmail Web"); });
       $("#btnMailChCopy").on("click", () => {
