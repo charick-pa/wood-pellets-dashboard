@@ -27,7 +27,7 @@ const DEMO_EUDR_PLOTS = [
       "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
       "Are male and female workers treated equally": "Y", "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
       "Are workers aged 18 employed and required to do heavy work": "N", "Are workers under 15 years of age employed at the site": "N",
-      "Area (rai)": "37", "Certificate No.": "FSC-C123456", "Do the foreign workers have social security": "N", "Do the workers have social security": "Y"
+      "Area (rai)": "37", "Certificate No.": "SBP-04-10425", "Do the foreign workers have social security": "N", "Do the workers have social security": "Y"
     },
     coordinates: [[6.942, 100.362], [6.9455, 100.368], [6.943, 100.3725], [6.9385, 100.37], [6.938, 100.3635]]
   },
@@ -45,7 +45,7 @@ const DEMO_EUDR_PLOTS = [
       "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
       "Are male and female workers treated equally": "Y", "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
       "Are workers aged 18 employed and required to do heavy work": "N", "Are workers under 15 years of age employed at the site": "N",
-      "Area (rai)": "14", "Certificate No.": "FSC-C123457", "Do the foreign workers have social security": "Y", "Do the workers have social security": "Y"
+      "Area (rai)": "14", "Certificate No.": "GGL-TH-10426", "Do the foreign workers have social security": "Y", "Do the workers have social security": "Y"
     },
     coordinates: [[6.947, 100.374], [6.951, 100.381], [6.9485, 100.385], [6.944, 100.382], [6.9435, 100.3755]]
   },
@@ -63,7 +63,7 @@ const DEMO_EUDR_PLOTS = [
       "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
       "Are male and female workers treated equally": "Y", "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
       "Are workers aged 18 employed and required to do heavy work": "N", "Are workers under 15 years of age employed at the site": "N",
-      "Area (rai)": "28", "FSC/SBP Certified": "Y", "Certificate No.": "SBP-04-8891",
+      "Area (rai)": "28", "SBP/GGL Certified": "Y", "Certificate No.": "SBP-04-8891",
       "Do the foreign workers have social security": "Y", "Do the workers have social security": "Y"
     },
     coordinates: [[6.638, 100.421], [6.6435, 100.427], [6.641, 100.433], [6.635, 100.43], [6.634, 100.423]]
@@ -83,7 +83,7 @@ const DEMO_EUDR_PLOTS = [
       "Are chemicals (herbicides/pesticides) such as paraquat, glyphosate, and chlorpyrifos used": "N",
       "Are male and female workers treated equally": "Y", "Are there policies/regulations for the prevention of corruption and misconduct": "Y",
       "Are workers aged 18 employed and required to do heavy work": "N", "Are workers under 15 years of age employed at the site": "N",
-      "Area (rai)": "42", "Certificate No.": "PEFC-2026-TR41", "Do the foreign workers have social security": "N",
+      "Area (rai)": "42", "Certificate No.": "GGL-TH-4102", "Do the foreign workers have social security": "N",
       "Do the workers have social security": "Y", "Surveyor": "K. Anan S. (EUDR Lead Auditor)"
     },
     coordinates: [[7.685, 99.412], [7.691, 99.419], [7.689, 99.426], [7.682, 99.423], [7.681, 99.415]]

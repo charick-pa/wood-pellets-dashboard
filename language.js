@@ -27,9 +27,9 @@ const translations = {
 
     kpi_qa: "รายการเบี่ยงเบนด้านคุณภาพ",
     kpi_qa_cases: "รายการ",
-    kpi_qa_sub: "ผ่านเกณฑ์มาตรฐาน ISO 9001",
+    kpi_qa_sub: "ผ่านเกณฑ์มาตรฐาน SBP & GGL",
     kpi_moisture: "ควบคุมความชื้นเฉลี่ย",
-    kpi_moisture_sub: "ได้มาตรฐาน ENplus A1 / ISO 17225-2",
+    kpi_moisture_sub: "ได้มาตรฐานใบรับรอง SBP & GGL",
     kpi_eudr: "การรับรองมาตรฐาน EUDR",
     kpi_eudr_sub: "เอกสาร DDS ตรวจสอบย้อนกลับสมบูรณ์",
 
@@ -152,9 +152,9 @@ const translations = {
 
     kpi_qa: "Quality Deviations",
     kpi_qa_cases: "Cases",
-    kpi_qa_sub: "Passed ISO 9001 standard",
+    kpi_qa_sub: "Passed SBP & GGL standard",
     kpi_moisture: "Avg Moisture Control",
-    kpi_moisture_sub: "Compliant with ENplus A1 / ISO 17225-2",
+    kpi_moisture_sub: "Compliant with SBP & GGL standard",
     kpi_eudr: "EUDR Compliance Rate",
     kpi_eudr_sub: "DDS Traceability Verified",
 

@@ -42,7 +42,7 @@ Object.assign(window.Components, {
         <div>
             <div>
                 <span class="company-pill">${item.company || 'GREEN RIVER PANELS (THAILAND) CO., LTD'}</span>
-                <span class="iso-cert">ISO 9001:2015 / SBP / GGL / EUDR Verified</span>
+                <span class="iso-cert">SBP &amp; GGL Certified / EUDR Verified</span>
             </div>
             <h1 class="doc-title">WOOD PELLETS OPERATIONS BPM MASTER FORM</h1>
             <div class="doc-sub">แบบฟอร์มบันทึกกระบวนการผลิตและควบคุมคุณภาพแบบบูรณาการ (8-Step Full Lifecycle: Sale ➔ RA ➔ Production ➔ QC ➔ QA ➔ Storage ➔ RA Verification ➔ Shipment)</div>
@@ -69,7 +69,7 @@ Object.assign(window.Components, {
             <div class="field-col"><span class="field-label">Product Name / Code:</span><span class="field-value">${item.productName || 'Wood Pellets'} (${item.productCode || '-'})</span></div>
             <div class="field-col"><span class="field-label">Product Type / Qty:</span><span class="field-value highlight-qty">${item.productType || '1-0.6mm, 2-0.8mm'} • ${item.orderQuantity || '500 Ton'}</span></div>
             <div class="field-col"><span class="field-label">Delivery Date / Dest:</span><span class="field-value highlight-ok">${item.requestedDeliveryDate || '-'} • ${item.destination || '-'}</span></div>
-            <div class="field-col col-span-full"><span class="field-label">Planning Production:</span><span class="field-value">Batch: <strong>${item.planBatchNo || '-'}</strong> | Plan MO: ${item.planMoNo || item.moNo || '-'} | Period: ${item.planDateStart || '-'} to ${item.planDateFinish || '-'} | Scheme: ${item.planCertScheme || 'SBP'}</span></div>
+            <div class="field-col col-span-full"><span class="field-label">Planning Production:</span><span class="field-value">Batch: <strong>${item.planBatchNo || '-'}</strong> | Plan MO: ${item.planMoNo || item.moNo || '-'} | Period: ${item.planDateStart || '-'} to ${item.planDateFinish || '-'} | Scheme: ${item.planCertScheme || item.certRequirement || 'SBP, GGL'}</span></div>
             ${(() => {
                 const complaints = typeof getComplaintsForOrder === "function" ? getComplaintsForOrder(item.orderNo) : (item.complaints || []);
                 if (!complaints || complaints.length === 0) return '';
@@ -114,8 +114,8 @@ Object.assign(window.Components, {
                 `;
             })()}
             <div class="field-col col-span-full"><span class="field-label">Specification Requirement:</span><span class="field-value">${item.specReq || s2.specReq || 'Moisture <= 10%, Ash <= 2.0%, Durability >= 97.5%'}</span></div>
-            <div class="field-col col-span-full"><span class="field-label">Packaging & Label Requirement:</span><span class="field-value">${item.packagingReq || s2.packagingReq || 'Jumbo Big Bag (1,000 kg)'} &bull; ${item.labelReq || s2.labelReq || 'FSC/SBP QR Barcode'}</span></div>
-            <div class="field-col col-span-full"><span class="field-label">Customer Regulatory Requirements:</span><span class="field-value">${item.customerRegulatory || s2.customerRegulatory || 'EUDR, SBP, GGL, FSC-100%'}</span></div>
+            <div class="field-col col-span-full"><span class="field-label">Packaging & Label Requirement:</span><span class="field-value">${item.packagingReq || s2.packagingReq || 'Jumbo Big Bag (1,000 kg)'} &bull; ${item.labelReq || s2.labelReq || 'SBP / GGL QR Barcode'}</span></div>
+            <div class="field-col col-span-full"><span class="field-label">Customer Regulatory Requirements:</span><span class="field-value">${item.customerRegulatory || s2.customerRegulatory || 'SBP, GGL, EUDR Geolocation Verified'}</span></div>
         </div>
     </div>
 
@@ -133,7 +133,11 @@ Object.assign(window.Components, {
             <div class="field-col"><span class="field-label">Start Period:</span><span class="field-value">${s3.startDate || item.startDate || '2026/10/12'}</span></div>
             <div class="field-col"><span class="field-label">Finish Period:</span><span class="field-value">${s3.finishDate || item.finishDate || '2026/10/02'}</span></div>
             <div class="field-col"><span class="field-label">Uptime / Downtime:</span><span class="field-value">${item.totalUptime || '142 hrs'} / ${item.totalDowntime || '8 hrs'}</span></div>
-            <div class="field-col"><span class="field-label">Raw Material Req:</span><span class="field-value">${item.rawMaterialReq || 'Para Rubber Wood (Sawdust & Slab)'}</span></div>
+            <div class="field-col"><span class="field-label">Material Code:</span><span class="field-value">${s3.materialCode || 'BWP-11-08 / BWP-12-08'}</span></div>
+            <div class="field-col"><span class="field-label">Raw Material — Log (Ton):</span><span class="field-value highlight-ok">${(s3.rawLogTon ?? s3.prod_raw_log_ton ?? 12000).toLocaleString()} Ton</span></div>
+            <div class="field-col"><span class="field-label">Raw Material — Slab (Ton):</span><span class="field-value">${(s3.rawSlabTon ?? s3.prod_raw_slab_ton ?? 5000).toLocaleString()} Ton</span></div>
+            <div class="field-col"><span class="field-label">Raw Material — Sawdust (Ton):</span><span class="field-value">${(s3.rawSawdustTon ?? s3.prod_raw_sawdust_ton ?? 3000).toLocaleString()} Ton</span></div>
+            <div class="field-col"><span class="field-label">Total Feed (Auto-Sum):</span><span class="field-value highlight-qty">${((s3.rawLogTon ?? s3.prod_raw_log_ton ?? 12000) + (s3.rawSlabTon ?? s3.prod_raw_slab_ton ?? 5000) + (s3.rawSawdustTon ?? s3.prod_raw_sawdust_ton ?? 3000)).toLocaleString()} Ton</span></div>
             <div class="field-col col-span-full"><span class="field-label">Line Status & Equipment:</span><span class="field-value">Fac1: ${item.fac1StatusUtil || 'Running (88%)'}, Fac2: ${item.fac2StatusUtil || 'Running (92%)'} | Feed Lines: ${item.feedLines || 'Line A, Line B'}</span></div>
         </div>
     </div>
@@ -146,11 +150,11 @@ Object.assign(window.Components, {
         </div>
         <div class="step-body grid-4">
             <div class="field-col"><span class="field-label">Batch No / Test Date:</span><span class="field-value highlight-val">${s4.batchNo || 'B2026-10-09'} • ${s4.testDate || '2026-10-09'}</span></div>
-            <div class="field-col"><span class="field-label">1. Logs Slab Moisture:</span><span class="field-value">${s4.paramLogsSlab || 'Moisture 42.1%'}</span></div>
-            <div class="field-col"><span class="field-label">2. Sawdust Moisture:</span><span class="field-value">${s4.paramSawdust || 'Moisture 38.5%'}</span></div>
+            <div class="field-col"><span class="field-label">1. Logs &amp; Slab Moisture:</span><span class="field-value">${Number(s4.qc_logs_slab_moisture_pct ?? 60.0).toFixed(1)}% (≤70%)</span></div>
+            <div class="field-col"><span class="field-label">2. Sawdust / 3. Chipper (%):</span><span class="field-value">${Number(s4.qc_sawdust_moisture_pct ?? 58.0).toFixed(1)}% / ${Number(s4.qc_chipper_moisture_pct ?? 58.0).toFixed(1)}% (≤60%)</span></div>
             <div class="field-col"><span class="field-label">3. Chipper Moisture:</span><span class="field-value">${s4.paramChipper || 'Moisture 35.2%'}</span></div>
-            <div class="field-col"><span class="field-label">4. After Dryer Moisture:</span><span class="field-value highlight-ok">${s4.paramAfterDryer || 'Moisture 9.8% (Target < 10%)'}</span></div>
-            <div class="field-col"><span class="field-label">5. After Magnetic Pellets:</span><span class="field-value highlight-ok">${s4.paramAfterMagnetic || 'Moisture 7.8% (Target < 8%)'}</span></div>
+            <div class="field-col"><span class="field-label">4. After Dryer Moisture (%):</span><span class="field-value highlight-ok">${Number(s4.qc_after_dryer_moisture_pct ?? 13.5).toFixed(1)}% (≤14%)</span></div>
+            <div class="field-col"><span class="field-label">5. After Magnetic (%):</span><span class="field-value highlight-ok">${Number(s4.qc_after_mag_moisture_pct ?? 13.0).toFixed(1)}% (${s4.qc_after_mag_dim_check || 'Verified'})</span></div>
             <div class="field-col col-span-2"><span class="field-label">In-Line QC Overall Status:</span><span class="field-value highlight-ok">${s4.status || 'PASS (All 5 checkpoints compliant)'}</span></div>
         </div>
     </div>
@@ -164,7 +168,7 @@ Object.assign(window.Components, {
         <div class="step-body grid-3">
             <div class="field-col"><span class="field-label">Test Date / Analyst:</span><span class="field-value">${s5.testDate || '2026-10-09'} • ${s5.analyst || 'NL-4092 (Somchai P.)'}</span></div>
             <div class="field-col"><span class="field-label">Sawdust Moisture / Chipper:</span><span class="field-value">${s5.sawdustMoisture || '9.8%'} • ${s5.paramChipper || '35.0%'}</span></div>
-            <div class="field-col"><span class="field-label">Hammer Mill / Magnetic:</span><span class="field-value">${s5.paramHammerMill || '10.2%'} • ${s5.paramMagneticPellets || '7.5%'}</span></div>
+            <div class="field-col"><span class="field-label">Final Pellet QA Metrics:</span><span class="field-value highlight-ok">Ø${Number(s5.qa_pellet_diameter_mm ?? 6.0).toFixed(1)}mm • M:${Number(s5.qa_pellet_moisture_pct ?? 7.8).toFixed(1)}% • Ash:${Number(s5.qa_ash_pct ?? 1.5).toFixed(1)}% • Dur:${Number(s5.qa_durability_pct ?? 97.8).toFixed(1)}%</span></div>
             <div class="field-col"><span class="field-label">Non-Compliance Status:</span><span class="field-value highlight-ok">${s5.nonCompliance || 'None (Zero Deviation)'}</span></div>
             <div class="field-col"><span class="field-label">Bulk Warehouses:</span><span class="field-value">${s5.bulkWarehouses || 'WH-Dry-01'}</span></div>
             <div class="field-col"><span class="field-label">COA Document Ref:</span><span class="field-value highlight-val">${s5.coaFile || s5.coaReferenced || 'COA-202610-LF2-03918.pdf'}</span></div>
@@ -198,7 +202,7 @@ Object.assign(window.Components, {
         <div class="step-body">
             <div class="field-col col-span-full"><span class="field-label">1. GGL FIT/FIP Checklists:</span><span class="field-value highlight-ok">${formatChecklist(s7.gglFitFip, '☑ Cover letter • ☑ Transaction Statement • ☑ TC from CU • ☑ Transport Docs • ☑ Cleanliness • ☑ GeoJSON')}</span></div>
             <div class="field-col col-span-full"><span class="field-label">2. GGL SDE++ Verification:</span><span class="field-value highlight-ok">${formatChecklist(s7.gglSde, '☑ Cover Letter • ☑ Transaction Statement • ☑ Transaction Certificate • ☑ EUDR Data Sheet • ☑ GeoJSON')}</span></div>
-            <div class="field-col col-span-full"><span class="field-label">3. SBP / EUDR Dossier:</span><span class="field-value highlight-ok">${formatChecklist(s7.sbpEudr, '☑ SBP-Compliant Biomass (FSC 100%) • ☑ EUDR Due Diligence Statement (DDS Valid) • ☑ GeoJSON Verified')}</span></div>
+            <div class="field-col col-span-full"><span class="field-label">3. SBP / EUDR Dossier:</span><span class="field-value highlight-ok">${formatChecklist(s7.sbpEudr, '☑ SBP-Compliant Biomass • ☑ EUDR Data Sheet • ☑ GeoJSON Verified')}</span></div>
         </div>
     </div>
 
@@ -221,7 +225,7 @@ Object.assign(window.Components, {
 
     <div class="footer-note">
         <span>Green River Panels (Thailand) Co., Ltd • Wood Pellets Operations Master System (8-Step Full Lifecycle)</span>
-        <span>เอกสารรับรองกระบวนการผลิตตามข้อกำหนด ISO 9001 / EUDR / SBP / GGL</span>
+        <span>เอกสารรับรองกระบวนการผลิตตามมาตรฐานใบรับรอง SBP &amp; GGL (EUDR Verified)</span>
     </div>
 </body>
 </html>`;

@@ -51,11 +51,10 @@ Object.assign(window.Components, {
         const totalOrders = summaryData?.activeOrders || dataset.length || 68;
         const eudrApprovedOrders = dataset.filter(x => (x.step2?.status || "").toUpperCase() === "APPROVED" || Number(x.currentStep) >= 2).length || totalOrders;
         const eudrPercent = totalOrders > 0 ? Math.round((eudrApprovedOrders / totalOrders) * 100) : 100;
-        const ddsRef = `DDS-2026-TH-${targetItem.moNo ? targetItem.moNo.replace(/[^0-9]/g, '').slice(-5) : '00412'}`;
-
-        // ค่าผลผลิต (Yield) และใบรับรองจริงของออเดอร์
-        const liveYield = targetItem.step4_pelletizing?.yield || summaryData?.avgYield || "94.2%";
-        const certList = targetItem.certRequirement || "ISO 9001 / SBP / FSC";
+        const raCertStatus = (targetItem.step2?.certStatus || "APPROVED & VALID").split("(")[0].trim();
+        const s3t = targetItem.step3 || {};
+        const liveYield = (s3t.prod_yield_ton && s3t.actual) ? `${((s3t.prod_yield_ton / s3t.actual) * 100).toFixed(1)}%` : (summaryData?.avgYield || "95.0%");
+        const certList = targetItem.certRequirement || "SBP, GGL";
 
         return `
             <!-- Executive Operations Alert Bar (Dynamic Live Ops Brief) -->
@@ -67,7 +66,7 @@ Object.assign(window.Components, {
                     <p class="text-xs text-slate-200 font-medium truncate">
                         <span class="text-amber-300 font-bold">🚢 ${shippingLine}</span> ${isTh ? `ส่งออก ${destPort} (ETD: ${etdDate}) [${orderRef}]` : `Dispatch to ${destPort} (ETD: ${etdDate}) [${orderRef}]`}
                         <span class="mx-2 text-slate-500">•</span>
-                        <span class="text-emerald-400 font-bold">🛡️ EUDR DDS</span> ${isTh ? `ตรวจสอบย้อนกลับสมบูรณ์ ${eudrPercent}% (${ddsRef})` : `${eudrPercent}% Traceability Verified (${ddsRef})`}
+                        <span class="text-emerald-400 font-bold">🛡️ RA & EUDR</span> ${isTh ? `ตรวจสอบสมบูรณ์ ${eudrPercent}% (${raCertStatus})` : `${eudrPercent}% Verified (${raCertStatus})`}
                     </p>
                 </div>
                 <div class="flex items-center space-x-2 shrink-0 self-end md:self-auto text-[11px]">
@@ -216,19 +215,21 @@ Object.assign(window.Components, {
         `;
     },
 
-    // แถบ Quick Summary เฉพาะทาง Wood Pellets (Executive Clean White / Slate Theme)
+    // แถบ Quick Summary เฉพาะทาง Wood Pellets (ผูกตรงกับฟิลด์ตัวเลข SA Spec v2.1)
     renderWoodPelletsQuickBar: function (item) {
         if (!item) return '';
-
-        const pz = item.step4_pelletizing || {
-            yield: "90,000 Ton", totalDowntimeMins: 4000, pelletDiameter: "6.0 mm", pelletMoisture: "7.8%", coolingMoisture: "6.5%"
-        };
-        const wh = item.step5 || {
-            location: "Warehouse 1", openingStock: "1,000 Ton", issueQty: "300 Ton", closingStock: "1,200 Ton"
-        };
-
         const isTh = (typeof currentLang !== "undefined" && currentLang === "th");
         const barTitle = isTh ? "พารามิเตอร์การผลิตและสต็อกเฉพาะทาง:" : "Specialized Production & Stock Parameters:";
+        const s2 = item.step2 || {}, s3 = item.step3 || {}, qc = item.step4_qc || {}, qa = item.step5_qa || {}, wh = item.step6_storage || item.step5 || {};
+        const raStatus = (s2.certStatus || "APPROVED & VALID").split("(")[0].trim();
+        const diamMm = Number(qa.qa_pellet_diameter_mm ?? 6.0).toFixed(1);
+        const certs = String(item.certRequirement || "SBP, GGL").split(/[,/]/).map(s => s.trim().toUpperCase()).filter(c => c === "SBP" || c === "GGL");
+        const certBadges = (certs.length ? certs : ["SBP", "GGL"]).map(c => `<span class="text-[9px] ${c === 'SBP' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-blue-100 text-blue-800 border-blue-200'} font-bold px-1.5 py-0.5 rounded border">${c}</span>`).join('');
+        const finalMoist = Number(qa.qa_pellet_moisture_pct ?? 7.8), dryerMoist = Number(qc.qc_after_dryer_moisture_pct ?? 13.5);
+        const moistOk = finalMoist <= 8.0 && dryerMoist <= 14.0;
+        const yieldTon = Number(s3.prod_yield_ton ?? 14250), downMins = Number(s3.prod_downtime_mins ?? 40);
+        const whLoc = wh.wh_storage_location || wh.location || "Warehouse 1";
+        const openTon = Number(wh.wh_opening_stock ?? 1000), issueTon = Number(wh.wh_issue_qty ?? 300), closeTon = Number(wh.wh_closing_stock ?? 1200);
 
         return `
             <div class="glass-card p-5 rounded-3xl border border-white/70 shadow-xs">
@@ -236,66 +237,44 @@ Object.assign(window.Components, {
                     <div class="flex flex-wrap items-center gap-2 min-w-0">
                         <span class="bg-amber-500 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded uppercase tracking-wider shrink-0">WOOD PELLETS BPM</span>
                         <span class="hidden md:inline-flex items-center text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
-                            <i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i>DDS-2026-TH-00412 Verified
+                            <i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i>RA: ${raStatus}
                         </span>
                         <h3 class="text-sm font-bold text-slate-900 tracking-wide truncate">
                             ${barTitle} <span class="text-indigo-600 font-mono font-bold">${item.orderNo}</span> <span class="text-slate-500 font-normal">(${item.customer})</span>
                         </h3>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-                    <!-- Widget 1: Wood Pellet Specs & Certs -->
+                    <!-- Widget 1: Wood Pellet Specs & Certs (Step 1 + Step 5 QA Diameter) -->
                     <div class="bg-white/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 hover:border-blue-300 hover:shadow-sm transition-all duration-300">
-                        <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium">
-                            <span>${isTh ? 'สเปก & ใบรับรอง' : 'Specs & Certificates'}</span>
-                            <i class="fa-solid fa-certificate text-blue-600"></i>
-                        </div>
-                        <p class="text-sm font-bold text-slate-900">${pz.pelletDiameter} <span class="text-xs text-slate-500 font-normal">(${item.productType || '1-0.6mm'})</span></p>
-                        <div class="flex items-center space-x-1 mt-2">
-                            <span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded border border-emerald-200">SBP</span>
-                            <span class="text-[9px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded border border-blue-200">GGL</span>
-                            <span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded border border-amber-200">FSC</span>
-                        </div>
+                        <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium"><span>${isTh ? 'สเปก & ใบรับรอง' : 'Specs & Certificates'}</span><i class="fa-solid fa-certificate text-blue-600"></i></div>
+                        <p class="text-sm font-bold text-slate-900">${diamMm} mm <span class="text-xs text-slate-500 font-normal">(${item.productType || '1-0.6mm'})</span></p>
+                        <div class="flex flex-wrap items-center gap-1 mt-2">${certBadges}</div>
                     </div>
-
-                    <!-- Widget 2: Moisture Control -->
+                    <!-- Widget 2: Moisture Control (Step 5 Final Pellet % & Step 4 After Dryer %) -->
                     <div class="bg-white/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 hover:border-cyan-300 hover:shadow-sm transition-all duration-300">
-                        <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium">
-                            <span>${isTh ? 'ควบคุมความชื้น' : 'Moisture Control'}</span>
-                            <i class="fa-solid fa-droplet text-cyan-600"></i>
-                        </div>
+                        <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium"><span>${isTh ? 'ควบคุมความชื้น' : 'Moisture Control'}</span><i class="fa-solid fa-droplet text-cyan-600"></i></div>
                         <div class="flex items-baseline space-x-2">
-                            <span class="text-sm font-bold text-cyan-700">${pz.pelletMoisture}</span>
-                            <span class="text-[11px] text-slate-500">${isTh ? 'ระบายความร้อน:' : 'Cooling:'} <strong class="text-slate-800">${pz.coolingMoisture}</strong></span>
+                            <span class="text-sm font-bold text-cyan-700">${finalMoist.toFixed(1)}%</span>
+                            <span class="text-[11px] text-slate-500">${isTh ? 'หลังอบ Dryer:' : 'After Dryer:'} <strong class="text-slate-800">${dryerMoist.toFixed(1)}%</strong></span>
                         </div>
-                        <p class="text-[10px] text-emerald-700 font-semibold mt-2 flex items-center">
-                            <i class="fa-solid fa-circle-check mr-1 text-emerald-500"></i> ${isTh ? 'ตามเกณฑ์ < 8%' : 'Compliant < 8%'}
+                        <p class="text-[10px] ${moistOk ? 'text-emerald-700' : 'text-amber-700'} font-semibold mt-2 flex items-center">
+                            <i class="fa-solid ${moistOk ? 'fa-circle-check text-emerald-500' : 'fa-triangle-exclamation text-amber-500'} mr-1"></i> ${moistOk ? (isTh ? 'ตามเกณฑ์ ≤ 8% (Dryer ≤ 14%)' : 'Compliant ≤ 8% (Dryer ≤ 14%)') : (isTh ? 'เกินเกณฑ์ความชื้น (> 8%)' : 'Above Spec (> 8%)')}
                         </p>
                     </div>
-
-                    <!-- Widget 3: Yield & Machine Downtime -->
+                    <!-- Widget 3: Yield & Machine Downtime (Step 3 Pure Numeric Fields) -->
                     <div class="bg-white/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 hover:border-amber-300 hover:shadow-sm transition-all duration-300">
-                        <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium">
-                            <span>${isTh ? 'ประสิทธิภาพ & Downtime' : 'Yield & Downtime'}</span>
-                            <i class="fa-solid fa-chart-line text-amber-600"></i>
-                        </div>
-                        <p class="text-sm font-bold text-slate-900">${isTh ? 'ผลผลิต:' : 'Yield:'} <span class="text-amber-700 font-bold">${pz.yield}</span></p>
-                        <p class="text-[10px] text-rose-600 font-semibold mt-2 flex items-center truncate">
-                            <i class="fa-solid fa-triangle-exclamation mr-1 text-rose-500"></i> ${isTh ? `หยุดเครื่อง: <strong>${(pz.totalDowntimeMins || 0).toLocaleString()} นาที</strong>` : `Downtime: <strong>${(pz.totalDowntimeMins || 0).toLocaleString()} mins</strong>`}
+                        <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium"><span>${isTh ? 'ประสิทธิภาพ & Downtime' : 'Yield & Downtime'}</span><i class="fa-solid fa-chart-line text-amber-600"></i></div>
+                        <p class="text-sm font-bold text-slate-900">${isTh ? 'ผลผลิต:' : 'Yield:'} <span class="text-amber-700 font-bold">${yieldTon.toLocaleString()} Ton</span></p>
+                        <p class="text-[10px] ${downMins > 120 ? 'text-rose-600' : 'text-slate-600'} font-semibold mt-2 flex items-center truncate">
+                            <i class="fa-solid ${downMins > 120 ? 'fa-triangle-exclamation text-rose-500' : 'fa-clock text-amber-500'} mr-1"></i> ${isTh ? `หยุดเครื่อง: <strong>${downMins.toLocaleString()} นาที</strong>` : `Downtime: <strong>${downMins.toLocaleString()} mins</strong>`}
                         </p>
                     </div>
-
-                    <!-- Widget 4: Warehouse Stock Movement -->
+                    <!-- Widget 4: Warehouse Stock Movement (Step 6 Pure Numeric Fields) -->
                     <div class="bg-white/65 backdrop-blur-md p-3.5 rounded-2xl border border-white/80 hover:border-indigo-300 hover:shadow-sm transition-all duration-300">
-                        <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium">
-                            <span>${isTh ? `สต็อก (${wh.location || 'WH 1'})` : `Stock (${wh.location || 'WH 1'})`}</span>
-                            <i class="fa-solid fa-warehouse text-indigo-600"></i>
-                        </div>
-                        <p class="text-sm font-bold text-slate-900">${isTh ? 'คงเหลือ:' : 'Closing:'} <span class="text-emerald-700 font-bold">${wh.closingStock || '1,200 Ton'}</span></p>
-                        <p class="text-[10px] text-slate-500 mt-2 truncate">
-                            ${isTh ? `ยกมา ${wh.openingStock || '1,000T'} • จ่ายออก ${wh.issueQty || '300T'}` : `Opening ${wh.openingStock || '1,000T'} • Issue ${wh.issueQty || '300T'}`}
-                        </p>
+                        <div class="flex items-center justify-between text-slate-500 text-[11px] mb-1 font-medium"><span>${isTh ? `สต็อก (${whLoc})` : `Stock (${whLoc})`}</span><i class="fa-solid fa-warehouse text-indigo-600"></i></div>
+                        <p class="text-sm font-bold text-slate-900">${isTh ? 'คงเหลือ:' : 'Closing:'} <span class="text-emerald-700 font-bold">${closeTon.toLocaleString()} Ton</span></p>
+                        <p class="text-[10px] text-slate-500 mt-2 truncate">${isTh ? `ยกมา ${openTon.toLocaleString()} Ton • จ่ายออก ${issueTon.toLocaleString()} Ton` : `Opening ${openTon.toLocaleString()}T • Issue ${issueTon.toLocaleString()}T`}</p>
                     </div>
                 </div>
             </div>
@@ -327,9 +306,9 @@ Object.assign(window.Components, {
             { id: 1, step: "Step 1", title: t.step1_name || (isThPipe ? "ฝ่ายขาย" : "Sale"), val: item.orderNo, sub: item.customer, status: "DONE" },
             { id: 2, step: "Step 2", title: t.step2_name || (isThPipe ? "ฝ่ายกำกับดูแล" : "RA"), val: promptStatus === "APPROVED" ? (t.approved_badge || "APPROVED") : promptStatus, sub: item.step2?.valid || item.step2?.licenseExpiry || 'EUDR Pass', status: promptStatus === "APPROVED" ? "COMPLETED" : promptStatus },
             { id: 3, step: "Step 3", title: t.step3_name || (isThPipe ? "ฝ่ายผลิต" : "Production"), val: `${(item.step3?.actual || 0).toLocaleString()} / ${((item.step3?.planned || 0) / 1000).toFixed(0)}k T`, sub: isThPipe ? 'วัตถุดิบไม้ยางพารา' : 'Woods Material', status: item.step3?.status || 'IN PROGRESS' },
-            { id: 4, step: "Step 4", title: t.step4_name || (isThPipe ? "ควบคุมคุณภาพหน้างาน" : "QC In-line"), val: item.step4_pelletizing ? item.step4_pelletizing.pelletDiameter : "6.0 mm", sub: item.step4_pelletizing ? `M: ${item.step4_pelletizing.pelletMoisture}` : (isThPipe ? "5 จุดตรวจ" : "5 Checkpoints"), status: item.currentStep >= 4 ? "IN PROGRESS" : "PENDING" },
-            { id: 5, step: "Step 5", title: t.step5_name || (isThPipe ? "ประกันคุณภาพ" : "QA Lab"), val: item.step4?.status || 'Zero Dev', sub: item.step4?.sub || 'COA Ready', status: item.step4?.status || 'PENDING' },
-            { id: 6, step: "Step 6", title: t.step6_name || (isThPipe ? "คลังสินค้า" : "Storage"), val: item.step5?.location || 'Warehouse 1', sub: item.step5?.closingStock ? `Stock: ${item.step5.closingStock}` : (isThPipe ? 'บันทึกบรรจุ' : 'Packing Log'), status: item.step5?.sub ? item.step5.sub.toUpperCase() : "PENDING" },
+            { id: 4, step: "Step 4", title: t.step4_name || (isThPipe ? "ควบคุมคุณภาพหน้างาน" : "QC In-line"), val: `Dryer: ${Number(item.step4_qc?.qc_after_dryer_moisture_pct ?? 13.5).toFixed(1)}%`, sub: `Mag: ${Number(item.step4_qc?.qc_after_mag_moisture_pct ?? 13.0).toFixed(1)}% (≤14%)`, status: item.currentStep >= 4 ? "IN PROGRESS" : "PENDING" },
+            { id: 5, step: "Step 5", title: t.step5_name || (isThPipe ? "ประกันคุณภาพ" : "QA Lab"), val: `${Number(item.step5_qa?.qa_pellet_diameter_mm ?? 6.0).toFixed(1)}mm • M:${Number(item.step5_qa?.qa_pellet_moisture_pct ?? 7.8).toFixed(1)}%`, sub: item.step4?.sub || 'COA Ready', status: item.step4?.status || 'PENDING' },
+            { id: 6, step: "Step 6", title: t.step6_name || (isThPipe ? "คลังสินค้า" : "Storage"), val: item.step6_storage?.wh_storage_location || item.step5?.location || 'Warehouse 1', sub: `Stock: ${Number(item.step6_storage?.wh_closing_stock ?? 1200).toLocaleString()} T`, status: item.step5?.sub ? item.step5.sub.toUpperCase() : "PENDING" },
             { id: 7, step: "Step 7", title: t.step7_name || (isThPipe ? "ตรวจสอบเอกสาร" : "RA Verification"), val: "Dossier Ready", sub: "GGL / SBP / EUDR", status: item.currentStep >= 7 ? "COMPLETED" : "PENDING" },
             { id: 8, step: "Step 8", title: t.step8_name || (isThPipe ? "จัดส่งสินค้า" : "Shipment"), val: item.step6?.tracking || item.step6?.saNo || item.step6?.bookingNo || 'SA Issued', sub: `ETD: ${item.step6?.etd || '-'}`, status: item.statusBadge ? item.statusBadge.toUpperCase() : "PENDING" }
         ];

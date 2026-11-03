@@ -34,18 +34,25 @@ Object.assign(window.Components, {
         const dataset = (typeof dashboardFilteredData !== "undefined" && dashboardFilteredData.length > 0)
             ? dashboardFilteredData : (typeof globalData !== "undefined" ? globalData : []);
 
-        // 1. รวมยอดจริงจากชุดข้อมูล 68 ออเดอร์ (Real Data: 2025 - 2028)
+        // 1. รวมยอดจริงจากชุดข้อมูล 68 ออเดอร์ (Real Data: 2025 - 2028) + 3 ฟิลด์วัตถุดิบ (Log, Slab, Sawdust)
         const yearlyMap = {};
         dataset.forEach(o => {
             const d = o.orderDate || o.requestedDeliveryDate || (o.step6 && o.step6.etd) || '2026-10-15';
             const y = parseInt(d.substring(0, 4)) || 2026;
             const m = parseInt(d.substring(5, 7)) || 1;
-            const planned = (o.step3 && Number(o.step3.planned)) || parseInt(String(o.orderQuantity || "0").replace(/[^0-9]/g, '')) || 5000;
-            const actual = (o.step3 && Number(o.step3.actual)) || Math.round(planned * 0.94);
+            const s3 = o.step3 || {};
+            const planned = Number(s3.planned) || parseInt(String(o.orderQuantity || "0").replace(/[^0-9]/g, '')) || 5000;
+            const actual = Number(s3.actual) || Math.round(planned * 0.94);
+            const rLog = Number(s3.rawLogTon ?? s3.prod_raw_log_ton ?? Math.round(planned * 0.50));
+            const rSlab = Number(s3.rawSlabTon ?? s3.prod_raw_slab_ton ?? Math.round(planned * 0.30));
+            const rDust = Number(s3.rawSawdustTon ?? s3.prod_raw_sawdust_ton ?? Math.max(0, planned - rLog - rSlab));
+            const upM = Number(s3.prod_uptime_mins ?? 5760), dnM = Number(s3.prod_downtime_mins ?? 40);
+            const qcLogM = Number(o.step4_qc?.qc_logs_slab_moisture_pct ?? 60.0), qcDustM = Number(o.step4_qc?.qc_sawdust_moisture_pct ?? 58.0);
 
-            if (!yearlyMap[y]) yearlyMap[y] = { actual: 0, plan: 0, count: 0, months: {} };
-            yearlyMap[y].actual += actual;
-            yearlyMap[y].plan += planned;
+            if (!yearlyMap[y]) yearlyMap[y] = { actual: 0, plan: 0, rawLog: 0, rawSlab: 0, rawDust: 0, upM: 0, dnM: 0, qcLogM: 0, qcDustM: 0, count: 0, months: {} };
+            yearlyMap[y].actual += actual; yearlyMap[y].plan += planned;
+            yearlyMap[y].rawLog += rLog; yearlyMap[y].rawSlab += rSlab; yearlyMap[y].rawDust += rDust;
+            yearlyMap[y].upM += upM; yearlyMap[y].dnM += dnM; yearlyMap[y].qcLogM += qcLogM; yearlyMap[y].qcDustM += qcDustM;
             yearlyMap[y].count++;
 
             if (!yearlyMap[y].months[m]) yearlyMap[y].months[m] = { actual: 0, plan: 0, count: 0 };
@@ -63,13 +70,15 @@ Object.assign(window.Components, {
         for (let y = minYear; y <= maxSelectableYear; y++) yearOptions.push(y);
 
         let hasData = true, noDataLabel = "", labels = [], prodData = [], targetData = [];
-        let totalActual = "0", totalPlanned = "0", yieldBadge = "Yield 95%", runRate = isTh ? "1,385 ตัน/วัน" : "1,385 T/Day";
+        let totalActual = "0", totalPlanned = "0", yieldBadge = "Yield 95%", runRate = isTh ? "1,385 ตัน/วัน" : "1,385 T/Day", oeeBadge = "OEE 98.8%";
+        let sumLog = 0, sumSlab = 0, sumDust = 0, sumUpM = 0, sumDnM = 0, sumQcLogM = 0, sumQcDustM = 0, activeCnt = 0;
 
         if (period === 'day') {
             labels = ['10/16', '10/17', '10/18', '10/19', '10/20', '10/21', '10/22', '10/23', '10/24', '10/25', '10/26', '10/27', '10/28', '10/29'];
             prodData   = [1380, 1420, 1450, 1310, 1480, 1500, 1290, 1410, 1460, 1390, 1440, 1470, 1420, 1490];
             targetData = [1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400, 1400];
-            totalActual = "19,910"; totalPlanned = "19,600"; yieldBadge = "Yield 98.4%"; runRate = isTh ? "1,422 ตัน/วัน" : "1,422 T/Day";
+            totalActual = "19,910"; totalPlanned = "19,600"; yieldBadge = "Yield 98.4%"; runRate = isTh ? "1,422 ตัน/วัน" : "1,422 T/Day"; oeeBadge = "OEE 98.9%";
+            sumLog = 9955; sumSlab = 5973; sumDust = 3982; sumQcLogM = 60.0; sumQcDustM = 58.0; activeCnt = 1;
         } else if (period === 'year') {
             const sYear = Math.min(window.chartStartYear || 2025, window.chartEndYear || 2028);
             const eYear = Math.max(window.chartStartYear || 2025, window.chartEndYear || 2028);
@@ -79,12 +88,13 @@ Object.assign(window.Components, {
                 const yrData = yearlyMap[y];
                 const act = yrData ? yrData.actual : 0;
                 const pln = yrData ? yrData.plan : 0;
-                if (yrData) totalOrdersCount += yrData.count;
+                if (yrData) {
+                    totalOrdersCount += yrData.count; activeCnt += yrData.count;
+                    sumLog += yrData.rawLog; sumSlab += yrData.rawSlab; sumDust += yrData.rawDust;
+                    sumUpM += yrData.upM; sumDnM += yrData.dnM; sumQcLogM += yrData.qcLogM; sumQcDustM += yrData.qcDustM;
+                }
                 labels.push(yrData ? String(y) : `${y} (No Data)`);
-                prodData.push(act);
-                targetData.push(pln);
-                sumActual += act;
-                sumPlan += pln;
+                prodData.push(act); targetData.push(pln); sumActual += act; sumPlan += pln;
             }
 
             if (totalOrdersCount === 0) {
@@ -92,6 +102,9 @@ Object.assign(window.Components, {
             } else {
                 totalActual = sumActual.toLocaleString(); totalPlanned = sumPlan.toLocaleString();
                 yieldBadge = `Yield ${sumPlan > 0 ? ((sumActual / sumPlan) * 100).toFixed(1) : '0.0'}%`;
+                const daysRun = Math.max(1, sumUpM / 1440);
+                runRate = `${Math.round(sumActual / daysRun).toLocaleString()} ${isTh ? 'ตัน/วัน' : 'T/Day'}`;
+                oeeBadge = `OEE ${(sumUpM + sumDnM) > 0 ? ((sumUpM / (sumUpM + sumDnM)) * 100).toFixed(1) : '98.5'}%`;
             }
         } else { // 'month' (default)
             const selYr = window.chartSelectedYear || 2026;
@@ -100,6 +113,8 @@ Object.assign(window.Components, {
             if (!yrData || yrData.count === 0) {
                 hasData = false; noDataLabel = String(selYr);
             } else {
+                sumLog = yrData.rawLog; sumSlab = yrData.rawSlab; sumDust = yrData.rawDust;
+                sumUpM = yrData.upM; sumDnM = yrData.dnM; sumQcLogM = yrData.qcLogM; sumQcDustM = yrData.qcDustM; activeCnt = yrData.count;
                 const monthNames = isTh 
                     ? ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
                     : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -113,8 +128,13 @@ Object.assign(window.Components, {
                 totalActual = yrData.actual.toLocaleString();
                 totalPlanned = yrData.plan.toLocaleString();
                 yieldBadge = `Yield ${yrData.plan > 0 ? ((yrData.actual / yrData.plan) * 100).toFixed(1) : '0.0'}%`;
+                const daysRun = Math.max(1, sumUpM / 1440);
+                runRate = `${Math.round(yrData.actual / daysRun).toLocaleString()} ${isTh ? 'ตัน/วัน' : 'T/Day'}`;
+                oeeBadge = `OEE ${(sumUpM + sumDnM) > 0 ? ((sumUpM / (sumUpM + sumDnM)) * 100).toFixed(1) : '98.5'}%`;
             }
         }
+        const avgLogMoist = activeCnt > 0 ? (sumQcLogM / activeCnt).toFixed(1) : '60.0';
+        const avgDustMoist = activeCnt > 0 ? (sumQcDustM / activeCnt).toFixed(1) : '58.0';
 
         // ความสูง SVG Chart กะทัดรัด (Height 125)
         const minVal = 0, maxVal = Math.max(100, ...prodData, ...targetData) * 1.15;
@@ -154,8 +174,10 @@ Object.assign(window.Components, {
             dotsHtml += `<g class="chart-point cursor-pointer group" tabindex="0"><circle cx="${x}" cy="${y}" r="${isHighlight ? 4.5 : 3}" fill="#ffffff" stroke="#10b981" stroke-width="${isHighlight ? 2.5 : 1.8}" />${isHighlight ? `<circle cx="${x}" cy="${y}" r="8" fill="#10b981" fill-opacity="0.25" class="animate-ping" />` : ''}<title>${lbl}: ${prodData[i].toLocaleString()} ${isTh ? 'ตัน' : 'Ton'}</title></g>`;
         });
 
-        // 2. คำนวณวัตถุดิบจริงจากข้อ 1.3
-        const cLen = 326.73, pLog = 0.50, pSlab = 0.30, pDust = 0.20;
+        // 2. คำนวณวัตถุดิบจริงจาก 3 ฟิลด์ตัวเลข ข้อ 1.3 (prod_raw_log_ton, prod_raw_slab_ton, prod_raw_sawdust_ton)
+        const totalFeed = sumLog + sumSlab + sumDust;
+        const cLen = 326.73, pLog = totalFeed > 0 ? sumLog / totalFeed : 0, pSlab = totalFeed > 0 ? sumSlab / totalFeed : 0, pDust = totalFeed > 0 ? sumDust / totalFeed : 0;
+        const pctLog = Math.round(pLog * 100), pctSlab = Math.round(pSlab * 100), pctDust = totalFeed > 0 ? Math.max(0, 100 - pctLog - pctSlab) : 0;
         const lenLog = (cLen * pLog).toFixed(1), lenSlab = (cLen * pSlab).toFixed(1), lenDust = (cLen * pDust).toFixed(1);
         const offLog = 0, offSlab = (-(cLen * pLog)).toFixed(1), offDust = (-(cLen * (pLog + pSlab))).toFixed(1);
 
@@ -218,7 +240,7 @@ Object.assign(window.Components, {
                             </div>
                             <div class="border-l border-slate-200/70 pl-2 flex items-center justify-between">
                                 <div><span class="text-[9px] text-slate-400 font-medium block">${isTh ? 'กำลังผลิตเฉลี่ย' : 'Run Rate'}</span><strong class="text-sm font-black text-slate-800">${hasData ? runRate : '-'}</strong></div>
-                                <span class="text-[8.5px] ${hasData ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-slate-500 bg-slate-100 border-slate-200'} font-semibold px-1.5 py-0.5 rounded border">${hasData ? 'OEE 89.2%' : 'Idle'}</span>
+                                <span class="text-[8.5px] ${hasData ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-slate-500 bg-slate-100 border-slate-200'} font-semibold px-1.5 py-0.5 rounded border">${hasData ? oeeBadge : 'Idle'}</span>
                             </div>
                         </div>
 
@@ -270,7 +292,7 @@ Object.assign(window.Components, {
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center space-x-2.5">
                                 <div class="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-100 shadow-2xs shrink-0"><i class="fa-solid fa-tree text-sm"></i></div>
-                                <div><h3 class="text-xs md:text-sm font-bold text-slate-900">${isTh ? 'สัดส่วนวัตถุดิบป้อนโรงงาน' : 'Raw Material Mix'}</h3><p class="text-[10px] text-slate-500">${isTh ? 'ข้อกำหนด 1.3: Raw Material Requirement' : 'Step 1.3: Logs, Slab & Sawdust'}</p></div>
+                                <div><h3 class="text-xs md:text-sm font-bold text-slate-900">${isTh ? 'สัดส่วนวัตถุดิบป้อนโรงงาน' : 'Raw Material Mix'}</h3><p class="text-[10px] text-slate-500">${isTh ? 'ข้อกำหนด 1.3: แยก 3 ฟิลด์ (Log, Slab, Sawdust)' : 'Step 1.3: Log, Slab & Sawdust (Ton)'}</p></div>
                             </div>
                             <span class="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">100% Rubberwood</span>
                         </div>
@@ -278,34 +300,32 @@ Object.assign(window.Components, {
                             <div class="relative shrink-0 flex items-center justify-center w-28 h-28">
                                 <svg viewBox="0 0 140 140" class="w-28 h-28 -rotate-90 select-none">
                                     <circle cx="70" cy="70" r="52" fill="none" stroke="#f1f5f9" stroke-width="16" />
-                                    <circle cx="70" cy="70" r="52" fill="none" stroke="#10b981" stroke-width="16" stroke-dasharray="${lenLog} ${cLen}" stroke-dashoffset="${offLog}" stroke-linecap="round" />
-                                    <circle cx="70" cy="70" r="52" fill="none" stroke="#06b6d4" stroke-width="16" stroke-dasharray="${lenSlab} ${cLen}" stroke-dashoffset="${offSlab}" stroke-linecap="round" />
-                                    <circle cx="70" cy="70" r="52" fill="none" stroke="#f59e0b" stroke-width="16" stroke-dasharray="${lenDust} ${cLen}" stroke-dashoffset="${offDust}" stroke-linecap="round" />
+                                    ${totalFeed > 0 ? `<circle cx="70" cy="70" r="52" fill="none" stroke="#10b981" stroke-width="16" stroke-dasharray="${lenLog} ${cLen}" stroke-dashoffset="${offLog}" stroke-linecap="round" /><circle cx="70" cy="70" r="52" fill="none" stroke="#06b6d4" stroke-width="16" stroke-dasharray="${lenSlab} ${cLen}" stroke-dashoffset="${offSlab}" stroke-linecap="round" /><circle cx="70" cy="70" r="52" fill="none" stroke="#f59e0b" stroke-width="16" stroke-dasharray="${lenDust} ${cLen}" stroke-dashoffset="${offDust}" stroke-linecap="round" />` : ''}
                                 </svg>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                                    <span class="text-base font-black text-slate-900 leading-tight">50,000</span>
+                                    <span class="text-base font-black text-slate-900 leading-tight">${totalFeed.toLocaleString()}</span>
                                     <span class="text-[8.5px] font-bold text-slate-500 uppercase">Tons Feed</span>
                                 </div>
                             </div>
                             <div class="flex-1 space-y-1.5 min-w-0">
                                 <div class="flex items-center justify-between p-1.5 rounded-xl bg-white/80 border border-slate-100 text-[11px]">
                                     <div class="flex items-center space-x-1.5 truncate"><span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span><span class="font-bold text-slate-800 truncate">${isTh ? 'ไม้ท่อน (Logs)' : 'Logs'}</span></div>
-                                    <div class="flex items-center space-x-1 shrink-0"><span class="text-[10px] text-slate-500 font-mono">25,000T</span><span class="font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded text-[9.5px]">50%</span></div>
+                                    <div class="flex items-center space-x-1 shrink-0"><span class="text-[10px] text-slate-500 font-mono">${sumLog.toLocaleString()}T</span><span class="font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded text-[9.5px]">${pctLog}%</span></div>
                                 </div>
                                 <div class="flex items-center justify-between p-1.5 rounded-xl bg-white/80 border border-slate-100 text-[11px]">
                                     <div class="flex items-center space-x-1.5 truncate"><span class="w-2 h-2 rounded-full bg-cyan-500 shrink-0"></span><span class="font-bold text-slate-800 truncate">${isTh ? 'ปีกไม้ (Slab)' : 'Slabs'}</span></div>
-                                    <div class="flex items-center space-x-1 shrink-0"><span class="text-[10px] text-slate-500 font-mono">15,000T</span><span class="font-bold text-cyan-700 bg-cyan-50 px-1 py-0.2 rounded text-[9.5px]">30%</span></div>
+                                    <div class="flex items-center space-x-1 shrink-0"><span class="text-[10px] text-slate-500 font-mono">${sumSlab.toLocaleString()}T</span><span class="font-bold text-cyan-700 bg-cyan-50 px-1 py-0.2 rounded text-[9.5px]">${pctSlab}%</span></div>
                                 </div>
                                 <div class="flex items-center justify-between p-1.5 rounded-xl bg-white/80 border border-slate-100 text-[11px]">
                                     <div class="flex items-center space-x-1.5 truncate"><span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span><span class="font-bold text-slate-800 truncate">${isTh ? 'ขี้เลื่อย (Sawdust)' : 'Sawdust'}</span></div>
-                                    <div class="flex items-center space-x-1 shrink-0"><span class="text-[10px] text-slate-500 font-mono">10,000T</span><span class="font-bold text-amber-700 bg-amber-50 px-1 py-0.2 rounded text-[9.5px]">20%</span></div>
+                                    <div class="flex items-center space-x-1 shrink-0"><span class="text-[10px] text-slate-500 font-mono">${sumDust.toLocaleString()}T</span><span class="font-bold text-amber-700 bg-amber-50 px-1 py-0.2 rounded text-[9.5px]">${pctDust}%</span></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-                        <span class="flex items-center truncate"><i class="fa-solid fa-droplet text-amber-500 mr-1 shrink-0"></i>${isTh ? 'QC ความชื้น: ไม้ท่อน 60% (≤70%) • ขี้เลื่อย 64%' : 'QC Moisture: Logs 60% • Sawdust 64%'}</span>
-                        <span class="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded-full border border-emerald-200 shrink-0">FSC / Zero Deforest</span>
+                        <span class="flex items-center truncate"><i class="fa-solid fa-droplet text-amber-500 mr-1 shrink-0"></i>${isTh ? `QC ความชื้น: ไม้ท่อน ${avgLogMoist}% (≤70%) • ขี้เลื่อย ${avgDustMoist}% (≤60%)` : `QC Moisture: Logs ${avgLogMoist}% • Sawdust ${avgDustMoist}%`}</span>
+                        <span class="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded-full border border-emerald-200 shrink-0">SBP &amp; GGL • Zero Deforest</span>
                     </div>
                 </div>
             </div>

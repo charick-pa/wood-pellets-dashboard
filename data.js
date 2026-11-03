@@ -18,9 +18,9 @@ function generateMockOrders() {
             productCode: "PRD-88204-X",
             productType: "1-0.6mm, 2-0.8mm",
             orderQuantity: "500 Ton",
-            certRequirement: "SPB, GGL, FSC",
-            customerReq: "High precision pressure resistance up to 350 bar with rust-proof coating",
-            specialReq: "Must pass ISO 9001:2015 inspection with full Certificate of Analysis (CoA) and mill test report attached.",
+            certRequirement: "SBP, GGL",
+            customerReq: "100% Rubberwood, Pellet Diameter 6.0mm, Moisture ≤8.0%, Ash ≤1.5%, Durability ≥97.5%",
+            specialReq: "Must comply with GGL & SBP sustainability standards with full Certificate of Analysis (CoA) attached.",
             planStartDate: "2026/09/30",
             planEndDate: "2026/10/30",
             requestedDeliveryDate: "2026/12/15",
@@ -31,10 +31,10 @@ function generateMockOrders() {
                 status: "APPROVED", 
                 certStatus: "APPROVED & VALID (Valid through 2028-12-31)",
                 licenseExpiry: "2027-09-30 (Active until late next year)",
-                specReq: "EN 10204 3.1 Material Certification, ASME B16.34 Pressure Class 2500, Hydrostatic Test 525 bar",
-                labelReq: "QR-Code Barcode Label (100x150 mm) containing PO No., Serial Range, Batch No., CoA URL",
-                packagingReq: "VCI Anti-Corrosion Vacuum Sealed Polybags, Wooden Crates with ShockWatch stickers",
-                customerRegulatory: "RoHS 3 (EU 2015/863) & REACH Compliance, PED 2014/68/EU Module H, TISI / มอก.",
+                specReq: "GGL & SBP Certified Biomass Specification, Moisture ≤8.0%, Ash ≤1.5%, Durability ≥97.5%",
+                labelReq: "SBP / GGL QR-Code Barcode Label (100x150 mm) containing PO No., Batch No., CoA URL",
+                packagingReq: "1,000 kg Jumbo Big Bags with moisture-proof liner / Bulk Vessel Hold",
+                customerRegulatory: "GGL & SBP Biomass Sustainability Certification, EU Deforestation Regulation (EUDR 2023/1115)",
                 transportExpiry: "2027-03-31",
                 valid: "Valid: 2028-12"
             },
@@ -44,12 +44,12 @@ function generateMockOrders() {
                 actual: 15000, 
                 unit: "Ton", 
                 startDate: "2026/10/12",
-                finishDate: "2026/10/02",
+                finishDate: "2026/10/02", rawLogTon: 12000, rawSlabTon: 5000, rawSawdustTon: 3000,
                 status: "In Progress" 
             },
             step4_pelletizing: {
                 yield: "90,000 Ton",
-                totalDowntimeMins: 4000,
+                totalDowntimeMins: 40,
                 issue: "Screen blockage on Hummer mill & die temperature stabilization",
                 pelletDiameter: "6.0 mm",
                 pelletMoisture: "7.8%",
@@ -114,9 +114,9 @@ function generateMockOrders() {
             productCode: "PRD-88205-A1",
             productType: "1-0.6mm",
             orderQuantity: "10,000 Ton",
-            certRequirement: "SBP, FSC, ENplus",
+            certRequirement: "SBP, GGL",
             customerReq: "Strict ash content < 0.5% with high calorific value > 4.6 kWh/kg",
-            specialReq: "COA with ENplus standard verification",
+            specialReq: "COA with SBP & GGL sustainability verification",
             planStartDate: "2026/09/15",
             planEndDate: "2026/10/10",
             requestedDeliveryDate: "2026/11/15",
@@ -127,7 +127,7 @@ function generateMockOrders() {
                 status: "APPROVED", 
                 certStatus: "APPROVED & VALID",
                 licenseExpiry: "2029-01-15",
-                specReq: "ENplus A1 Standard",
+                specReq: "SBP & GGL Biomass Standard",
                 labelReq: "Barcoded Big Bag Label with QR Code",
                 packagingReq: "1,000 kg Big Bags with water-proof liner",
                 customerRegulatory: "EU Timber Regulation (EUTR) & REACH",
@@ -149,13 +149,13 @@ function generateMockOrders() {
                 sub: "COA Generated",
                 sampleNo: "1-8",
                 testDate: "2026-10-01",
-                specification: "ENplus A1 / ISO 17225-2",
+                specification: "SBP / GGL Biomass Standard",
                 testParameter: "Calorific Value & Ash Content verification",
                 analyst: "NL-4088 (Prasert M.)",
-                coaFile: "COA-202610-ENP-01129.pdf",
-                coaUrl: "https://dms.company.com/verify/COA-202610-ENP-01129",
+                coaFile: "COA-202610-SBP-01129.pdf",
+                coaUrl: "https://dms.company.com/verify/COA-202610-SBP-01129",
                 deviation: "None",
-                qcReport: "QCR-20261001-ENP-02"
+                qcReport: "QCR-20261001-SBP-02"
             },
             step5: { 
                 name: "Warehouse", 
@@ -200,7 +200,7 @@ function generateMockOrders() {
             productCode: "PRD-88206-I",
             productType: "2-0.8mm",
             orderQuantity: "15,000 Ton",
-            certRequirement: "TISI, ISO 9001",
+            certRequirement: "SBP",
             customerReq: "Domestic bulk transport via dump truck",
             specialReq: "Factory weight bridge ticket required",
             planStartDate: "2026/09/01",
@@ -239,7 +239,7 @@ function generateMockOrders() {
             productCode: "PRD-88207-JP",
             productType: "1-0.6mm",
             orderQuantity: "25,000 Ton",
-            certRequirement: "GGL, FSC, Green Energy",
+            certRequirement: "GGL, SBP",
             step1: { name: "Sale Department", status: "Done" },
             step2: { name: "Regulatory (RA)", status: "APPROVED", valid: "Valid: 2030-01" },
             step3: { name: "Production Woods material planning", planned: 25000, actual: 8000, unit: "Ton", status: "In Progress" },
@@ -264,7 +264,7 @@ function generateMockOrders() {
             productCode: "PRD-88204-X",
             productType: "1-0.6mm",
             orderQuantity: "12,000 Ton",
-            certRequirement: "SPB, FSC",
+            certRequirement: "SBP",
             step1: { name: "Sale Department", status: "Done" },
             step2: { name: "Regulatory (RA)", status: "APPROVED", valid: "Valid: 2028-11" },
             step3: { name: "Production Woods material planning", planned: 12000, actual: 12000, unit: "Ton", status: "Completed" },
@@ -285,11 +285,11 @@ function generateMockOrders() {
             destination: "ROTTERDAM, NETHERLANDS",
             podCode: "CPM2600105",
             currentStep: 3,
-            productName: "Bio-Fuel Pellets Grade ENplus",
+            productName: "Bio-Fuel Pellets (SBP / GGL Grade)",
             productCode: "PRD-88205-A1",
             productType: "1-0.6mm",
             orderQuantity: "30,000 Ton",
-            certRequirement: "SBP, FSC, ENplus",
+            certRequirement: "SBP, GGL",
             step1: { name: "Sale Department", status: "Done" },
             step2: { name: "Regulatory (RA)", status: "APPROVED", valid: "Valid: 2029-05" },
             step3: { name: "Production Woods material planning", planned: 30000, actual: 10000, unit: "Ton", status: "In Progress" },
@@ -314,7 +314,7 @@ function generateMockOrders() {
             productCode: "PRD-88206-I",
             productType: "2-0.8mm",
             orderQuantity: "18,000 Ton",
-            certRequirement: "TISI, ISO 9001",
+            certRequirement: "GGL",
             step1: { name: "Sale Department", status: "Done" },
             step2: { name: "Regulatory (RA)", status: "APPROVED", valid: "Valid: 2028-09" },
             step3: { name: "Production Woods material planning", planned: 18000, actual: 18000, unit: "Ton", status: "Completed" },
@@ -339,7 +339,7 @@ function generateMockOrders() {
             productCode: "PRD-88204-US",
             productType: "1-0.6mm",
             orderQuantity: "22,000 Ton",
-            certRequirement: "CARB, PFI, FSC",
+            certRequirement: "SBP, GGL",
             step1: { name: "Sale Department", status: "Done" },
             step2: { name: "Regulatory (RA)", status: "Pending", valid: "Valid: 2030-03" },
             step3: { name: "Production Woods material planning", planned: 22000, actual: 0, unit: "Ton", status: "Pending" },
@@ -364,7 +364,7 @@ function generateMockOrders() {
             productCode: "PRD-88204-X",
             productType: "1-0.6mm",
             orderQuantity: "14,000 Ton",
-            certRequirement: "FSC, PEFC",
+            certRequirement: "GGL",
             step1: { name: "Sale Department", status: "Done" },
             step2: { name: "Regulatory (RA)", status: "APPROVED", valid: "Valid: 2029-08" },
             step3: { name: "Production Woods material planning", planned: 14000, actual: 14000, unit: "Ton", status: "Completed" },
@@ -389,7 +389,7 @@ function generateMockOrders() {
             productCode: "PRD-88204-EU",
             productType: "1-0.6mm, 2-0.8mm",
             orderQuantity: "16,000 Ton",
-            certRequirement: "SPB, GGL, FSC",
+            certRequirement: "SBP, GGL",
             step1: { name: "Sale Department", status: "Done" },
             step2: { name: "Regulatory (RA)", status: "APPROVED", valid: "Valid: 2028-10" },
             step3: { name: "Production Woods material planning", planned: 16000, actual: 0, unit: "Ton", status: "Pending" },
@@ -479,7 +479,7 @@ function generateMockOrders() {
             productCode: "PRD-88204-X",
             productType: "1-0.6mm, 2-0.8mm",
             orderQuantity: item.q,
-            certRequirement: "SPB, GGL, FSC",
+            certRequirement: ["SBP, GGL", "GGL, SBP", "SBP", "GGL"][index % 4],
             step1: { name: "Sale Department", status: "Done" },
             step2: { name: "Regulatory (RA)", status: item.step >= 2 ? "APPROVED" : "Pending", valid: "Valid: 2028-12" },
             step3: { 
@@ -522,21 +522,21 @@ function generateMockOrders() {
     const mockLocations = [
         // --- โซนสุราษฎร์ธานี (แหล่งป่ายางพาราและชีวมวลหลัก) ---
         { lat: 9.1382, lng: 99.3217, placeName: "แปลงสวนไม้ยางพารา พุนพิน สุราษฎร์ธานี (Plot A1)", plotId: "PLOT-SR-01", areaRai: "350 ไร่", eudrStatus: "EUDR Certified / SBP" },
-        { lat: 8.7958, lng: 99.3642, placeName: "แปลงไม้ยางพารา บ้านนาสาร สุราษฎร์ธานี (Plot A2)", plotId: "PLOT-SR-02", areaRai: "280 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 8.7958, lng: 99.3642, placeName: "แปลงไม้ยางพารา บ้านนาสาร สุราษฎร์ธานี (Plot A2)", plotId: "PLOT-SR-02", areaRai: "280 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 8.6367, lng: 99.3512, placeName: "แปลงสวนไม้ยางพารา เวียงสระ สุราษฎร์ธานี (Plot A3)", plotId: "PLOT-SR-03", areaRai: "420 ไร่", eudrStatus: "EUDR Verified & Due Diligence Pass" },
         { lat: 9.2612, lng: 99.1982, placeName: "แปลงไม้ยางพารา ท่าฉาง สุราษฎร์ธานี (Plot A4)", plotId: "PLOT-SR-04", areaRai: "190 ไร่", eudrStatus: "SBP / EUDR Certified" },
-        { lat: 9.1652, lng: 99.4718, placeName: "ลานรับซื้อไม้ยาง กาญจนดิษฐ์ สุราษฎร์ธานี", plotId: "PLOT-SR-05", areaRai: "ลานรับซื้อไม้ชีวมวล", eudrStatus: "ISO 9001 / EUDR Verified" },
+        { lat: 9.1652, lng: 99.4718, placeName: "ลานรับซื้อไม้ยาง กาญจนดิษฐ์ สุราษฎร์ธานี", plotId: "PLOT-SR-05", areaRai: "ลานรับซื้อไม้ชีวมวล", eudrStatus: "SBP & GGL / EUDR Verified" },
         { lat: 8.8415, lng: 99.1892, placeName: "แปลงไม้ยางพารา เคียนซา สุราษฎร์ธานี (Plot A6)", plotId: "PLOT-SR-06", areaRai: "310 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 8.5521, lng: 99.0345, placeName: "แปลงสวนยาง พระแสง สุราษฎร์ธานี (Plot A7)", plotId: "PLOT-SR-07", areaRai: "260 ไร่", eudrStatus: "EUDR Certified" },
         { lat: 9.3142, lng: 99.6912, placeName: "ท่าเรือเฟอร์รี่และลานไม้ ดอนสัก สุราษฎร์ธานี", plotId: "PORT-DS-01", areaRai: "จุดโหลดทางน้ำ", eudrStatus: "Export Terminal" },
 
         // --- โซนนครศรีธรรมราช (ศูนย์กลางไม้ยางพาราภาคใต้ตอนกลาง) ---
         { lat: 8.1645, lng: 99.6804, placeName: "ศูนย์รวบรวมไม้ยาง ทุ่งสง นครศรีธรรมราช", plotId: "PLOT-NST-01", areaRai: "ศูนย์คัดแยกไม้", eudrStatus: "EUDR Certified / SBP" },
-        { lat: 8.4304, lng: 99.9631, placeName: "แปลงสวนไม้ยาง เมืองนครศรีธรรมราช (Plot C2)", plotId: "PLOT-NST-02", areaRai: "320 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 8.4304, lng: 99.9631, placeName: "แปลงสวนไม้ยาง เมืองนครศรีธรรมราช (Plot C2)", plotId: "PLOT-NST-02", areaRai: "320 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 7.9741, lng: 100.0012, placeName: "แปลงไม้ยาง ชะอวด นครศรีธรรมราช (Plot C3)", plotId: "PLOT-NST-03", areaRai: "210 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 8.3412, lng: 99.7825, placeName: "แปลงสวนยางเชิงเขา ลานสกา นครศรีธรรมราช", plotId: "PLOT-NST-04", areaRai: "185 ไร่", eudrStatus: "SBP / EUDR Verified" },
         { lat: 8.4215, lng: 99.5014, placeName: "แปลงไม้ยาง ฉวาง นครศรีธรรมราช (Plot C5)", plotId: "PLOT-NST-05", areaRai: "290 ไร่", eudrStatus: "EUDR Certified" },
-        { lat: 8.6652, lng: 99.9234, placeName: "แปลงสวนยาง ท่าศาลา นครศรีธรรมราช (Plot C6)", plotId: "PLOT-NST-06", areaRai: "240 ไร่", eudrStatus: "EUDR Ready / FSC" },
+        { lat: 8.6652, lng: 99.9234, placeName: "แปลงสวนยาง ท่าศาลา นครศรีธรรมราช (Plot C6)", plotId: "PLOT-NST-06", areaRai: "240 ไร่", eudrStatus: "GGL / EUDR Ready" },
         { lat: 9.0045, lng: 99.9015, placeName: "แปลงไม้ยาง สิชล นครศรีธรรมราช (Plot C7)", plotId: "PLOT-NST-07", areaRai: "330 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 8.1812, lng: 99.8541, placeName: "แปลงสวนยาง ร่อนพิบูลย์ นครศรีธรรมราช", plotId: "PLOT-NST-08", areaRai: "195 ไร่", eudrStatus: "GGL / EUDR Certified" },
 
@@ -544,17 +544,17 @@ function generateMockOrders() {
         { lat: 7.5563, lng: 99.6114, placeName: "แปลงปลูกไม้ยางพารา เมืองตรัง (Plot B1)", plotId: "PLOT-TR-01", areaRai: "280 ไร่", eudrStatus: "EUDR Verified & Due Diligence Pass" },
         { lat: 7.7892, lng: 99.5512, placeName: "แปลงสวนไม้ยาง ห้วยยอด ตรัง (Plot B2)", plotId: "PLOT-TR-02", areaRai: "360 ไร่", eudrStatus: "EUDR Certified / SBP" },
         { lat: 7.4112, lng: 99.5124, placeName: "ลานรับซื้อไม้และท่าเรือ กันตัง ตรัง", plotId: "PORT-KT-01", areaRai: "ลานโหลดไม้ชายฝั่งอันดามัน", eudrStatus: "Coastal Transfer Terminal" },
-        { lat: 7.3412, lng: 99.8512, placeName: "แปลงสวนยาง ปะเหลียน ตรัง (Plot B4)", plotId: "PLOT-TR-04", areaRai: "220 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 7.3412, lng: 99.8512, placeName: "แปลงสวนยาง ปะเหลียน ตรัง (Plot B4)", plotId: "PLOT-TR-04", areaRai: "220 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 7.3912, lng: 99.6712, placeName: "แปลงสวนไม้ยาง ย่านตาขาว ตรัง (Plot B5)", plotId: "PLOT-TR-05", areaRai: "175 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 7.7124, lng: 99.3512, placeName: "แปลงไม้ยางพารา วังวิเศษ ตรัง (Plot B6)", plotId: "PLOT-TR-06", areaRai: "310 ไร่", eudrStatus: "SBP / EUDR Certified" },
 
         // --- โซนสงขลา & พัทลุง (โรงงาน Green River HQ และท่าเรือส่งออกหลัก) ---
-        { lat: 7.0089, lng: 100.4767, placeName: "โรงงาน Green River Panels หาดใหญ่ HQ", plotId: "FAC-GRP-01", areaRai: "โรงงานแปรรูปหลัก", eudrStatus: "ISO 9001 / SBP Certified" },
-        { lat: 7.0845, lng: 100.4125, placeName: "โรงงานแปรรูปชีวมวล บางกล่ำ สงขลา", plotId: "FAC-GRP-02", areaRai: "โรงงานอัดเม็ดแห่งที่ 2", eudrStatus: "SBP / ENplus Certified" },
+        { lat: 7.0089, lng: 100.4767, placeName: "โรงงาน Green River Panels หาดใหญ่ HQ", plotId: "FAC-GRP-01", areaRai: "โรงงานแปรรูปหลัก", eudrStatus: "SBP & GGL Certified" },
+        { lat: 7.0845, lng: 100.4125, placeName: "โรงงานแปรรูปชีวมวล บางกล่ำ สงขลา", plotId: "FAC-GRP-02", areaRai: "โรงงานอัดเม็ดแห่งที่ 2", eudrStatus: "GGL & SBP Certified" },
         { lat: 7.2281, lng: 100.5925, placeName: "ท่าเรือน้ำลึกสงขลา (Songkhla Deep Sea Port)", plotId: "PORT-SK-01", areaRai: "จุดโหลดสินค้าขึ้นเรือส่งออก", eudrStatus: "Export Terminal" },
         { lat: 6.9145, lng: 100.7412, placeName: "ลานรวบรวมไม้ชีวมวล จะนะ สงขลา", plotId: "PLOT-SK-02", areaRai: "160 ไร่", eudrStatus: "EUDR Certified" },
         { lat: 6.6412, lng: 100.4215, placeName: "แปลงไม้ยางและคลัง สะเดา สงขลา (ชายแดน)", plotId: "PLOT-SK-03", areaRai: "250 ไร่", eudrStatus: "EUDR Verified" },
-        { lat: 7.1345, lng: 100.2745, placeName: "แปลงสวนไม้ยาง รัตภูมิ สงขลา (Plot D4)", plotId: "PLOT-SK-04", areaRai: "340 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 7.1345, lng: 100.2745, placeName: "แปลงสวนไม้ยาง รัตภูมิ สงขลา (Plot D4)", plotId: "PLOT-SK-04", areaRai: "340 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 6.9412, lng: 100.3812, placeName: "แปลงสวนยาง คลองหอยโข่ง สงขลา", plotId: "PLOT-SK-05", areaRai: "190 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 6.7412, lng: 100.7012, placeName: "แปลงสวนไม้ยาง นาทวี สงขลา", plotId: "PLOT-SK-06", areaRai: "275 ไร่", eudrStatus: "EUDR Certified" },
         { lat: 7.7345, lng: 100.0125, placeName: "แปลงไม้ยางพารา ควนขนุน พัทลุง", plotId: "PLOT-PTL-01", areaRai: "210 ไร่", eudrStatus: "SBP / EUDR Verified" },
@@ -563,7 +563,7 @@ function generateMockOrders() {
         // --- โซนกระบี่ & พังงา & ชุมพร & ระนอง ---
         { lat: 7.9412, lng: 99.1452, placeName: "แปลงสวนไม้ยาง คลองท่อม กระบี่", plotId: "PLOT-KB-01", areaRai: "320 ไร่", eudrStatus: "EUDR Certified / SBP" },
         { lat: 8.3712, lng: 98.7345, placeName: "แปลงสวนยาง อ่าวลึก กระบี่", plotId: "PLOT-KB-02", areaRai: "230 ไร่", eudrStatus: "EUDR Verified" },
-        { lat: 8.8812, lng: 98.3712, placeName: "แปลงไม้ยาง ตะกั่วป่า พังงา", plotId: "PLOT-PNA-01", areaRai: "205 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 8.8812, lng: 98.3712, placeName: "แปลงไม้ยาง ตะกั่วป่า พังงา", plotId: "PLOT-PNA-01", areaRai: "205 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 9.9412, lng: 99.0812, placeName: "แปลงไม้ยางพารา หลังสวน ชุมพร", plotId: "PLOT-CPN-01", areaRai: "410 ไร่", eudrStatus: "EUDR Certified" },
         { lat: 9.7712, lng: 99.0912, placeName: "แปลงสวนยาง ละแม ชุมพร", plotId: "PLOT-CPN-02", areaRai: "290 ไร่", eudrStatus: "SBP / EUDR Verified" },
         { lat: 9.5812, lng: 98.5912, placeName: "แปลงไม้ยางพารา กะเปอร์ ระนอง", plotId: "PLOT-RN-01", areaRai: "180 ไร่", eudrStatus: "EUDR Certified" },
@@ -576,28 +576,28 @@ function generateMockOrders() {
         { lat: 6.1712, lng: 101.1812, placeName: "แปลงไม้ยาง ธารโต ยะลา", plotId: "PLOT-YLA-03", areaRai: "165 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 6.7212, lng: 101.1214, placeName: "แปลงสวนยาง โคกโพธิ์ ปัตตานี", plotId: "PLOT-PTN-01", areaRai: "240 ไร่", eudrStatus: "EUDR Certified" },
         { lat: 6.7012, lng: 101.6212, placeName: "ลานรับซื้อไม้ สายบุรี ปัตตานี", plotId: "PLOT-PTN-02", areaRai: "170 ไร่", eudrStatus: "SBP / EUDR Verified" },
-        { lat: 6.3912, lng: 101.5212, placeName: "แปลงสวนไม้ยาง รือเสาะ นราธิวาส", plotId: "PLOT-NRT-01", areaRai: "285 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 6.3912, lng: 101.5212, placeName: "แปลงสวนไม้ยาง รือเสาะ นราธิวาส", plotId: "PLOT-NRT-01", areaRai: "285 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 6.0312, lng: 101.9712, placeName: "แปลงไม้ยาง สุไหงโก-ลก นราธิวาส", plotId: "PLOT-NRT-02", areaRai: "230 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 6.2912, lng: 101.7212, placeName: "แปลงสวนไม้ยาง ระแงะ นราธิวาส", plotId: "PLOT-NRT-03", areaRai: "310 ไร่", eudrStatus: "EUDR Certified / GGL" },
         { lat: 8.9124, lng: 98.8852, placeName: "แปลงสวนไม้ยาง บ้านตาขุน สุราษฎร์ธานี", plotId: "PLOT-SR-08", areaRai: "270 ไร่", eudrStatus: "EUDR Certified / SBP" },
-        { lat: 8.8542, lng: 98.8115, placeName: "แปลงไม้ยางพารา พนม สุราษฎร์ธานี", plotId: "PLOT-SR-09", areaRai: "245 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 8.8542, lng: 98.8115, placeName: "แปลงไม้ยางพารา พนม สุราษฎร์ธานี", plotId: "PLOT-SR-09", areaRai: "245 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 8.4612, lng: 99.0754, placeName: "แปลงสวนยาง ชัยบุรี สุราษฎร์ธานี", plotId: "PLOT-SR-10", areaRai: "315 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 8.5814, lng: 99.6412, placeName: "แปลงสวนไม้ยาง พิปูน นครศรีธรรมราช", plotId: "PLOT-NST-09", areaRai: "230 ไร่", eudrStatus: "SBP / EUDR Certified" },
         { lat: 8.2564, lng: 99.5842, placeName: "แปลงไม้ยางพารา นาบอน นครศรีธรรมราช", plotId: "PLOT-NST-10", areaRai: "390 ไร่", eudrStatus: "EUDR Certified / GGL" },
         { lat: 8.0345, lng: 99.4812, placeName: "แปลงสวนยาง บางขัน นครศรีธรรมราช", plotId: "PLOT-NST-11", areaRai: "265 ไร่", eudrStatus: "EUDR Verified" },
-        { lat: 8.2945, lng: 99.3624, placeName: "แปลงไม้ยางพารา ทุ่งใหญ่ นครศรีธรรมราช", plotId: "PLOT-NST-12", areaRai: "340 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 8.2945, lng: 99.3624, placeName: "แปลงไม้ยางพารา ทุ่งใหญ่ นครศรีธรรมราช", plotId: "PLOT-NST-12", areaRai: "340 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 7.9685, lng: 99.6542, placeName: "แปลงสวนไม้ยาง รัษฎา ตรัง", plotId: "PLOT-TR-07", areaRai: "255 ไร่", eudrStatus: "EUDR Certified / SBP" },
         { lat: 7.5612, lng: 99.7545, placeName: "แปลงสวนยางเชิงเขา นาโยง ตรัง", plotId: "PLOT-TR-08", areaRai: "210 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 7.5742, lng: 99.3845, placeName: "แปลงไม้ยางพารา สิเกา ตรัง", plotId: "PLOT-TR-09", areaRai: "285 ไร่", eudrStatus: "GGL / EUDR Certified" },
         { lat: 7.4125, lng: 99.9412, placeName: "แปลงสวนไม้ยาง กงหรา พัทลุง", plotId: "PLOT-PTL-03", areaRai: "225 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 7.6945, lng: 99.8812, placeName: "แปลงสวนยาง ศรีบรรพต พัทลุง", plotId: "PLOT-PTL-04", areaRai: "195 ไร่", eudrStatus: "SBP / EUDR Verified" },
         { lat: 6.6185, lng: 100.9512, placeName: "แปลงไม้ยางพารา สะบ้าย้อย สงขลา", plotId: "PLOT-SK-07", areaRai: "305 ไร่", eudrStatus: "EUDR Certified" },
-        { lat: 6.7845, lng: 100.9112, placeName: "ลานรวบรวมไม้ยาง เทพา สงขลา", plotId: "PLOT-SK-08", areaRai: "240 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 6.7845, lng: 100.9112, placeName: "ลานรวบรวมไม้ยาง เทพา สงขลา", plotId: "PLOT-SK-08", areaRai: "240 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 8.5312, lng: 98.8645, placeName: "แปลงสวนไม้ยาง ปลายพระยา กระบี่", plotId: "PLOT-KB-03", areaRai: "330 ไร่", eudrStatus: "EUDR Certified / SBP" },
         { lat: 8.2615, lng: 99.0485, placeName: "แปลงสวนยาง เขาพนม กระบี่", plotId: "PLOT-KB-04", areaRai: "275 ไร่", eudrStatus: "EUDR Verified" },
         { lat: 8.4512, lng: 98.3125, placeName: "แปลงไม้ยางพารา ท้ายเหมือง พังงา", plotId: "PLOT-PNA-02", areaRai: "215 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 10.6542, lng: 99.1412, placeName: "แปลงสวนไม้ยาง ท่าแซะ ชุมพร", plotId: "PLOT-CPN-03", areaRai: "360 ไร่", eudrStatus: "EUDR Certified / SBP" },
-        { lat: 10.2312, lng: 99.0845, placeName: "แปลงไม้ยางพารา สวี ชุมพร", plotId: "PLOT-CPN-04", areaRai: "295 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 10.2312, lng: 99.0845, placeName: "แปลงไม้ยางพารา สวี ชุมพร", plotId: "PLOT-CPN-04", areaRai: "295 ไร่", eudrStatus: "GGL / EUDR Verified" },
         { lat: 8.3742, lng: 99.5685, placeName: "แปลงสวนไม้ยาง ช้างกลาง นครศรีธรรมราช", plotId: "PLOT-NST-13", areaRai: "260 ไร่", eudrStatus: "EUDR Certified / SBP" }
     ];
 
@@ -653,8 +653,8 @@ function generateMockOrders() {
         o.shipToLocation = o.shipToLocation || o.destination || "Port of Japan";
         o.deliveryDateReq = o.requestedDeliveryDate;
         o.deliveryDateTarget = o.deliveryDateTarget || o.requestedDeliveryDate;
-        o.certRequirement = o.certRequirement || "SBP, GGL, FSC-100%";
-        o.otherCertificate = o.otherCertificate || "ENplus A1 Standard";
+        o.certRequirement = o.certRequirement || "SBP, GGL";
+        o.otherCertificate = o.otherCertificate || "-";
         o.customerReq = o.customerReq || "Rubberwood, Pellet Diameter 0.6mm±1mm, Moisture ≤10%, Ash ≤3%, Calorie ≥4,000 kcal/kg, Density ≥600 kg/m³, Fines ≤1%, Bulk Shipment, COA, Inspection";
         o.specialReq = o.specialReq || "ต้องแจ้งลูกค้าหากคุณภาพของสินค้าไม่เป็นไปตามข้อกำหนด, Moisture ≤8%, ตรวจทุก Batch, ส่ง COA ก่อนโหลด, Weather Protection";
 
@@ -665,7 +665,7 @@ function generateMockOrders() {
         o.planDateFinish = o.planEndDate || "2026/09/30";
         o.planBatchNo = o.planBatchNo || `SBP-xx-YY-02-${String(3000 + i)}`;
         o.planProdDesc = o.planProdDesc || "Rubber wood pellets";
-        o.planCertScheme = o.planCertScheme || "SBP, GGL";
+        o.planCertScheme = o.planCertScheme || o.certRequirement || "SBP, GGL";
         o.planProductCode = o.planProductCode || "Bwp.12-08";
         o.planVolume = o.planVolume || o.orderQuantity || "5,000 MT";
 
@@ -676,10 +676,10 @@ function generateMockOrders() {
             regCertStatus: "APPROVED & VALID (Valid through 2028-12-31)",
             certStatus: "APPROVED & VALID (Valid through 2028-12-31)",
             licenseExpiry: "2027-09-30 (Active until late next year)",
-            specReq: "EN 10204 3.1 Material Certification, ASME B16.34 Pressure Class 2500, and 100% Non-Destructive Hydrostatic Testing at 525 bar for 15 minutes.",
-            labelReq: "QR-Code Barcode Label (100x150 mm) containing PO No., Serial Range, Batch No., ISO Compliance Mark, and Direct CoA URL Download link.",
-            packagingReq: "VCI Anti-Corrosion Vacuum Sealed Polybags, individual shock-proof foam casing, packed in heavy-duty ISPM-15 heat-treated Wooden Crates (max 50 units/crate) with ShockWatch & TiltWatch indicator stickers.",
-            customerRegulatory: "RoHS 3 (EU 2015/863) & REACH Compliance, Pressure Equipment Directive (PED 2014/68/EU) Category III Module H, and Thai Industrial Standards (TISI / มอก.) Certification for high-pressure fluid power equipment.",
+            specReq: "GGL & SBP Sustainability Biomass Standard, Pellet Moisture ≤8.0%, Ash ≤1.5%, Mechanical Durability ≥97.5%.",
+            labelReq: "SBP / GGL QR-Code Barcode Label (100x150 mm) containing PO No., Batch No., GGL/SBP Claim, and Direct CoA Download link.",
+            packagingReq: "1,000 kg Jumbo Big Bags with moisture-proof liner (ISPM-15 palletized where required) or Clean Dry Bulk Vessel Hold.",
+            customerRegulatory: "GGL (Green Gold Label) & SBP (Sustainable Biomass Program) Certification, EU Deforestation Regulation (EUDR 2023/1115) Geolocation Verified.",
             transportExpiry: "2027-03-31 (Active transport permit; renewal required 30 days prior to expiration)",
             infoSupplier: "As Attachment (Verified Supplier Dossier)"
         }, o.step2 || {});
@@ -699,12 +699,25 @@ function generateMockOrders() {
             finishTime: "07:00",
             materialCode: "BWP-11-08 / BWP-12-08",
             plantSupervisor: "Operations Lead",
+            rawLogTon: Math.round(((o.step3 && Number(o.step3.planned)) || parseInt(String(o.orderQuantity || "5000").replace(/[^0-9]/g, '')) || 20000) * ([0.50, 0.52, 0.48, 0.53, 0.47][i % 5])),
+            rawSlabTon: Math.round(((o.step3 && Number(o.step3.planned)) || parseInt(String(o.orderQuantity || "5000").replace(/[^0-9]/g, '')) || 20000) * ([0.30, 0.28, 0.32, 0.29, 0.31][i % 5])),
+            rawSawdustTon: Math.round(((o.step3 && Number(o.step3.planned)) || parseInt(String(o.orderQuantity || "5000").replace(/[^0-9]/g, '')) || 20000) * ([0.20, 0.20, 0.20, 0.18, 0.22][i % 5])),
             rawMaterialReq: "Log amount: 12,000 Ton | Slab amount: 5,000 Ton | Sawdust amount: 3,000 Ton",
             productionIssue: "It couldn’t be pressed into solid bar because raw materials were too dry (moisture adjusted).",
             fac1StatusUtil: "Downtime: 40 mins | Cause: Raw material dry | Fuels: 1,200 L | Electricity: 85,000 kWh",
             fac2StatusUtil: "Downtime: 0 mins | Cause: None | Fuels: 950 L | Electricity: 78,000 kWh",
             feedLines: ["Hammer mill", "Flaker 3", "Flaker 4"]
         }, o.step3 || {});
+        o.step3.prod_raw_log_ton = Number(o.step3.rawLogTon) || 0;
+        o.step3.prod_raw_slab_ton = Number(o.step3.rawSlabTon) || 0;
+        o.step3.prod_raw_sawdust_ton = Number(o.step3.rawSawdustTon) || 0;
+        o.step3.rawMaterialReq = `Log: ${o.step3.prod_raw_log_ton.toLocaleString()} Ton | Slab: ${o.step3.prod_raw_slab_ton.toLocaleString()} Ton | Sawdust: ${o.step3.prod_raw_sawdust_ton.toLocaleString()} Ton`;
+        o.step3.prod_yield_ton = Number(o.step3.prod_yield_ton) || Math.round((Number(o.step3.actual) || 15000) * 0.95);
+        o.step3.prod_uptime_mins = Number(o.step3.prod_uptime_mins) || (5760 - (i % 5) * 60);
+        o.step3.prod_downtime_mins = Number(o.step3.prod_downtime_mins ?? o.step4_pelletizing?.totalDowntimeMins ?? [40, 120, 65, 35, 80][i % 5]);
+        o.step3.yield = `${o.step3.prod_yield_ton.toLocaleString()} Ton`;
+        o.step3.totalUptime = `${o.step3.prod_uptime_mins.toLocaleString()} mins`;
+        o.step3.totalDowntime = `${o.step3.prod_downtime_mins.toLocaleString()} mins`;
 
         // Step 4: QC In-line 5 Checkpoints
         o.step4_qc = {
@@ -715,6 +728,13 @@ function generateMockOrders() {
             paramChipper: "Moisture content (≤ 60%): 64%",
             paramAfterDryer: "Moisture content (≤12 - 14 %): 14%",
             paramAfterMagnetic: "Diameter and length: Verified | Moisture content (≤12 - 14 %): 14%",
+            qc_logs_slab_cleanliness: "Refer wood spec (Verified)",
+            qc_logs_slab_moisture_pct: [60.0, 59.5, 61.0, 58.5, 60.5][i % 5],
+            qc_sawdust_moisture_pct: [58.0, 57.5, 59.0, 56.5, 58.5][i % 5],
+            qc_chipper_moisture_pct: [58.0, 57.0, 58.5, 56.0, 57.5][i % 5],
+            qc_after_dryer_moisture_pct: [13.5, 13.2, 13.8, 12.9, 13.4][i % 5],
+            qc_after_mag_moisture_pct: [13.0, 12.8, 13.2, 12.5, 12.9][i % 5],
+            qc_after_mag_dim_check: "Diameter and length: Verified",
             status: "5 Checkpoints In-Line Verified (Zero Dev)"
         };
 
@@ -729,6 +749,14 @@ function generateMockOrders() {
             bulkWarehouses: "Moisture content (20±10%): 27% | Bulk density (>600kg/m3): 650 | Fines below (> 1.0): 1.0%",
             coaReferenced: "COA: Customer’s requirements | Referenced TPC test report: TPC-2026-WP-098",
             analyst: "Somchai P. / Lead QC Inspector",
+            qa_sawdust_moisture_pct: 47.0,
+            qa_pellet_diameter_mm: (String(o.productType || "").includes("2-0.8") && !String(o.productType || "").includes("1-0.6")) ? 8.0 : 6.0,
+            qa_pellet_length_mm: 26.0,
+            qa_pellet_moisture_pct: parseFloat(String(o.step4_pelletizing?.pelletMoisture || "").replace(/[^0-9.]/g, '')) || [7.8, 7.1, 7.5, 7.9, 7.4][i % 5],
+            qa_bulk_density_kgm3: [650.0, 660.0, 645.0, 655.0, 648.0][i % 5],
+            qa_ash_pct: [1.5, 0.5, 1.4, 1.3, 1.2][i % 5],
+            qa_fines_pct: [0.8, 0.6, 0.9, 0.7, 0.8][i % 5],
+            qa_durability_pct: [97.8, 98.2, 97.6, 98.0, 97.9][i % 5],
             coaFile: `COA-202610-LF2-0${String(3918 + i)}.pdf`
         };
 
@@ -749,6 +777,11 @@ function generateMockOrders() {
             closingStock: "1200 Ton (สินค้าคงเหลือยกไป)",
             inventoryController: "Warehouse Manager"
         }, o.step5 || {});
+        o.step6_storage.wh_storage_location = o.step6_storage.location || o.step6_storage.storageLocation || "Warehouse 1";
+        o.step6_storage.wh_opening_stock = parseFloat(String(o.step6_storage.openingStock || "1000").replace(/[^0-9.]/g, '')) || 1000;
+        o.step6_storage.wh_receipt_qty = parseFloat(String(o.step6_storage.totalReceiptQties || "500").replace(/[^0-9.]/g, '')) || 500;
+        o.step6_storage.wh_issue_qty = parseFloat(String(o.step6_storage.issueQty || o.step6_storage.totalIssueQties || "300").replace(/[^0-9.]/g, '')) || 300;
+        o.step6_storage.wh_closing_stock = parseFloat(String(o.step6_storage.closingStock || "").replace(/[^0-9.]/g, '')) || (o.step6_storage.wh_opening_stock + o.step6_storage.wh_receipt_qty - o.step6_storage.wh_issue_qty);
 
         // Step 7: RA Gather Info (Compliance Dossier Checklists)
         o.step7_ra_dossier = {
@@ -779,7 +812,7 @@ function generateMockOrders() {
 
         // Step 8: Shipment & Shipping
         o.step8_shipping = Object.assign({
-            saNumber: `SA-202610-0${String(3918 + i)}-ISO`,
+            saNumber: `SA-202610-0${String(3918 + i)}-SBP`,
             customerName: o.customer || "Bnbm company (ABC Biomass)",
             pod: o.destination || "ANTWERP (or Port of Japan)",
             shippingLine: o.step6?.shippingLine || (i % 2 === 0 ? "EVG" : "MAERSK"),

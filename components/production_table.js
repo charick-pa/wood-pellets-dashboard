@@ -79,8 +79,8 @@ Object.assign(window.Components, {
                         <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
                             <div class="bg-amber-500 h-1.5 rounded-full" style="width: ${percent}%"></div>
                         </div>
-                        <div class="flex justify-between"><span class="text-slate-500">Yield Output:</span><span class="font-bold text-slate-800">${s3.yield || '90,000 Ton'}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Uptime / Downtime:</span><span class="font-semibold text-slate-700">${s3.totalUptime || '5760m'} / <span class="text-rose-600 font-bold">${s3.totalDowntime || '40m'}</span></span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Yield Output:</span><span class="font-bold text-slate-800">${Number(s3.prod_yield_ton ?? 14250).toLocaleString()} Ton</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Uptime / Downtime:</span><span class="font-semibold text-slate-700">${Number(s3.prod_uptime_mins ?? 5760).toLocaleString()}m / <span class="text-rose-600 font-bold">${Number(s3.prod_downtime_mins ?? 40).toLocaleString()}m</span></span></div>
                         <div class="flex justify-between"><span class="text-slate-500">Supervisor:</span><span class="text-slate-700 truncate">${s3.plantSupervisor || 'Operations Lead'}</span></div>
                     </div>
                 </div>
@@ -93,9 +93,9 @@ Object.assign(window.Components, {
                     </div>
                     <div class="space-y-1 text-[11px]">
                         <div class="flex justify-between"><span class="text-slate-500">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'QC หน้างาน 5 จุด:' : 'In-line QC 5 Pts:'}</span><span class="text-emerald-700 font-bold text-[10px]"><i class="fa-solid fa-check-double mr-0.5"></i> ${(typeof currentLang !== "undefined" && currentLang === "th") ? 'ตรวจผ่าน 100%' : '100% Passed'}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">After Dryer / Mag:</span><span class="font-bold text-indigo-700">14% / 13.5%</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Durability (>97.5%):</span><span class="font-bold text-emerald-700">97.8% (Pass)</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Ash (<2%) / Fines:</span><span class="font-semibold text-slate-700">1.5% / 0.8%</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">After Dryer / Mag:</span><span class="font-bold text-indigo-700">${Number(qc.qc_after_dryer_moisture_pct ?? 13.5).toFixed(1)}% / ${Number(qc.qc_after_mag_moisture_pct ?? 13.0).toFixed(1)}%</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Durability (&gt;97.5%):</span><span class="font-bold text-emerald-700">${Number(qa.qa_durability_pct ?? 97.8).toFixed(1)}% (${Number(qa.qa_durability_pct ?? 97.8) >= 97.5 ? 'Pass' : 'Check'})</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Ash (&lt;2%) / Fines:</span><span class="font-semibold text-slate-700">${Number(qa.qa_ash_pct ?? 1.5).toFixed(1)}% / ${Number(qa.qa_fines_pct ?? 0.8).toFixed(1)}%</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">COA File:</span><span class="text-indigo-600 font-mono font-semibold truncate text-[10px]">${qa.coaFile || 'COA-202610.pdf'}</span></div>
                     </div>
                 </div>
@@ -107,8 +107,8 @@ Object.assign(window.Components, {
                         <span class="text-[10px] bg-teal-100 text-teal-800 px-1.5 py-0.2 rounded font-semibold">Dispatched</span>
                     </div>
                     <div class="space-y-1 text-[11px]">
-                        <div class="flex justify-between"><span class="text-slate-500">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'จุดจัดเก็บคลัง:' : 'Warehouse Loc:'}</span><span class="font-semibold text-slate-800">${wh.storageLocation || 'Warehouse 1'}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'สต็อกคงเหลือยกไป:' : 'Closing Stock:'}</span><span class="font-bold text-emerald-700">${wh.closingStock || '1,200 Ton'}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'จุดจัดเก็บคลัง:' : 'Warehouse Loc:'}</span><span class="font-semibold text-slate-800">${wh.wh_storage_location || wh.storageLocation || 'Warehouse 1'}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'สต็อกคงเหลือยกไป:' : 'Closing Stock:'}</span><span class="font-bold text-emerald-700">${Number(wh.wh_closing_stock ?? 1200).toLocaleString()} Ton</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">SA / Booking:</span><span class="font-mono text-slate-800 truncate">${ship.saNumber || ship.saNo || 'SA-03918'} (${ship.bookingNo || '-'})</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">Shipping Line:</span><span class="font-bold text-indigo-700">${ship.shippingLine || 'EVG'} (${ship.transitTime || '30d'})</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">ETD &rarr; ETA:</span><span class="font-semibold text-emerald-700">${ship.etd || '-'} &rarr; ${ship.eta || '-'}</span></div>

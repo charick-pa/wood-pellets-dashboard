@@ -29,7 +29,7 @@ Object.assign(window.Components, {
                                 <span class="text-xs font-black tracking-widest text-indigo-900 uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
                                     ${item.company || 'GREEN RIVER PANELS (THAILAND) CO., LTD'}
                                 </span>
-                                <span class="text-[10px] text-slate-500 font-mono">ISO 9001:2015 / SBP-Certified</span>
+                                <span class="text-[10px] text-slate-500 font-mono">SBP &amp; GGL Certified Biomass</span>
                             </div>
                             <h1 class="text-lg md:text-xl font-black text-slate-900 tracking-tight mt-0.5">
                                 WOOD PELLETS OPERATIONS BPM MASTER FORM
@@ -87,7 +87,7 @@ Object.assign(window.Components, {
                         <div><strong class="text-slate-500 block text-[11px]">Ship-to Location:</strong> <span class="text-slate-900 font-semibold">${s1.shipToLocation || s1.destination || 'Port of Japan'}</span></div>
 
                         <div class="md:col-span-2"><strong class="text-slate-500 block text-[11px]">Contact & Email:</strong> <span class="text-slate-800">${s1.contactPerson || 'Thomason'} &bull; ${s1.emailTel || 'sales@greenriverholding.com'}</span></div>
-                        <div class="md:col-span-2"><strong class="text-slate-500 block text-[11px]">Certificate Scheme:</strong> <span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-semibold border border-slate-200">${s1.certRequirement || 'SBP, GGL'}</span> <span class="text-slate-500 text-[11px]">(${s1.otherCertificate || 'FSC-100%'})</span></div>
+                        <div class="md:col-span-2"><strong class="text-slate-500 block text-[11px]">Certificate Scheme:</strong> <span class="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded font-bold border border-emerald-200">${s1.certRequirement || 'SBP, GGL'}</span>${(s1.otherCertificate && s1.otherCertificate !== '-' && s1.otherCertificate !== 'None') ? ` <span class="text-slate-500 text-[11px]">(${s1.otherCertificate})</span>` : ''}</div>
 
                         <div class="md:col-span-4 border-t border-slate-100 pt-1.5"><strong class="text-slate-500 text-[11px]">Customer Requirement:</strong> <span class="text-slate-700 text-[11px]">${s1.customerReq || 'Rubberwood, Pellet Diameter 0.6mm±1mm, Moisture ≤10%, Ash ≤3%, Calorie ≥4,000 kcal/kg, Density ≥600 kg/m³, Fines ≤1%, Bulk Shipment, COA, Inspection'}</span></div>
                         <div class="md:col-span-4"><strong class="text-slate-500 text-[11px]">Special Requirement:</strong> <span class="text-slate-700 text-[11px]">${s1.specialReq || 'ต้องแจ้งลูกค้าหากคุณภาพของสินค้าไม่เป็นไปตามข้อกำหนด, Moisture ≤8%, ตรวจทุก Batch, ส่ง COA ก่อนโหลด, Weather Protection'}</span></div>
@@ -127,9 +127,9 @@ Object.assign(window.Components, {
                     <div class="bpm-step-content p-3.5 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs bg-white">
                         <div><strong class="text-slate-500 block text-[11px]">Certificate Status:</strong> <span class="text-emerald-700 font-bold">${ra.certStatus || 'APPROVED & VALID (Valid through 2028-12-31)'}</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">License / Permit Expired:</strong> <span class="text-slate-800 font-semibold">${ra.licenseExpiry || '2027-09-30 (Active until late next year)'}</span></div>
-                        <div class="md:col-span-2"><strong class="text-slate-500 text-[11px]">Specification Req:</strong> <span class="text-slate-800 text-[11px]">${ra.specReq || 'EN 10204 3.1 Material Certification, ASME B16.34 Pressure Class 2500, and 100% Hydrostatic Test at 525 bar'}</span></div>
-                        <div class="md:col-span-2"><strong class="text-slate-500 text-[11px]">Label & Packaging:</strong> <span class="text-slate-800 text-[11px]">${ra.labelReq || 'QR-Code Barcode Label (100x150 mm)'} &bull; ${ra.packagingReq || 'VCI Vacuum Sealed Polybags, ISPM-15 Wooden Crates'}</span></div>
-                        <div><strong class="text-slate-500 block text-[11px]">Customer Regulatory Req:</strong> <span class="text-slate-800 text-[11px]">${ra.customerRegulatory || 'RoHS 3 (EU 2015/863) & REACH Compliance, PED 2014/68/EU Module H, TISI / มอก.'}</span></div>
+                        <div class="md:col-span-2"><strong class="text-slate-500 text-[11px]">Specification Req:</strong> <span class="text-slate-800 text-[11px]">${ra.specReq || 'GGL & SBP Sustainability Biomass Standard, Moisture ≤8.0%, Ash ≤1.5%, Durability ≥97.5%'}</span></div>
+                        <div class="md:col-span-2"><strong class="text-slate-500 text-[11px]">Label & Packaging:</strong> <span class="text-slate-800 text-[11px]">${ra.labelReq || 'SBP / GGL QR-Code Barcode Label (100x150 mm)'} &bull; ${ra.packagingReq || '1,000 kg Jumbo Big Bags with moisture-proof liner'}</span></div>
+                        <div><strong class="text-slate-500 block text-[11px]">Customer Regulatory Req:</strong> <span class="text-slate-800 text-[11px]">${ra.customerRegulatory || 'GGL & SBP Biomass Sustainability Certification, EUDR 2023/1115 Geolocation Verified'}</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">Transportation Expiry:</strong> <span class="text-rose-700 font-semibold">${ra.transportExpiry || '2027-03-31 (Active transport permit)'}</span></div>
                     </div>
                 </div>
@@ -151,7 +151,10 @@ Object.assign(window.Components, {
                         <div><strong class="text-slate-500 block text-[11px]">Material Code:</strong> <span class="text-indigo-700 font-mono font-bold">${s3.materialCode || 'BWP-11-08 / BWP-12-08'}</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">Plant Supervisor:</strong> <span class="text-slate-800 font-medium">${s3.plantSupervisor || 'Operations Lead'}</span></div>
 
-                        <div class="col-span-full border-t border-slate-100 pt-1.5"><strong class="text-slate-500 text-[11px]">Raw Material Requirement:</strong> <span class="text-slate-800 text-[11px] font-medium">${s3.rawMaterialReq || 'Log amount: 12,000 Ton | Slab amount: 5,000 Ton | Sawdust amount: 3,000 Ton'}</span></div>
+                        <div class="border-t border-slate-100 pt-1.5"><strong class="text-slate-500 block text-[11px]">Raw Material — Log (Ton):</strong> <span class="text-emerald-700 font-bold font-mono">${(s3.rawLogTon ?? s3.prod_raw_log_ton ?? 12000).toLocaleString()} Ton</span></div>
+                        <div class="border-t border-slate-100 pt-1.5"><strong class="text-slate-500 block text-[11px]">Raw Material — Slab (Ton):</strong> <span class="text-cyan-700 font-bold font-mono">${(s3.rawSlabTon ?? s3.prod_raw_slab_ton ?? 5000).toLocaleString()} Ton</span></div>
+                        <div class="border-t border-slate-100 pt-1.5"><strong class="text-slate-500 block text-[11px]">Raw Material — Sawdust (Ton):</strong> <span class="text-amber-700 font-bold font-mono">${(s3.rawSawdustTon ?? s3.prod_raw_sawdust_ton ?? 3000).toLocaleString()} Ton</span></div>
+                        <div class="border-t border-slate-100 pt-1.5"><strong class="text-slate-500 block text-[11px]">Total Raw Material Feed:</strong> <span class="text-slate-900 font-black font-mono">${((s3.rawLogTon ?? s3.prod_raw_log_ton ?? 12000) + (s3.rawSlabTon ?? s3.prod_raw_slab_ton ?? 5000) + (s3.rawSawdustTon ?? s3.prod_raw_sawdust_ton ?? 3000)).toLocaleString()} Ton</span></div>
                         <div class="col-span-full"><strong class="text-slate-500 text-[11px]">Production Issue:</strong> <span class="text-rose-700 text-[11px] bg-rose-50 px-2 py-0.5 rounded border border-rose-100 inline-block">${s3.productionIssue || 'It couldn’t be pressed into solid bar because raw materials were too dry (moisture adjusted).'}</span></div>
                         <div class="col-span-2"><strong class="text-slate-500 text-[11px]">Factory 1 Utilities:</strong> <span class="text-slate-700 text-[11px]">${s3.fac1StatusUtil || 'Downtime: 40 mins | Cause: Raw material dry | Fuels: 1,200 L | Electricity: 85,000 kWh'}</span></div>
                         <div class="col-span-2"><strong class="text-slate-500 text-[11px]">Factory 2 Utilities:</strong> <span class="text-slate-700 text-[11px]">${s3.fac2StatusUtil || 'Downtime: 0 mins | Cause: None | Fuels: 950 L | Electricity: 78,000 kWh'}</span></div>
@@ -168,28 +171,28 @@ Object.assign(window.Components, {
                         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-1.5 text-[11px]">
                             <div><strong class="text-slate-500">Batch No.:</strong> <span class="font-mono font-bold text-slate-800 ml-1">${qc.batchNo || '1-4'}</span></div>
                             <div><strong class="text-slate-500">Test Date:</strong> <span class="text-slate-800 font-semibold ml-1">${qc.testDate || '2026/10/10'}</span></div>
-                            <div><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px] border border-emerald-300"><i class="fa-solid fa-check-circle mr-1"></i>${qc.status || '5 Checkpoints Passed (ISO 9001)'}</span></div>
+                            <div><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px] border border-emerald-300"><i class="fa-solid fa-check-circle mr-1"></i>${qc.status || '5 Checkpoints Passed (SBP / GGL)'}</span></div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-[11px]">
                             <div class="bg-slate-50 p-2 rounded border border-slate-200">
                                 <strong class="text-slate-600 block">1. Logs & Slab:</strong>
-                                <span class="text-slate-800">${qc.paramLogsSlab || 'Cleanliness (%): Refer wood spec | Moisture: 60% (≤70%)'}</span>
+                                <span class="text-slate-800">${qc.qc_logs_slab_cleanliness || 'Refer wood spec'} | Moisture: <strong>${Number(qc.qc_logs_slab_moisture_pct ?? 60.0).toFixed(1)}%</strong> (≤70%)</span>
                             </div>
                             <div class="bg-slate-50 p-2 rounded border border-slate-200">
                                 <strong class="text-slate-600 block">2. Raw Sawdust:</strong>
-                                <span class="text-slate-800">${qc.paramSawdust || 'Moisture content: 64% (≤60%)'}</span>
+                                <span class="text-slate-800">Moisture: <strong>${Number(qc.qc_sawdust_moisture_pct ?? 58.0).toFixed(1)}%</strong> (≤60%)</span>
                             </div>
                             <div class="bg-slate-50 p-2 rounded border border-slate-200">
                                 <strong class="text-slate-600 block">3. Chipper:</strong>
-                                <span class="text-slate-800">${qc.paramChipper || 'Moisture content: 64% (≤60%)'}</span>
+                                <span class="text-slate-800">Moisture: <strong>${Number(qc.qc_chipper_moisture_pct ?? 58.0).toFixed(1)}%</strong> (≤60%)</span>
                             </div>
                             <div class="bg-slate-50 p-2 rounded border border-slate-200">
                                 <strong class="text-slate-600 block">4. After Dryer:</strong>
-                                <span class="text-slate-800">${qc.paramAfterDryer || 'Moisture content: 14% (≤12 - 14%)'}</span>
+                                <span class="text-slate-800">Moisture: <strong class="text-cyan-700">${Number(qc.qc_after_dryer_moisture_pct ?? 13.5).toFixed(1)}%</strong> (≤12 - 14%)</span>
                             </div>
                             <div class="bg-slate-50 p-2 rounded border border-slate-200 md:col-span-2">
                                 <strong class="text-slate-600 block">5. After Magnetic Separator:</strong>
-                                <span class="text-slate-800">${qc.paramAfterMagnetic || 'Diameter & length: Verified | Moisture: 14% (≤12 - 14%)'}</span>
+                                <span class="text-slate-800">${qc.qc_after_mag_dim_check || 'Diameter & length: Verified'} | Moisture: <strong class="text-cyan-700">${Number(qc.qc_after_mag_moisture_pct ?? 13.0).toFixed(1)}%</strong> (≤12 - 14%)</span>
                             </div>
                         </div>
                     </div>
@@ -208,11 +211,11 @@ Object.assign(window.Components, {
 
                         <div class="md:col-span-3 border-t border-slate-100 pt-1.5"><strong class="text-slate-500 text-[11px]">Wood Pellets After Magnetic Separator:</strong> 
                             <div class="text-slate-800 text-[11px] bg-purple-50/50 p-2 rounded border border-purple-100 mt-1">
-                                ${qa.paramMagneticPellets || 'Diameter (8±1 mm): 8 mm | Length (25±15mm): 26 mm | Moisture (<10%): 7% | Bulk density (>600kg/m³): 600 kg/m³ | Fines (<1.0%): 1.0% | Ash (<2%): 1.5% | Mechanical durability (>97.5%): 97.5%'}
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-medium"><span>Diameter: <strong>${Number(qa.qa_pellet_diameter_mm ?? 6.0).toFixed(1)} mm</strong></span><span>Length: <strong>${Number(qa.qa_pellet_length_mm ?? 26.0).toFixed(1)} mm</strong></span><span>Moisture: <strong class="text-cyan-700">${Number(qa.qa_pellet_moisture_pct ?? 7.8).toFixed(1)}%</strong> (&lt;8%)</span><span>Bulk Density: <strong>${Number(qa.qa_bulk_density_kgm3 ?? 650).toFixed(1)} kg/m³</strong></span><span>Ash: <strong>${Number(qa.qa_ash_pct ?? 1.5).toFixed(1)}%</strong> (&lt;2%)</span><span>Fines: <strong>${Number(qa.qa_fines_pct ?? 0.8).toFixed(1)}%</strong> (≤1%)</span><span class="col-span-2">Durability: <strong class="text-emerald-700">${Number(qa.qa_durability_pct ?? 97.8).toFixed(1)}%</strong> (&gt;97.5%)</span></div>
                             </div>
                         </div>
 
-                        <div><strong class="text-slate-500 block text-[11px]">Raw Material Sawdust:</strong> <span class="text-slate-800 text-[11px]">${qa.sawdustMoisture || 'Moisture: 47%'}</span></div>
+                        <div><strong class="text-slate-500 block text-[11px]">Raw Sawdust Moisture (%):</strong> <span class="text-slate-800 text-[11px] font-bold">${Number(qa.qa_sawdust_moisture_pct ?? 47.0).toFixed(1)}%</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">Chipper Chips Dimensions:</strong> <span class="text-slate-800 text-[11px]">${qa.paramChipper || '30±10mm / 25±5mm / ≤8mm'}</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">Hammer Mill Sieves:</strong> <span class="text-slate-800 text-[11px]">${qa.paramHammerMill || 'Length 25±15 / Width 25±5 / Thickness ≤8mm'}</span></div>
 
@@ -236,10 +239,10 @@ Object.assign(window.Components, {
                         <div class="col-span-full border-t border-slate-100 pt-1.5"><strong class="text-slate-500 text-[11px]">Big Bag Label No.:</strong> <span class="text-slate-800 font-mono text-[11px]">${wh.bigBagLabelNo || 'factory 1 : BB-GRP1-2026-001 | factory 2 : BB-GRP2-2026-002'}</span></div>
 
                         <div class="col-span-full bg-slate-50 p-2 rounded border border-slate-200 grid grid-cols-4 gap-2 text-center text-[11px]">
-                            <div><span class="text-slate-500 block">Opening Stock (ยอดยกมา)</span><span class="font-bold text-slate-800">${wh.openingStock || '1000 Ton'}</span></div>
-                            <div><span class="text-slate-500 block">Total Receipt (รับเข้า)</span><span class="font-bold text-emerald-700">${wh.totalReceiptQties || '500 Ton'}</span></div>
-                            <div><span class="text-slate-500 block">Total Issue (จ่ายออก)</span><span class="font-bold text-rose-700">${wh.totalIssueQties || '300 Ton'}</span></div>
-                            <div><span class="text-slate-500 block">Closing Stock (คงเหลือ)</span><span class="font-black text-indigo-700">${wh.closingStock || '1200 Ton'}</span></div>
+                            <div><span class="text-slate-500 block">Opening Stock (Ton)</span><span class="font-bold text-slate-800">${Number(wh.wh_opening_stock ?? 1000).toLocaleString()} Ton</span></div>
+                            <div><span class="text-slate-500 block">Total Receipt (Ton)</span><span class="font-bold text-emerald-700">${Number(wh.wh_receipt_qty ?? 500).toLocaleString()} Ton</span></div>
+                            <div><span class="text-slate-500 block">Total Issue (Ton)</span><span class="font-bold text-rose-700">${Number(wh.wh_issue_qty ?? 300).toLocaleString()} Ton</span></div>
+                            <div><span class="text-slate-500 block">Closing Stock (Ton)</span><span class="font-black text-indigo-700">${Number(wh.wh_closing_stock ?? 1200).toLocaleString()} Ton</span></div>
                         </div>
                     </div>
                 </div>
@@ -273,7 +276,7 @@ Object.assign(window.Components, {
                         <span class="text-[10px] bg-teal-600 px-2 py-0.2 rounded font-semibold text-white">Step 8</span>
                     </div>
                     <div class="bpm-step-content p-3.5 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs bg-white">
-                        <div><strong class="text-slate-500 block text-[11px]">SA Number:</strong> <span class="text-slate-900 font-mono font-bold">${ship.saNumber || ship.saNo || 'SA-202610-03918-ISO'}</span></div>
+                        <div><strong class="text-slate-500 block text-[11px]">SA Number:</strong> <span class="text-slate-900 font-mono font-bold">${ship.saNumber || ship.saNo || 'SA-202610-03918-SBP'}</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">Customer Name:</strong> <span class="text-slate-800 font-bold">${ship.customerName || s1.customer || 'Bnbm company'}</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">POD (Port of Discharge):</strong> <span class="text-indigo-700 font-bold">${ship.pod || s1.destination || 'ANTWERP (or Port of Japan)'}</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">Shipping Line:</strong> <span class="text-slate-900 font-bold">${ship.shippingLine || 'EVG'}</span></div>
