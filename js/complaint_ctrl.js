@@ -198,9 +198,18 @@ function requestAdminDeleteComplaint(orderNo, complaintId, fallbackIdx = -1) {
   }).then((res) => {
     if (res.isConfirmed && res.value) {
       localStorage.setItem("last_admin_email", res.value.adminMail);
-      const subj = encodeURIComponent(`[Request Delete Complaint] Ticket ${c.id} - Order ${orderNo}`);
-      const body = encodeURIComponent(`เรียน ผู้ดูแลระบบ (System Admin),\n\nขอความอนุเคราะห์ลบรายการบันทึกข้อร้องเรียนลูกค้า ดังนี้:\n• Ticket ID: ${c.id}\n• Order No: ${orderNo}\n• Category: ${c.category}\n• Recorded By: ${c.recordedBy}\n• เหตุผลที่ขอลบ: ${res.value.reason}\n\nขอบคุณครับ/ค่ะ`);
-      window.location.href = `mailto:${res.value.adminMail}?subject=${subj}&body=${body}`;
+      const subjRaw = `[Request Delete Complaint] Ticket ${c.id} - Order ${orderNo}`;
+      const bodyRaw = `เรียน ผู้ดูแลระบบ (System Admin),\n\nขอความอนุเคราะห์ลบรายการบันทึกข้อร้องเรียนลูกค้า ดังนี้:\n• Ticket ID: ${c.id}\n• Order No: ${orderNo}\n• Category: ${c.category}\n• Recorded By: ${c.recordedBy}\n• เหตุผลที่ขอลบ: ${res.value.reason}\n\nขอบคุณครับ/ค่ะ`;
+      const ch = typeof buildEmailChannelLinks === "function" ? buildEmailChannelLinks(res.value.adminMail, "", subjRaw, bodyRaw) : { mailtoUrl: `mailto:${res.value.adminMail}?subject=${encodeURIComponent(subjRaw)}&body=${encodeURIComponent(bodyRaw)}`, outlookWebUrl: "#", gmailUrl: "#", copyText: bodyRaw };
+      Swal.fire({
+        title: "เลือกช่องทางส่งอีเมลแจ้ง Admin", width: 480, showConfirmButton: true, confirmButtonText: "ปิดหน้าต่าง",
+        html: `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2">
+          <a href="${ch.mailtoUrl}" class="py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center justify-center no-underline"><i class="fa-solid fa-desktop mr-2"></i>Outlook ในเครื่อง</a>
+          <a href="${ch.outlookWebUrl}" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold flex items-center justify-center no-underline"><i class="fa-solid fa-globe mr-2"></i>Outlook Web (M365)</a>
+          <a href="${ch.gmailUrl}" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold flex items-center justify-center no-underline"><i class="fa-solid fa-envelope mr-2"></i>Gmail (บนเว็บ)</a>
+          <button type="button" onclick="if(typeof copyTextToClipboardSafe==='function') copyTextToClipboardSafe(decodeURIComponent('${encodeURIComponent(ch.copyText).replace(/'/g, "%27")}')); this.innerText='✓ คัดลอกแล้ว!';" class="py-2.5 px-3 bg-slate-700 hover:bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center cursor-pointer"><i class="fa-solid fa-copy mr-2"></i>คัดลอกข้อความ</button>
+        </div>`
+      });
     }
   });
 }
