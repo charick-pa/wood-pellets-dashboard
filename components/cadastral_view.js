@@ -70,10 +70,10 @@ Object.assign(window.Components, {
         if (activePlot && activePlot.vertices && activePlot.vertices.length > 0) {
             activePlot.vertices.forEach((v, vIdx) => {
                 vertexRowsHtml += `
-                    <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100 text-xs">
+                    <tr onclick="window.open('https://www.google.com/maps?q=${v.lat},${v.lng}','_blank','noopener')" title="คลิกเพื่อเปิดหมุดนี้ใน Google Maps" class="hover:bg-rose-50/60 cursor-pointer transition-colors border-b border-slate-100 text-xs">
                         <td class="py-1.5 px-3 font-bold text-center text-slate-700">#${v.no || (vIdx + 1)}</td>
                         <td class="py-1.5 px-3 font-mono text-emerald-700 font-medium">${Number(v.lat).toFixed(6)}</td>
-                        <td class="py-1.5 px-3 font-mono text-indigo-700 font-medium">${Number(v.lng).toFixed(6)}</td>
+                        <td class="py-1.5 px-3 font-mono text-indigo-700 font-medium">${Number(v.lng).toFixed(6)} <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-rose-500 ml-1"></i></td>
                     </tr>`;
             });
         } else {
@@ -183,6 +183,7 @@ Object.assign(window.Components, {
                             <button type="button" id="btnCadastralStreet" onclick="setCadastralTileLayer('street')" class="px-2.5 py-1 text-xs rounded-lg font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap"> <i class="fa-solid fa-road mr-1"></i> ${isTh ? 'แผนที่ถนน' : 'Street Map'} </button>
                             <button type="button" onclick="fitCadastralBounds()" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs" title="Fit Bounds"><i class="fa-solid fa-crosshairs"></i></button>
                             <button type="button" id="btnToggleCornerPins" onclick="toggleCadastralCornerPins()" class="px-2.5 py-1 text-xs rounded-lg font-semibold transition-all bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 whitespace-nowrap" title="Corner Pins"><i class="fa-solid fa-location-pin mr-1"></i> ${isTh ? 'หมุดมุมแปลง' : 'Corner Pins'}</button>
+                            <button type="button" onclick="openActivePlotInGoogleMaps()" class="px-2.5 py-1 text-xs rounded-lg font-bold transition-all bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 whitespace-nowrap cursor-pointer" title="เปิดแปลงนี้ใน Google Maps"><i class="fa-solid fa-location-dot mr-1"></i> Google Maps</button>
                             <button type="button" id="btnCadastralFullscreen" onclick="toggleCadastralFullscreen()" class="px-2.5 py-1 text-xs rounded-lg font-bold transition-all bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 shadow-xs flex items-center whitespace-nowrap"> <i id="cadastralFullscreenIcon" class="fa-solid fa-expand text-xs mr-1 text-emerald-300"></i><span id="cadastralFullscreenText">${isTh ? 'เต็มจอ' : 'Fullscreen'}</span> </button>
                         </div>
                     </div>

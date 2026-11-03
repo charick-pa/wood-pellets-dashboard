@@ -119,15 +119,13 @@ function drawCadastralPlot(plotId) {
     fillOpacity: 0.25
   }).addTo(window.cadastralMapInstance);
 
+  const cPt = plot.centroid || (plot.vertices && plot.vertices[0]) || { lat: 7.0089, lng: 100.4767 };
   window.cadastralPolygonLayer.bindPopup(`
     <div class="text-xs p-1 font-sans">
-      <div class="font-bold text-slate-900 border-b pb-1 mb-1.5 flex items-center">
-        <i class="fa-solid fa-draw-polygon text-emerald-600 mr-1.5"></i> ${plot.name}
-      </div>
-      <p class="text-slate-600 mb-1"><strong>เนื้อที่:</strong> ${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว.</p>
-      <p class="text-slate-500 text-[11px]">(${plot.thaiArea.sqMeters} ตร.ม. / ${plot.thaiArea.hectares} Ha)</p>
-      <div class="mt-2 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">EUDR Geolocation Traceability Passed</div>
-      ${plot.attributes && Object.keys(plot.attributes).length > 0 ? `<div class="mt-1 text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded flex items-center justify-between"><span><i class="fa-solid fa-clipboard-question mr-1"></i>ExtendedData:</span><strong>${Object.keys(plot.attributes).length} Attributes</strong></div>` : ''}
+      <div class="font-bold text-slate-900 border-b pb-1 mb-1.5 flex items-center"><i class="fa-solid fa-draw-polygon text-emerald-600 mr-1.5"></i> ${plot.name}</div>
+      <p class="text-slate-600 mb-1"><strong>เนื้อที่:</strong> ${plot.thaiArea.rai} ไร่ ${plot.thaiArea.ngan} งาน ${plot.thaiArea.sqWah} ตร.ว. (${plot.thaiArea.hectares} Ha)</p>
+      <div class="mt-1.5 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">EUDR Geolocation Traceability Passed</div>
+      <a href="https://www.google.com/maps?q=${cPt.lat},${cPt.lng}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;margin-top:6px;padding:4px 9px;background:#e11d48;color:#fff;border-radius:7px;font-weight:700;text-decoration:none;font-size:11px;">📍 เปิดใน Google Maps ↗</a>
     </div>
   `);
 
@@ -148,10 +146,8 @@ function drawCadastralPlot(plotId) {
       });
 
       const marker = L.marker([v.lat, v.lng], { icon: pinIcon });
-      marker.bindTooltip(`หมุดที่ #${v.no}<br>Lat: ${v.lat.toFixed(6)}<br>Lng: ${v.lng.toFixed(6)}`, {
-        direction: "top",
-        offset: [0, -10]
-      });
+      marker.bindTooltip(`หมุดที่ #${v.no} (${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}) — คลิกเพื่อเปิด Google Maps`, { direction: "top", offset: [0, -10] });
+      marker.on("click", () => window.open(`https://www.google.com/maps?q=${v.lat},${v.lng}`, "_blank", "noopener"));
       window.cadastralCornerMarkersLayer.addLayer(marker);
     });
     window.cadastralCornerMarkersLayer.addTo(window.cadastralMapInstance);
@@ -215,10 +211,9 @@ function drawAllPlotsForMo(moNo) {
         </div>
         <p class="text-slate-600 mb-1"><strong>คำสั่งซื้อ:</strong> <span class="text-indigo-700 font-bold">${p.linkedMoNo}</span> (แปลงที่ ${idx + 1}/${plots.length})</p>
         <p class="text-slate-600 mb-1"><strong>เนื้อที่:</strong> ${p.thaiArea.rai} ไร่ ${p.thaiArea.ngan} งาน ${p.thaiArea.sqWah} ตร.ว.</p>
-        <div class="mt-2 text-center">
-          <button onclick="selectCadastralPlot('${p.id}')" class="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[10px] font-bold hover:bg-indigo-700 shadow-xs">
-            ดูเจาะจงแปลงนี้
-          </button>
+        <div class="mt-2 flex items-center justify-center gap-1.5">
+          <button onclick="selectCadastralPlot('${p.id}')" class="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[10px] font-bold hover:bg-indigo-700 shadow-xs">ดูแปลงนี้</button>
+          <a href="https://www.google.com/maps?q=${(p.centroid || p.vertices[0]).lat},${(p.centroid || p.vertices[0]).lng}" target="_blank" rel="noopener noreferrer" style="padding:4px 8px;background:#e11d48;color:#fff;border-radius:7px;font-weight:700;text-decoration:none;font-size:10px;">📍 Google Maps ↗</a>
         </div>
       </div>
     `);
@@ -313,10 +308,10 @@ function updateCadastralDetailsCards(plot) {
   if (plot.vertices && plot.vertices.length > 0) {
     let rHtml = "";
     plot.vertices.forEach((v, vIdx) => {
-      rHtml += `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100 text-xs">
+      rHtml += `<tr onclick="window.open('https://www.google.com/maps?q=${v.lat},${v.lng}','_blank','noopener')" title="คลิกเพื่อเปิดหมุดนี้ใน Google Maps" class="hover:bg-rose-50/60 cursor-pointer transition-colors border-b border-slate-100 text-xs">
         <td class="py-1.5 px-3 font-bold text-center text-slate-700">#${v.no || (vIdx + 1)}</td>
         <td class="py-1.5 px-3 font-mono text-emerald-700 font-medium">${Number(v.lat).toFixed(6)}</td>
-        <td class="py-1.5 px-3 font-mono text-indigo-700 font-medium">${Number(v.lng).toFixed(6)}</td>
+        <td class="py-1.5 px-3 font-mono text-indigo-700 font-medium">${Number(v.lng).toFixed(6)} <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-rose-500 ml-1"></i></td>
       </tr>`;
     });
     $("#cadastralVertexTableBody").html(rHtml);
@@ -390,4 +385,10 @@ function handleKmlMarkerClick(plotId) {
 function openPlotInCadastralView(plotId) {
   window.activeCadastralPlotId = plotId;
   switchView("cadastral");
+}
+
+function openActivePlotInGoogleMaps() {
+  const plot = (window.cadastralPlots || []).find(p => p.id === window.activeCadastralPlotId) || (window.cadastralPlots || [])[0];
+  const pt = plot && (plot.centroid || (plot.vertices && plot.vertices[0]));
+  if (pt) window.open(`https://www.google.com/maps?q=${pt.lat},${pt.lng}`, "_blank", "noopener");
 }

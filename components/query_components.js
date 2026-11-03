@@ -106,6 +106,7 @@ Object.assign(window.Components, {
                 </td>
                 <td class="py-3 px-3 text-right">
                     <div class="flex items-center justify-end space-x-1.5">
+                        ${(typeof getPendingEmailsForOrder === "function" && getPendingEmailsForOrder(item.orderNo).length > 0) ? `<button onclick="resumeFirstPendingEmail('${item.orderNo}')" title="มีอีเมลค้างส่ง คลิกเพื่อส่งให้เสร็จ" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold shadow-xs animate-pulse flex items-center cursor-pointer"><i class="fa-solid fa-envelope mr-1"></i> ค้างส่งเมล!</button>` : ''}
                         <button onclick="openComplaintModal('${item.orderNo}')" title="Log Customer Complaint (Post-Delivery)" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center">
                             <i class="fa-solid fa-comment-medical mr-1 text-[11px] text-rose-600"></i> Complain
                         </button>

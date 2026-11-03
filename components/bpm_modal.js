@@ -16,6 +16,7 @@ Object.assign(window.Components, {
         const qa = item.step5_qa || item.step4 || {};
         const wh = item.step6_storage || item.step5 || {};
         const rd = item.step7_ra_dossier || {};
+        const isTh = (typeof currentLang !== "undefined" && currentLang === "th");
         const ship = item.step8_shipping || item.step6 || {};
 
         return `
@@ -284,7 +285,20 @@ Object.assign(window.Components, {
 
                         <div><strong class="text-slate-500 block text-[11px]">ETD:</strong> <span class="text-emerald-700 font-bold">${ship.etd || '2026/10/10'}</span></div>
                         <div><strong class="text-slate-500 block text-[11px]">ETA:</strong> <span class="text-slate-800 font-semibold">${ship.eta || '2026/11/10'}</span></div>
-                        <div><strong class="text-slate-500 block text-[11px]">ATD:</strong> <span class="text-emerald-700 font-bold">${ship.atd || '2026/11/10'}</span></div>
+                        <div>
+                            <strong class="text-slate-500 block text-[11px] flex items-center justify-between">
+                                <span>ATD:</span>
+                                <button type="button" onclick="openUpdateAtdModal('${item.orderNo}')" class="text-indigo-600 hover:text-indigo-800 text-[10px] font-bold flex items-center">
+                                    <i class="fa-solid fa-pen-to-square mr-1"></i> ${isTh ? 'อัปเดต' : 'Update'}
+                                </button>
+                            </strong>
+                            <div class="flex items-center space-x-1.5 mt-0.5">
+                                <span id="bpmModalAtdDisplay" class="${ship.atd && ship.atd !== '-' ? 'text-emerald-700 font-bold' : 'text-amber-600 font-semibold italic text-[11px]'}">
+                                    ${ship.atd && ship.atd !== '-' ? ship.atd : (isTh ? 'รออัปเดตจากท่าเรือ' : 'Pending Port Departure')}
+                                </span>
+                                ${ship.atd && ship.atd !== '-' ? '<span class="text-[9px] bg-emerald-100 text-emerald-800 px-1 py-0.2 rounded font-bold">Confirmed</span>' : ''}
+                            </div>
+                        </div>
                         <div><strong class="text-slate-500 block text-[11px]">Shipment Status:</strong> <span class="text-emerald-700 font-bold text-[10px]"><i class="fa-solid fa-circle-check mr-1"></i> Dispatched & Closed</span></div>
                     </div>
                 </div>

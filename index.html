@@ -409,7 +409,222 @@
         width: 100% !important;
         height: 100% !important;
       }
+
+      /* ===================================================
+         SweetAlert2 VisionOS Glassmorphism Theme (Matched with Dashboard)
+         =================================================== */
+      div:where(.swal2-container).swal2-backdrop-show,
+      div:where(.swal2-container).swal2-noanimation {
+        background: rgba(30, 25, 20, 0.30) !important;
+        backdrop-filter: blur(10px) saturate(145%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(145%) !important;
+      }
+
+      div:where(.swal2-popup):not(.swal2-toast) {
+        position: relative !important;
+        overflow: hidden !important;
+        background: linear-gradient(155deg, rgba(255, 255, 255, 0.88) 0%, rgba(250, 248, 244, 0.84) 55%, rgba(236, 253, 245, 0.80) 100%) !important;
+        backdrop-filter: blur(32px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.92) !important;
+        box-shadow: inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.98),
+                    0 35px 70px -15px rgba(45, 30, 15, 0.25),
+                    0 12px 28px -8px rgba(16, 185, 129, 0.16) !important;
+        border-radius: 28px !important;
+        padding: 1.45rem 1.55rem 1.35rem !important;
+        color: #1e293b !important;
+        transition: none !important;
+      }
+
+      div:where(.swal2-popup):not(.swal2-toast)::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981 0%, #14b8a6 50%, #6366f1 100%);
+        opacity: 0.95;
+        pointer-events: none;
+      }
+
+      div:where(.swal2-popup).swal-theme-danger:not(.swal2-toast)::before {
+        background: linear-gradient(90deg, #f59e0b 0%, #f43f5e 55%, #be123c 100%);
+      }
+
+      /* Toast Capsule (Matches Header & Bottom Dock) */
+      div:where(.swal2-popup).swal2-toast {
+        background: rgba(255, 255, 255, 0.86) !important;
+        backdrop-filter: blur(24px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.92) !important;
+        box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+                    0 16px 36px -8px rgba(45, 30, 15, 0.18) !important;
+        border-radius: 20px !important;
+        padding: 0.65rem 1rem !important;
+      }
+
+      div:where(.swal2-popup) .swal2-title {
+        color: #0f172a !important;
+        font-size: 1.05rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.01em !important;
+        padding: 0.25rem 0.5rem 0 !important;
+      }
+
+      div:where(.swal2-popup) .swal2-html-container {
+        color: #334155 !important;
+        font-size: 0.82rem !important;
+        line-height: 1.55 !important;
+        margin: 0.65rem 0.25rem 0.2rem !important;
+      }
+
+      /* Inner Sub-cards & Form Controls inside SweetAlert2 */
+      div:where(.swal2-popup) .bg-slate-50 {
+        background: rgba(255, 255, 255, 0.66) !important;
+        border-color: rgba(255, 255, 255, 0.9) !important;
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.92), 0 2px 8px rgba(15, 23, 42, 0.03) !important;
+      }
+
+      div:where(.swal2-popup) input:not([type="radio"]):not([type="checkbox"]),
+      div:where(.swal2-popup) select,
+      div:where(.swal2-popup) textarea {
+        background: rgba(255, 255, 255, 0.84) !important;
+        border: 1px solid rgba(203, 213, 225, 0.9) !important;
+        border-radius: 12px !important;
+        transition: all 0.2s ease !important;
+      }
+
+      div:where(.swal2-popup) input:not([type="radio"]):not([type="checkbox"]):focus,
+      div:where(.swal2-popup) select:focus,
+      div:where(.swal2-popup) textarea:focus {
+        background: #ffffff !important;
+        border-color: #10b981 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18) !important;
+      }
+
+      /* Transparent-safe SweetAlert2 Icons on Glass Surface */
+      div:where(.swal2-icon) {
+        transform: scale(0.84) !important;
+        margin: 0.25rem auto 0.15rem !important;
+      }
+      .swal2-icon.swal2-success .swal2-success-circular-line-left,
+      .swal2-icon.swal2-success .swal2-success-circular-line-right,
+      .swal2-icon.swal2-success .swal2-success-fix {
+        background-color: transparent !important;
+      }
+      .swal2-icon.swal2-success {
+        border-color: rgba(16, 185, 129, 0.35) !important;
+        color: #059669 !important;
+        background: rgba(16, 185, 129, 0.08) !important;
+      }
+      .swal2-icon.swal2-success [class^="swal2-success-line"] {
+        background-color: #059669 !important;
+      }
+      .swal2-icon.swal2-success .swal2-success-ring {
+        border-color: rgba(16, 185, 129, 0.28) !important;
+      }
+      .swal2-icon.swal2-warning {
+        border-color: rgba(245, 158, 11, 0.45) !important;
+        color: #d97706 !important;
+        background: rgba(245, 158, 11, 0.10) !important;
+      }
+      .swal2-icon.swal2-error {
+        border-color: rgba(225, 29, 72, 0.4) !important;
+        color: #e11d48 !important;
+        background: rgba(225, 29, 72, 0.09) !important;
+      }
+      .swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+        background-color: #e11d48 !important;
+      }
+      .swal2-icon.swal2-info,
+      .swal2-icon.swal2-question {
+        border-color: rgba(13, 148, 136, 0.4) !important;
+        color: #0d9488 !important;
+        background: rgba(20, 184, 166, 0.09) !important;
+      }
+
+      /* Validation Message Pill */
+      div:where(.swal2-validation-message) {
+        background: rgba(255, 241, 242, 0.92) !important;
+        color: #be123c !important;
+        border: 1px solid rgba(253, 164, 175, 0.85) !important;
+        border-radius: 12px !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        margin: 0.6rem 0.25rem 0 !important;
+        padding: 0.5rem 0.75rem !important;
+      }
+
+      /* Action Buttons (Emerald Primary, Rose Danger, Indigo Action, Frosted Cancel) */
+      div:where(.swal2-actions) {
+        margin-top: 1rem !important;
+        gap: 0.55rem !important;
+      }
+
+      button:where(.swal2-styled) {
+        border-radius: 14px !important;
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+        padding: 0.6rem 1.25rem !important;
+        margin: 0 !important;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, background 0.22s ease !important;
+      }
+
+      button:where(.swal2-styled):not(:disabled):hover {
+        transform: translateY(-1.5px) scale(1.01) !important;
+      }
+
+      button:where(.swal2-styled).swal-btn-emerald,
+      button:where(.swal2-confirm):not(.swal-btn-danger):not(.swal-btn-indigo):not(.swal-btn-locked) {
+        background: linear-gradient(135deg, #10b981 0%, #059669 55%, #047857 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.38) !important;
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.45),
+                    0 10px 22px -5px rgba(5, 150, 105, 0.45) !important;
+      }
+
+      button:where(.swal2-styled).swal-btn-danger {
+        background: linear-gradient(135deg, #f43f5e 0%, #e11d48 55%, #be123c 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.38) !important;
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.42),
+                    0 10px 22px -5px rgba(225, 29, 72, 0.42) !important;
+      }
+
+      button:where(.swal2-styled).swal-btn-indigo {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 55%, #4338ca 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.38) !important;
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.42),
+                    0 10px 22px -5px rgba(79, 70, 229, 0.42) !important;
+      }
+
+      button:where(.swal2-styled).swal-btn-locked {
+        background: rgba(148, 163, 184, 0.65) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: none !important;
+      }
+
+      button:where(.swal2-cancel),
+      button:where(.swal2-styled).swal-btn-glass-cancel {
+        background: rgba(255, 255, 255, 0.80) !important;
+        color: #475569 !important;
+        border: 1px solid rgba(203, 213, 225, 0.9) !important;
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.95),
+                    0 4px 12px -2px rgba(15, 23, 42, 0.06) !important;
+      }
+
+      button:where(.swal2-cancel):hover,
+      button:where(.swal2-styled).swal-btn-glass-cancel:hover {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
     </style>
+  
   </head>
 
   <body class="text-slate-800 antialiased min-h-screen relative overflow-x-hidden" style="background: url('./bg_glassy_loft.jpg') center center / cover no-repeat fixed, #d8cbba;">
@@ -478,6 +693,17 @@
               <span data-i18n="nav_cadastral">รูปแปลงที่ดิน</span>
             </button>
           </nav>
+
+          <!-- Simulated Role Switcher (User vs Admin สำหรับจำลองสิทธิ์ลบ Complaint) -->
+          <button
+            id="sim-role-toggle-btn"
+            onclick="toggleSimulatedAdminRole()"
+            class="bg-white/80 hover:bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center whitespace-nowrap cursor-pointer"
+            title="จำลองสลับสิทธิ์ User / Admin (เฉพาะ Admin เท่านั้นที่ลบ Complaint ได้)"
+          >
+            <i id="sim-role-icon" class="fa-solid fa-user text-slate-500 mr-1.5"></i>
+            <span id="sim-role-label">User</span>
+          </button>
 
           <!-- Language Button (สลับแสดงภาษาเป้าหมาย: หน้าเว็บ EN จะแสดง TH) -->
           <button
@@ -1078,32 +1304,34 @@
 
     <!-- 1. Language & Data Store -->
     <script src="./language.js"></script>
-    <script src="./data.js"></script>
+    <script src="./data.js?v=20261103_p11"></script>
 
     <!-- 2. UI Components (Modularized: < 400 lines per file) -->
-    <script src="./components/kpi_pipeline.js"></script>
-    <script src="./components/dashboard_charts.js"></script>
-    <script src="./components/production_table.js"></script>
-    <script src="./components/query_components.js"></script>
+    <script src="./components/kpi_pipeline.js?v=20261103_p11"></script>
+    <script src="./components/dashboard_charts.js?v=20261103_p11"></script>
+    <script src="./components/production_table.js?v=20261103_p8"></script>
+    <script src="./components/query_components.js?v=20261103_p8"></script>
     <script src="./components/bpm_modal.js"></script>
     <script src="./components/bpm_print_style.js"></script>
     <script src="./components/bpm_print.js"></script>
-    <script src="./components/map_overview.js"></script>
-    <script src="./components/cadastral_view.js"></script>
+    <script src="./components/map_overview.js?v=20261103_p8"></script>
+    <script src="./components/cadastral_view.js?v=20261103_p8"></script>
 
     <!-- 3. Logic Engines & Controllers (Modularized: < 400 lines per file) -->
     <script src="./js/cadastral_engine.js"></script>
     <script src="./js/cadastral_export.js"></script>
-    <script src="./js/cadastral_map_ctrl.js"></script>
+    <script src="./js/cadastral_map_ctrl.js?v=20261103_p8"></script>
     <script src="./js/cadastral_upload_ctrl.js"></script>
-    <script src="./js/gis_map_ctrl.js"></script>
+    <script src="./js/gis_map_ctrl.js?v=20261103_p8"></script>
     <script src="./js/export_period_ctrl.js"></script>
     <script src="./js/query_controller.js"></script>
-    <script src="./js/dashboard_controller.js"></script>
-    <script src="./js/complaint_ctrl.js"></script>
+    <script src="./js/dashboard_controller.js?v=20261103_p11"></script>
+    <script src="./js/complaint_email_guard.js?v=20261103_p8"></script>
+    <script src="./js/complaint_ctrl.js?v=20261103_p8"></script>
+    <script src="./js/shipping_ctrl.js"></script>
 
     <!-- 4. Core Router & Main App Lifecycle -->
-    <script src="./app.js"></script>
+    <script src="./app.js?v=20261103_p8"></script>
     <!-- Floating VisionOS Bottom Capsule Dock (Signature element from video) -->
     <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
       <nav class="glass-dock p-1.5 rounded-full flex items-center space-x-1.5 border border-white/80 shadow-2xl backdrop-blur-2xl">

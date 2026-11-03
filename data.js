@@ -402,7 +402,7 @@ function generateMockOrders() {
         }
     ];
 
-    // เพิ่มรายการคำสั่งซื้อจำลองให้ครบ 48 รายการ (รวม Base Orders เป็น 48-50 รายการ) เพื่อแสดงจุดพิกัดจำนวนมากทั่วภาคใต้
+    // เพิ่มรายการคำสั่งซื้อจำลองให้ครบ 68 รายการ (Base Orders 10 + Additional 58 = 68 รายการ) เพื่อแสดงข้อมูลและจุดพิกัดทั่วภาคใต้
     const additionalData = [
         { no: "ORD-04169", mo: "MO-672649862", po: "PO-2026-09320", cust: "Osaka Bio-Power Ltd.", dest: "OSAKA, JAPAN", step: 4, q: "20,000 Ton", line: "NYK Line", etd: "18/10/26", eta: "26/10/26", stat: "In Production" },
         { no: "ORD-04170", mo: "MO-672649863", po: "PO-2026-09340", cust: "Kanto Energy Corp.", dest: "YOKOHAMA, JAPAN", step: 5, q: "18,000 Ton", line: "MOL", etd: "19/10/26", eta: "28/10/26", stat: "On Schedule" },
@@ -441,7 +441,27 @@ function generateMockOrders() {
         { no: "ORD-04203", mo: "MO-672649896", po: "PO-2026-09835", cust: "Hokkaido Biomass Ltd.", dest: "TOMAKOMAI, JAPAN", step: 5, q: "29,000 Ton", line: "NYK Line", etd: "16/10/26", eta: "27/10/26", stat: "On Schedule" },
         { no: "ORD-04204", mo: "MO-672649897", po: "PO-2026-09850", cust: "Amsterdam Eco Fuel BV", dest: "AMSTERDAM, NETHERLANDS", step: 7, q: "36,000 Ton", line: "Maersk", etd: "11/10/26", eta: "02/11/26", stat: "On Schedule" },
         { no: "ORD-04205", mo: "MO-672649898", po: "PO-2026-09865", cust: "Penang Green Power", dest: "PENANG, MALAYSIA", step: 6, q: "8,500 Ton", line: "Regional Feeder", etd: "14/10/26", eta: "16/10/26", stat: "On Schedule" },
-        { no: "ORD-04206", mo: "MO-672649899", po: "PO-2026-09880", cust: "Shikoku Bio Generation", dest: "TAKAMATSU, JAPAN", step: 4, q: "21,500 Ton", line: "MOL", etd: "24/10/26", eta: "03/11/26", stat: "In Production" }
+        { no: "ORD-04206", mo: "MO-672649899", po: "PO-2026-09880", cust: "Shikoku Bio Generation", dest: "TAKAMATSU, JAPAN", step: 4, q: "21,500 Ton", line: "MOL", etd: "24/10/26", eta: "03/11/26", stat: "In Production" },
+        { no: "ORD-04207", mo: "MO-672649900", po: "PO-2026-09895", cust: "Baltic Green Energy Sp.", dest: "GDANSK, POLAND", step: 6, q: "24,000 Ton", line: "MSC", etd: "18/10/26", eta: "15/11/26", stat: "On Schedule" },
+        { no: "ORD-04208", mo: "MO-672649901", po: "PO-2026-09910", cust: "Humber Bio-Thermal UK", dest: "HULL, UNITED KINGDOM", step: 7, q: "33,000 Ton", line: "Maersk", etd: "12/10/26", eta: "08/11/26", stat: "On Schedule" },
+        { no: "ORD-04209", mo: "MO-672649902", po: "PO-2026-09925", cust: "Niigata Clean Power Co.", dest: "NIIGATA, JAPAN", step: 5, q: "19,500 Ton", line: "NYK Line", etd: "20/10/26", eta: "29/10/26", stat: "On Schedule" },
+        { no: "ORD-04210", mo: "MO-672649903", po: "PO-2026-09940", cust: "Adriatic Eco Fuels Srl", dest: "TRIESTE, ITALY", step: 3, q: "21,000 Ton", line: "CMA CGM", etd: "26/10/26", eta: "19/11/26", stat: "In Production" },
+        { no: "ORD-04211", mo: "MO-672649904", po: "PO-2026-09955", cust: "Gwangyang Bio Utility", dest: "GWANGYANG, SOUTH KOREA", step: 8, q: "28,500 Ton", line: "HMM", etd: "09/10/26", eta: "17/10/26", stat: "On Schedule" },
+        { no: "ORD-04212", mo: "MO-672649905", po: "PO-2026-09970", cust: "Gothenburg District Heat", dest: "GOTHENBURG, SWEDEN", step: 4, q: "26,500 Ton", line: "Hapag-Lloyd", etd: "24/10/26", eta: "18/11/26", stat: "In Production" },
+        { no: "ORD-04213", mo: "MO-672649906", po: "PO-2026-09985", cust: "Chiba Bay Biomass Corp.", dest: "CHIBA, JAPAN", step: 6, q: "30,000 Ton", line: "ONE Line", etd: "17/10/26", eta: "26/10/26", stat: "On Schedule" },
+        { no: "ORD-04214", mo: "MO-672649907", po: "PO-2026-10000", cust: "Rayong Cogeneration PLC", dest: "ระยอง, ประเทศไทย", step: 8, q: "11,000 Ton", line: "Inland Logistics", etd: "08/10/26", eta: "09/10/26", stat: "On Schedule" },
+        { no: "ORD-04215", mo: "MO-672649908", po: "PO-2026-10015", cust: "Bilbao Renewable Iberica", dest: "BILBAO, SPAIN", step: 2, q: "17,500 Ton", line: "MSC", etd: "29/10/26", eta: "22/11/26", stat: "In Production" },
+        { no: "ORD-04216", mo: "MO-672649909", po: "PO-2026-10030", cust: "Taichung Green Thermal", dest: "TAICHUNG, TAIWAN", step: 5, q: "15,500 Ton", line: "Evergreen", etd: "19/10/26", eta: "25/10/26", stat: "On Schedule" },
+        { no: "ORD-04217", mo: "MO-672649910", po: "PO-2026-10045", cust: "Bremerhaven BioKraft GmbH", dest: "BREMERHAVEN, GERMANY", step: 7, q: "34,000 Ton", line: "Hapag-Lloyd", etd: "13/10/26", eta: "09/11/26", stat: "On Schedule" },
+        { no: "ORD-04218", mo: "MO-672649911", po: "PO-2026-10060", cust: "Kitakyushu Eco Station", dest: "KITAKYUSHU, JAPAN", step: 4, q: "22,000 Ton", line: "MOL", etd: "23/10/26", eta: "31/10/26", stat: "In Production" },
+        { no: "ORD-04219", mo: "MO-672649912", po: "PO-2026-10075", cust: "Zeebrugge Biomass NV", dest: "ZEEBRUGGE, BELGIUM", step: 1, q: "19,000 Ton", line: "CMA CGM", etd: "04/11/26", eta: "27/11/26", stat: "In Production" },
+        { no: "ORD-04220", mo: "MO-672649913", po: "PO-2026-10090", cust: "Dangjin Eco Energy Co.", dest: "DANGJIN, SOUTH KOREA", step: 6, q: "27,500 Ton", line: "Pan Ocean", etd: "18/10/26", eta: "26/10/26", stat: "On Schedule" },
+        { no: "ORD-04221", mo: "MO-672649914", po: "PO-2026-10105", cust: "Toyama Hokuriku Power", dest: "TOYAMA, JAPAN", step: 5, q: "16,500 Ton", line: "K-Line", etd: "20/10/26", eta: "29/10/26", stat: "On Schedule" },
+        { no: "ORD-04222", mo: "MO-672649915", po: "PO-2026-10120", cust: "Le Havre Bio Terminal", dest: "LE HAVRE, FRANCE", step: 3, q: "23,500 Ton", line: "CMA CGM", etd: "27/10/26", eta: "20/11/26", stat: "In Production" },
+        { no: "ORD-04223", mo: "MO-672649916", po: "PO-2026-10135", cust: "Ayutthaya Clean Steam", dest: "พระนครศรีอยุธยา, ประเทศไทย", step: 7, q: "9,500 Ton", line: "Inland Logistics", etd: "14/10/26", eta: "15/10/26", stat: "On Schedule" },
+        { no: "ORD-04224", mo: "MO-672649917", po: "PO-2026-10150", cust: "Esbjerg Nordic Bio A/S", dest: "ESBJERG, DENMARK", step: 6, q: "25,500 Ton", line: "Maersk", etd: "17/10/26", eta: "11/11/26", stat: "On Schedule" },
+        { no: "ORD-04225", mo: "MO-672649918", po: "PO-2026-10165", cust: "Muroran North Biomass", dest: "MURORAN, JAPAN", step: 4, q: "20,500 Ton", line: "NYK Line", etd: "25/10/26", eta: "04/11/26", stat: "In Production" },
+        { no: "ORD-04226", mo: "MO-672649919", po: "PO-2026-10180", cust: "Eemshaven Green Grid BV", dest: "EEMSHAVEN, NETHERLANDS", step: 8, q: "38,000 Ton", line: "Maersk", etd: "07/10/26", eta: "01/11/26", stat: "On Schedule" }
     ];
 
     additionalData.forEach((item, index) => {
@@ -498,7 +518,7 @@ function generateMockOrders() {
         });
     });
 
-    // คลังพิกัดจำลองของแปลงสวนไม้ยางพารา โรงงาน และท่าเรือทั่วภาคใต้ 48 จุดจริง (EUDR Geolocation Supply Chain)
+    // คลังพิกัดจำลองของแปลงสวนไม้ยางพารา โรงงาน และท่าเรือทั่วภาคใต้ 68 จุดจริง (EUDR Geolocation Supply Chain)
     const mockLocations = [
         // --- โซนสุราษฎร์ธานี (แหล่งป่ายางพาราและชีวมวลหลัก) ---
         { lat: 9.1382, lng: 99.3217, placeName: "แปลงสวนไม้ยางพารา พุนพิน สุราษฎร์ธานี (Plot A1)", plotId: "PLOT-SR-01", areaRai: "350 ไร่", eudrStatus: "EUDR Certified / SBP" },
@@ -558,7 +578,27 @@ function generateMockOrders() {
         { lat: 6.7012, lng: 101.6212, placeName: "ลานรับซื้อไม้ สายบุรี ปัตตานี", plotId: "PLOT-PTN-02", areaRai: "170 ไร่", eudrStatus: "SBP / EUDR Verified" },
         { lat: 6.3912, lng: 101.5212, placeName: "แปลงสวนไม้ยาง รือเสาะ นราธิวาส", plotId: "PLOT-NRT-01", areaRai: "285 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
         { lat: 6.0312, lng: 101.9712, placeName: "แปลงไม้ยาง สุไหงโก-ลก นราธิวาส", plotId: "PLOT-NRT-02", areaRai: "230 ไร่", eudrStatus: "EUDR Verified" },
-        { lat: 6.2912, lng: 101.7212, placeName: "แปลงสวนไม้ยาง ระแงะ นราธิวาส", plotId: "PLOT-NRT-03", areaRai: "310 ไร่", eudrStatus: "EUDR Certified / GGL" }
+        { lat: 6.2912, lng: 101.7212, placeName: "แปลงสวนไม้ยาง ระแงะ นราธิวาส", plotId: "PLOT-NRT-03", areaRai: "310 ไร่", eudrStatus: "EUDR Certified / GGL" },
+        { lat: 8.9124, lng: 98.8852, placeName: "แปลงสวนไม้ยาง บ้านตาขุน สุราษฎร์ธานี", plotId: "PLOT-SR-08", areaRai: "270 ไร่", eudrStatus: "EUDR Certified / SBP" },
+        { lat: 8.8542, lng: 98.8115, placeName: "แปลงไม้ยางพารา พนม สุราษฎร์ธานี", plotId: "PLOT-SR-09", areaRai: "245 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 8.4612, lng: 99.0754, placeName: "แปลงสวนยาง ชัยบุรี สุราษฎร์ธานี", plotId: "PLOT-SR-10", areaRai: "315 ไร่", eudrStatus: "EUDR Verified" },
+        { lat: 8.5814, lng: 99.6412, placeName: "แปลงสวนไม้ยาง พิปูน นครศรีธรรมราช", plotId: "PLOT-NST-09", areaRai: "230 ไร่", eudrStatus: "SBP / EUDR Certified" },
+        { lat: 8.2564, lng: 99.5842, placeName: "แปลงไม้ยางพารา นาบอน นครศรีธรรมราช", plotId: "PLOT-NST-10", areaRai: "390 ไร่", eudrStatus: "EUDR Certified / GGL" },
+        { lat: 8.0345, lng: 99.4812, placeName: "แปลงสวนยาง บางขัน นครศรีธรรมราช", plotId: "PLOT-NST-11", areaRai: "265 ไร่", eudrStatus: "EUDR Verified" },
+        { lat: 8.2945, lng: 99.3624, placeName: "แปลงไม้ยางพารา ทุ่งใหญ่ นครศรีธรรมราช", plotId: "PLOT-NST-12", areaRai: "340 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 7.9685, lng: 99.6542, placeName: "แปลงสวนไม้ยาง รัษฎา ตรัง", plotId: "PLOT-TR-07", areaRai: "255 ไร่", eudrStatus: "EUDR Certified / SBP" },
+        { lat: 7.5612, lng: 99.7545, placeName: "แปลงสวนยางเชิงเขา นาโยง ตรัง", plotId: "PLOT-TR-08", areaRai: "210 ไร่", eudrStatus: "EUDR Verified" },
+        { lat: 7.5742, lng: 99.3845, placeName: "แปลงไม้ยางพารา สิเกา ตรัง", plotId: "PLOT-TR-09", areaRai: "285 ไร่", eudrStatus: "GGL / EUDR Certified" },
+        { lat: 7.4125, lng: 99.9412, placeName: "แปลงสวนไม้ยาง กงหรา พัทลุง", plotId: "PLOT-PTL-03", areaRai: "225 ไร่", eudrStatus: "EUDR Verified" },
+        { lat: 7.6945, lng: 99.8812, placeName: "แปลงสวนยาง ศรีบรรพต พัทลุง", plotId: "PLOT-PTL-04", areaRai: "195 ไร่", eudrStatus: "SBP / EUDR Verified" },
+        { lat: 6.6185, lng: 100.9512, placeName: "แปลงไม้ยางพารา สะบ้าย้อย สงขลา", plotId: "PLOT-SK-07", areaRai: "305 ไร่", eudrStatus: "EUDR Certified" },
+        { lat: 6.7845, lng: 100.9112, placeName: "ลานรวบรวมไม้ยาง เทพา สงขลา", plotId: "PLOT-SK-08", areaRai: "240 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 8.5312, lng: 98.8645, placeName: "แปลงสวนไม้ยาง ปลายพระยา กระบี่", plotId: "PLOT-KB-03", areaRai: "330 ไร่", eudrStatus: "EUDR Certified / SBP" },
+        { lat: 8.2615, lng: 99.0485, placeName: "แปลงสวนยาง เขาพนม กระบี่", plotId: "PLOT-KB-04", areaRai: "275 ไร่", eudrStatus: "EUDR Verified" },
+        { lat: 8.4512, lng: 98.3125, placeName: "แปลงไม้ยางพารา ท้ายเหมือง พังงา", plotId: "PLOT-PNA-02", areaRai: "215 ไร่", eudrStatus: "GGL / EUDR Verified" },
+        { lat: 10.6542, lng: 99.1412, placeName: "แปลงสวนไม้ยาง ท่าแซะ ชุมพร", plotId: "PLOT-CPN-03", areaRai: "360 ไร่", eudrStatus: "EUDR Certified / SBP" },
+        { lat: 10.2312, lng: 99.0845, placeName: "แปลงไม้ยางพารา สวี ชุมพร", plotId: "PLOT-CPN-04", areaRai: "295 ไร่", eudrStatus: "FSC-100% / EUDR Ready" },
+        { lat: 8.3742, lng: 99.5685, placeName: "แปลงสวนไม้ยาง ช้างกลาง นครศรีธรรมราช", plotId: "PLOT-NST-13", areaRai: "260 ไร่", eudrStatus: "EUDR Certified / SBP" }
     ];
 
     // ตรวจสอบและกำหนด orderDate, shipmentDate และ location พิกัด GPS ให้ทุกรายการ

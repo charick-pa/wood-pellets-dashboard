@@ -7,7 +7,7 @@
 let leafletMapInstance = null;
 let leafletMarkersMap = {}; // key -> { marker, targetLat, targetLng, item, index }
 let currentTileLayer = null;
-let currentTileType = "osm"; // 'osm' | 'satellite'
+let currentTileType = "satellite"; // 'osm' | 'satellite' (Default: ภาพถ่ายดาวเทียม)
 let dispersionAnimFrameId = null;
 let isMapFullscreen = false;
 let currentGisItems = [];
@@ -39,7 +39,7 @@ function initGisLeafletMap(orders) {
   leafletMapInstance = L.map("leafletMap", {
     center: [8.1, 100.2], zoom: 8, minZoom: 6, maxZoom: 18, zoomControl: true
   });
-  setLeafletTileLayer(currentTileType);
+  switchLeafletTile(currentTileType);
 
   const centerLat = 7.0089, centerLng = 100.4767;
   const hubIcon = L.divIcon({
@@ -258,16 +258,22 @@ function focusGisItem(key) {
       <div><span class="text-slate-400 block text-[10px]">ปริมาณ:</span> <strong class="text-amber-400">${item.orderQuantity || '500 Ton'}</strong></div>
       <div class="col-span-2 pt-1 border-t border-slate-700 flex items-center justify-between text-[11px]">
         <span class="text-slate-400">พิกัด GPS:</span>
-        <span class="font-mono text-emerald-400 font-bold">${typeof item.lat === 'number' ? item.lat.toFixed(4) : item.lat}, ${typeof item.lng === 'number' ? item.lng.toFixed(4) : item.lng}</span>
+        <a href="https://www.google.com/maps?q=${item.lat},${item.lng}" target="_blank" rel="noopener noreferrer" title="คลิกเพื่อเปิดพิกัดนี้ใน Google Maps" class="font-mono text-emerald-400 hover:text-emerald-300 underline font-bold flex items-center">
+          ${typeof item.lat === 'number' ? item.lat.toFixed(4) : item.lat}, ${typeof item.lng === 'number' ? item.lng.toFixed(4) : item.lng}
+          <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px]"></i>
+        </a>
       </div>
     </div>
 
-    <div class="flex items-center space-x-2">
-      <button onclick="openBpmModal('${item.orderNo}')" class="flex-1 py-1.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center">
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <a href="https://www.google.com/maps?q=${item.lat},${item.lng}" target="_blank" rel="noopener noreferrer" class="py-1.5 px-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center whitespace-nowrap" title="เปิดตำแหน่งนี้ใน Google Maps">
+        <i class="fa-solid fa-location-dot mr-1.5 text-[11px]"></i> Google Maps
+      </a>
+      <button onclick="openBpmModal('${item.orderNo}')" class="flex-1 py-1.5 px-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center whitespace-nowrap">
         <i class="fa-solid fa-file-invoice mr-1.5 text-[11px]"></i> ดูฟอร์ม BPM
       </button>
-      <button onclick="jumpToCadastralPlot('${item.plotId || item.orderNo}')" class="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center">
-        <i class="fa-solid fa-draw-polygon mr-1.5 text-[11px]"></i> ดูเส้นรูปแปลง
+      <button onclick="jumpToCadastralPlot('${item.plotId || item.orderNo}')" class="py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center whitespace-nowrap">
+        <i class="fa-solid fa-draw-polygon mr-1.5 text-[11px]"></i> รูปแปลง
       </button>
     </div>
   `;

@@ -112,6 +112,19 @@ Object.assign(window.Components, {
                         <div class="flex justify-between"><span class="text-slate-500">SA / Booking:</span><span class="font-mono text-slate-800 truncate">${ship.saNumber || ship.saNo || 'SA-03918'} (${ship.bookingNo || '-'})</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">Shipping Line:</span><span class="font-bold text-indigo-700">${ship.shippingLine || 'EVG'} (${ship.transitTime || '30d'})</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">ETD &rarr; ETA:</span><span class="font-semibold text-emerald-700">${ship.etd || '-'} &rarr; ${ship.eta || '-'}</span></div>
+                        <div class="flex justify-between items-center pt-1 border-t border-teal-200/50 text-[11px]">
+                            <span class="text-teal-950 font-bold">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'วันเรือออกจริง (ATD):' : 'Actual ATD:'}</span>
+                            ${ship.atd && ship.atd !== '-' ? `
+                                <span class="font-bold text-emerald-800 font-mono text-[10px] flex items-center bg-emerald-100/70 px-1.5 py-0.5 rounded border border-emerald-300">
+                                    <i class="fa-solid fa-ship mr-1 text-emerald-600 text-[8.5px]"></i>${ship.atd}
+                                    <button onclick="event.stopPropagation(); openUpdateAtdModal('${item.orderNo}');" class="text-slate-400 hover:text-indigo-600 ml-1.5" title="${(typeof currentLang !== 'undefined' && currentLang === 'th') ? 'แก้ไข ATD' : 'Edit ATD'}"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                                </span>
+                            ` : `
+                                <button onclick="event.stopPropagation(); openUpdateAtdModal('${item.orderNo}');" class="px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-white rounded text-[10px] font-bold shadow-2xs flex items-center transition-all hover:scale-105 active:scale-95">
+                                    <i class="fa-solid fa-anchor mr-1 text-[9px]"></i>+ ATD
+                                </button>
+                            `}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -143,14 +156,18 @@ Object.assign(window.Components, {
     },
 
     renderTableRow: function (item, isSelected = false, rowIndex = 1) {
+        const isTh = (typeof currentLang !== "undefined" && currentLang === "th");
         const t = (typeof translations !== "undefined" && translations[currentLang]) || {};
         const statusText = item.statusBadge === "On Schedule" ? (t.status_onschedule || 'ตามกำหนด') : (t.status_inproduction || 'กำลังผลิต');
         const selectedClass = isSelected ? "bg-emerald-50/70 border-l-4 border-emerald-500 font-semibold" : "hover:bg-emerald-50/30 transition-colors";
         const ship = item.step6 || {};
         const complaints = typeof getComplaintsForOrder === "function" ? getComplaintsForOrder(item.orderNo) : [];
-        const complaintBadge = complaints.length > 0 
-            ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-300" title="Has ${complaints.length} customer complaint(s)"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${complaints.length} Complain</span>`
-            : '';
+        const pendingMails = typeof getPendingEmailsForOrder === "function" ? getPendingEmailsForOrder(item.orderNo) : [];
+        const complaintBadge = pendingMails.length > 0
+            ? `<button onclick="event.stopPropagation(); resumeFirstPendingEmail('${item.orderNo}');" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-xs animate-pulse cursor-pointer" title="มีรายการที่ยังไม่ได้กดส่งอีเมล คลิกเพื่อส่งให้เสร็จ"><i class="fa-solid fa-envelope mr-1"></i>${isTh ? 'ค้างส่งเมล!' : 'Unsent Mail!'}</button>`
+            : (complaints.length > 0
+                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-300" title="Has ${complaints.length} customer complaint(s)"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${complaints.length} Complain</span>`
+                : '');
 
         return `
             <tr id="order-row-${item.orderNo}" class="${selectedClass} cursor-pointer transition-colors" onclick="handleSelectOrder('${item.orderNo}')">
@@ -168,7 +185,21 @@ Object.assign(window.Components, {
                     <div>${item.destination}</div>
                     <div class="text-[11px] text-slate-400">${ship.shippingLine ? `Line: ${ship.shippingLine}` : ''} ${ship.bookingNo ? `(${ship.bookingNo})` : ''}</div>
                 </td>
-                <td class="py-3 px-3 text-emerald-600 font-semibold">${ship.etd || '-'}</td>
+                <td class="py-3 px-3">
+                    <div class="text-emerald-600 font-semibold">${ship.etd || '-'}</div>
+                    ${ship.atd && ship.atd !== '-' ? `
+                        <div class="text-[10px] text-emerald-800 font-mono flex items-center mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 inline-block"></span>ATD: ${ship.atd}
+                            <button onclick="event.stopPropagation(); openUpdateAtdModal('${item.orderNo}');" class="text-slate-400 hover:text-indigo-600 ml-1.5" title="${isTh ? 'แก้ไข ATD' : 'Edit ATD'}"><i class="fa-solid fa-pen text-[9px]"></i></button>
+                        </div>
+                    ` : `
+                        <div class="mt-0.5">
+                            <button onclick="event.stopPropagation(); openUpdateAtdModal('${item.orderNo}');" class="px-1.5 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded text-[9.5px] font-semibold transition-colors flex items-center">
+                                <i class="fa-solid fa-anchor mr-1 text-amber-600 text-[8.5px]"></i>+ ATD
+                            </button>
+                        </div>
+                    `}
+                </td>
                 <td class="py-3 px-3 text-slate-600">
                     <div>${ship.eta || '-'}</div>
                     <div class="text-[10px] text-indigo-500">${ship.transitTime ? `Transit: ${ship.transitTime}` : ''}</div>

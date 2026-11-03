@@ -44,9 +44,14 @@ Object.assign(window.Components, {
                     </div>
                 </div>
 
-                <!-- Leaflet Interactive Map Viewport -->
+                <!-- Leaflet Interactive Map Viewport + Quick Google Maps Button -->
                 <div class="relative w-full h-80 rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-900">
                     <div id="modalLeafletMap" class="w-full h-full z-10" style="min-height: 320px; height: 320px;"></div>
+                    <a href="https://www.google.com/maps?q=${loc.lat},${loc.lng}" target="_blank" rel="noopener noreferrer"
+                       class="absolute top-3 right-3 z-30 px-3 py-1.5 bg-white/95 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 rounded-xl text-xs font-bold shadow-lg flex items-center transition-all">
+                        <i class="fa-solid fa-location-dot mr-1.5"></i> ${(typeof currentLang !== "undefined" && currentLang === "th") ? 'เปิดใน Google Maps' : 'Open in Google Maps'}
+                        <i class="fa-solid fa-arrow-up-right-from-square ml-1.5 text-[10px]"></i>
+                    </a>
                 </div>
 
                 <!-- ข้อมูลสรุปพารามิเตอร์ของแปลง -->
@@ -61,7 +66,7 @@ Object.assign(window.Components, {
                     </div>
                     <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                         <span class="text-[10px] text-slate-400 block font-medium">${(typeof currentLang !== "undefined" && currentLang === "th") ? 'พิกัดดาวเทียม' : 'Geolocation Coordinates'}</span>
-                        <span class="font-mono font-bold text-slate-800 mt-0.5 block">${loc.lat}, ${loc.lng}</span>
+                        <a href="https://www.google.com/maps?q=${loc.lat},${loc.lng}" target="_blank" rel="noopener noreferrer" class="font-mono font-bold text-indigo-600 hover:text-rose-600 underline mt-0.5 inline-flex items-center">${loc.lat}, ${loc.lng} <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px]"></i></a>
                     </div>
                 </div>
 
@@ -245,10 +250,10 @@ Object.assign(window.Components, {
 
                                 <!-- ตัวสลับ Street / Satellite -->
                                 <div class="bg-slate-900 border border-slate-700 rounded-xl p-0.5 flex items-center space-x-1 text-[11px]">
-                                    <button type="button" onclick="switchLeafletTile('osm')" id="btnTileOsm" class="px-2.5 py-1 rounded-lg font-bold bg-indigo-600 text-white transition-all flex items-center whitespace-nowrap">
+                                    <button type="button" onclick="switchLeafletTile('osm')" id="btnTileOsm" class="px-2.5 py-1 rounded-lg font-medium text-slate-300 hover:text-white transition-all flex items-center whitespace-nowrap">
                                         <i class="fa-solid fa-map mr-1 text-xs"></i> ${(typeof currentLang !== "undefined" && currentLang === "th") ? 'แผนที่ถนน' : 'Street'}
                                     </button>
-                                    <button type="button" onclick="switchLeafletTile('satellite')" id="btnTileSat" class="px-2.5 py-1 rounded-lg font-medium text-slate-300 hover:text-white transition-all flex items-center whitespace-nowrap">
+                                    <button type="button" onclick="switchLeafletTile('satellite')" id="btnTileSat" class="px-2.5 py-1 rounded-lg font-bold bg-indigo-600 text-white transition-all flex items-center whitespace-nowrap">
                                         <i class="fa-solid fa-satellite mr-1 text-xs"></i> ${(typeof currentLang !== "undefined" && currentLang === "th") ? 'ภาพถ่ายดาวเทียม' : 'Satellite'}
                                     </button>
                                 </div>

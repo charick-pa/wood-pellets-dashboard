@@ -61,11 +61,11 @@ function renderDashboard(data) {
     ? globalSummary : (window.globalSummary || {});
 
   const safeSummary = {
-    activeOrders: rawSummary.activeOrders || dashboardFilteredData.length || 48,
+    activeOrders: rawSummary.activeOrders || dashboardFilteredData.length || 68,
     activeOrdersTrend: rawSummary.activeOrdersTrend || "+15% จากเดือนที่แล้ว",
     monthlyOrders: rawSummary.monthlyOrders || 8,
     monthlyTons: rawSummary.monthlyTons || "125,000",
-    yearlyOrders: rawSummary.yearlyOrders || dashboardFilteredData.length || 48,
+    yearlyOrders: rawSummary.yearlyOrders || dashboardFilteredData.length || 68,
     yearlyTons: rawSummary.yearlyTons || "485,000",
     currentYear: rawSummary.currentYear || "2026",
     currentMonthName: rawSummary.currentMonthName || "ต.ค.",
@@ -299,18 +299,19 @@ function initModalLeafletMap(item) {
     popupAnchor: [0, -22]
   });
 
+  const gUrl = `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
   const marker = L.marker([loc.lat, loc.lng], { icon: modalIcon }).addTo(modalMapInstance);
-  marker.bindPopup(`<strong>${loc.placeName}</strong><br>Plot: ${loc.plotId || '-'}<br>GPS: ${loc.lat}, ${loc.lng}`).openPopup();
+  marker.bindPopup(`<div class="text-xs font-sans"><strong>${loc.placeName}</strong><br>Plot: ${loc.plotId || '-'} | GPS: ${loc.lat}, ${loc.lng}<br><a href="${gUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:5px;padding:3px 8px;background:#e11d48;color:#fff;border-radius:6px;font-weight:700;text-decoration:none;font-size:11px;">📍 เปิดใน Google Maps ↗</a></div>`).openPopup();
 
   const moPlots = typeof getPlotsByMoNo === "function" ? getPlotsByMoNo(item.moNo) : [];
   if (moPlots.length > 0) {
     const latlngs = [];
     moPlots.forEach((p, pIdx) => {
       if (p.vertices && p.vertices.length > 2) {
-        const polyCoords = p.vertices.map(v => [v.lat, v.lng]);
+        const polyCoords = p.vertices.map(v => [v.lat, v.lng]), v0 = p.centroid || p.vertices[0];
         latlngs.push(...polyCoords);
         L.polygon(polyCoords, { color: pIdx === 0 ? "#10b981" : "#6366f1", weight: 2.5, fillOpacity: 0.25 })
-          .addTo(modalMapInstance).bindPopup(`<strong>${p.name}</strong><br>MO: ${item.moNo}`);
+          .addTo(modalMapInstance).bindPopup(`<div class="text-xs font-sans"><strong>${p.name}</strong> (MO: ${item.moNo})<br><a href="https://www.google.com/maps?q=${v0.lat},${v0.lng}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:4px;color:#e11d48;font-weight:700;text-decoration:underline;">📍 เปิดแปลงนี้ใน Google Maps ↗</a></div>`);
       }
     });
     if (latlngs.length > 0) modalMapInstance.fitBounds(L.latLngBounds(latlngs), { padding: [25, 25] });

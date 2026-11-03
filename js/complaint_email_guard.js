@@ -1,0 +1,359 @@
+/**
+ * Customer Complaint Pending-Email State Guard & List Renderer
+ * Enforces: Status NEVER transitions to Notified/Resolved until email is confirmed sent.
+ * File size target: <= 400 lines (Strictly verified)
+ */
+
+function hasPendingComplaintEmail(c) {
+  return c && (c.emailStatus === "PENDING_SALE_EMAIL" || c.emailStatus === "PENDING_QA_EMAIL");
+}
+
+function getPendingEmailsForOrder(orderNo) {
+  return getComplaintsForOrder(orderNo).filter(hasPendingComplaintEmail);
+}
+
+function buildSaleComplaintMailto(order, c) {
+  const subj = encodeURIComponent(`[URGENT] Customer Complaint - Order ${c.orderNo || order.orderNo} (${c.category})`);
+  const body = encodeURIComponent(
+    `Dear QA Quality Assurance Team,\n\nA customer complaint has been logged by Sale: ${c.recordedBy}\n\n` +
+    `• Ticket ID: ${c.id}\n• Order No: ${c.orderNo || order.orderNo}\n• Customer: ${(order && order.customer) || "Customer"}\n` +
+    `• Category: ${c.category}\n• Severity: ${c.severity}\n• Recorded Time: ${c.timestamp}\n` +
+    `• Reported By: ${c.recordedBy} (${c.saleEmail})\n\nComplaint Details:\n"${c.description}"\n\n` +
+    `Please investigate, input Root Cause & CAPA, and Approve in the Wood Pellets Dashboard.\n\nRegards,\n${c.recordedBy}\nSales Division, Green River Panels`
+  );
+  return `mailto:${c.qaEmail}?subject=${subj}&body=${body}`;
+}
+
+function buildQaResolutionMailto(order, c) {
+  const targetDecision = c.qaTargetStatus || c.status || "Resolved / Corrective Action Agreed";
+  const isResolved = targetDecision.includes("Resolved");
+  const subj = encodeURIComponent(`[${isResolved ? "RESOLVED & APPROVED" : "QA UPDATE"}] Customer Complaint Resolution - Order ${c.orderNo || order.orderNo} (${c.category})`);
+  const body = encodeURIComponent(
+    `Dear Sale Representative & Operations Team,\n\nThe customer complaint for Order ${c.orderNo || order.orderNo} has been REVIEWED and APPROVED by QA.\n\n` +
+    `• Ticket ID: ${c.id}\n• Order No: ${c.orderNo || order.orderNo} (Customer: ${(order && order.customer) || "Customer"})\n` +
+    `• Category: ${c.category} (${c.severity})\n• QA Approver: ${c.qaOfficer}\n` +
+    `• Decision: ${targetDecision}\n• Reviewed Time: ${c.qaReviewedAt || c.resolvedAt || "-"}\n\n` +
+    `[1] Root Cause Analysis:\n"${c.rootCause || "-"}"\n\n[2] Corrective & Preventive Action (CAPA):\n"${c.actionTaken || "-"}"\n\n` +
+    `Regards,\n${c.qaOfficer}\nQuality Assurance Division, Green River Panels`
+  );
+  let url = `mailto:${c.resolutionTo}?subject=${subj}&body=${body}`;
+  if (c.resolutionCc) url += `&cc=${encodeURIComponent(c.resolutionCc)}`;
+  return url;
+}
+
+function markMailClientOpenedInStorage(orderNo, complaintId, fallbackIdx = -1) {
+  const all = loadAllComplaintsFromStorage();
+  if (!Array.isArray(all[orderNo])) return;
+  const idx = findComplaintIndex(all[orderNo], complaintId, fallbackIdx);
+  if (idx !== -1) {
+    all[orderNo][idx].mailClientOpened = true;
+    saveAllComplaintsToStorage(all);
+  }
+}
+
+// เปลี่ยนสถานะจริงเฉพาะเมื่อผู้ใช้กดยืนยันว่าส่งเมลเรียบร้อยแล้วเท่านั้น
+function markComplaintEmailDispatched(orderNo, complaintId, phase, fallbackIdx = -1) {
+  const all = loadAllComplaintsFromStorage();
+  if (!Array.isArray(all[orderNo])) return;
+  const idx = findComplaintIndex(all[orderNo], complaintId, fallbackIdx);
+  if (idx === -1) return;
+
+  const nowStr = formatCurrentDateTime();
+  const item = all[orderNo][idx];
+  item.mailClientOpened = false;
+  if (phase === "QA") {
+    item.emailStatus = "SENT";
+    item.qaEmailSentAt = nowStr;
+    item.resolvedAt = nowStr;
+    item.status = item.qaTargetStatus || "Resolved / Corrective Action Agreed";
+  } else {
+    item.emailStatus = "SENT";
+    item.saleEmailSentAt = nowStr;
+    item.status = "Pending QA Investigation";
+  }
+  all[orderNo][idx] = item;
+  saveAllComplaintsToStorage(all);
+  renderUnsentEmailTopBanner();
+  refreshComplaintViews(orderNo);
+}
+
+// ยกเลิกร่างที่ยังไม่ได้ส่งอีเมล (ไม่ใช้ Swal.close() + setTimeout เพื่อป้องกัน SweetAlert2 animation race condition)
+function discardUnsentComplaintDraft(orderNo, complaintId, fallbackIdx = -1, fromModal = false) {
+  Swal.fire({
+    title: "ยกเลิกร่างที่ยังไม่ได้ส่งอีเมล?",
+    text: "หากยืนยัน รายการร่างที่ยังไม่ได้ส่งอีเมลนี้จะถูกลบออก (หรือย้อนกลับสถานะก่อนหน้า)",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#e11d48",
+    cancelButtonColor: "#64748b",
+    confirmButtonText: `<i class="fa-solid fa-trash-can mr-1.5"></i> ใช่, ลบร่างที่ค้าง`,
+    cancelButtonText: fromModal ? "กลับไปหน้าส่งอีเมล" : "ปิด",
+    customClass: { popup: "rounded-2xl shadow-2xl font-sans" }
+  }).then((res) => {
+    if (res.isConfirmed) {
+      const all = loadAllComplaintsFromStorage();
+      if (!Array.isArray(all[orderNo])) return;
+      const idx = findComplaintIndex(all[orderNo], complaintId, fallbackIdx);
+      if (idx === -1) return;
+      const item = all[orderNo][idx];
+      if (item.emailStatus === "PENDING_QA_EMAIL") {
+        item.emailStatus = "SENT";
+        item.status = "Pending QA Investigation";
+        item.mailClientOpened = false;
+      } else {
+        all[orderNo].splice(idx, 1);
+        if (all[orderNo].length === 0) delete all[orderNo];
+      }
+      saveAllComplaintsToStorage(all);
+      renderUnsentEmailTopBanner();
+      refreshComplaintViews(orderNo);
+      showSwalSuccess("ยกเลิกร่างสำเร็จ", `ลบร่างที่ค้างส่งอีเมลของออเดอร์ ${orderNo} เรียบร้อยแล้ว`);
+    } else if (fromModal) {
+      resumePendingComplaintEmail(orderNo, complaintId, fallbackIdx);
+    }
+  });
+}
+
+// หน้าต่างบังคับส่งอีเมล 2 จังหวะ: (1) เปิด Outlook -> (2) กดปุ่มสีเขียว "ส่งเมลใน Outlook เรียบร้อยแล้ว"
+function resumePendingComplaintEmail(orderNo, complaintId, fallbackIdx = -1) {
+  const complaints = getComplaintsForOrder(orderNo);
+  const idx = findComplaintIndex(complaints, complaintId, fallbackIdx);
+  if (idx === -1) return;
+  const c = complaints[idx];
+
+  const dataset = typeof globalData !== "undefined" ? globalData : [];
+  const order = dataset.find((o) => o.orderNo === orderNo) || { orderNo, customer: "Customer" };
+  const isQaPhase = c.emailStatus === "PENDING_QA_EMAIL";
+  const isTh = (typeof currentLang === "undefined" || currentLang === "th");
+
+  const mailtoUrl = isQaPhase ? buildQaResolutionMailto(order, c) : buildSaleComplaintMailto(order, c);
+  const titleText = isQaPhase
+    ? (isTh ? "บันทึกผล QA ไว้ชั่วคราว — ส่งอีเมลเพื่อปิดเคส" : "QA Draft Saved — Send Email to Finalize")
+    : (isTh ? "บันทึกข้อความไว้ชั่วคราว — ส่งอีเมลเพื่อแจ้ง QA" : "Draft Saved — Send Email to Notify QA");
+  const targetStatusLabel = isQaPhase ? (c.qaTargetStatus || "Resolved / Corrective Action Agreed") : "Pending QA Investigation";
+  const recipientEmail = isQaPhase ? `${c.resolutionTo}${c.resolutionCc ? ` (CC: ${c.resolutionCc})` : ""}` : c.qaEmail;
+  const senderDisplay = isQaPhase ? c.qaOfficer : `${c.recordedBy} (${c.saleEmail})`;
+
+  Swal.fire({
+    html: `
+      <div class="text-left font-sans text-xs space-y-3 pt-1 text-slate-700">
+        <div class="text-center pb-1">
+          <div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-amber-100 text-amber-600 mb-2">
+            <i class="fa-solid fa-envelope-open-text text-xl"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">${titleText}</h3>
+        </div>
+        <div id="pendingAlertBox" class="p-3 bg-rose-50 border border-rose-300 rounded-2xl flex items-start space-x-2.5 text-rose-900">
+          <i class="fa-solid fa-circle-info text-rose-600 text-sm mt-0.5 shrink-0"></i>
+          <div class="text-[11px] leading-relaxed">
+            <strong class="block text-rose-950">${isTh ? "หมายเหตุ: เว็บเบราว์เซอร์ไม่สามารถตรวจจับปุ่ม Send ในโปรแกรม Outlook ได้อัตโนมัติ" : "Note: Browser cannot auto-detect Outlook's Send button"}</strong>
+            <span>${isTh ? `เมื่อกดส่งเมลใน Outlook เสร็จแล้ว กรุณากดปุ่มสีเขียวด้านล่างเพื่อเปลี่ยนสถานะเป็น "${targetStatusLabel}"` : `After clicking Send in Outlook, click the green button below to update status to "${targetStatusLabel}".`}</span>
+          </div>
+        </div>
+        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-[11px]">
+          <div class="flex justify-between"><span><span class="text-slate-400">Ticket:</span> <strong class="font-mono text-indigo-700">[${c.id}]</strong></span><span class="font-mono text-slate-500">Order: ${orderNo}</span></div>
+          <div><span class="text-slate-400">${isQaPhase ? "To (Sale):" : "To (QA):"}</span> <strong class="text-indigo-600 font-mono">${recipientEmail}</strong></div>
+          <div><span class="text-slate-400">Sender:</span> <strong class="text-slate-800">${senderDisplay}</strong></div>
+          <div class="pt-1 border-t border-slate-200 flex items-center justify-between">
+            <span class="text-slate-500 font-semibold">${isTh ? "สถานะปัจจุบัน:" : "Current State:"}</span>
+            <span id="modalLiveStateBadge" class="px-2 py-0.5 rounded text-[10px] bg-rose-600 text-white font-bold">⚠️ ${isTh ? "รอส่งอีเมล (EMAIL_PENDING)" : "EMAIL_PENDING"}</span>
+          </div>
+        </div>
+        <div class="pt-1">
+          <button type="button" id="btnOpenMailClientStep1" class="w-full py-3 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center cursor-pointer">
+            <i class="fa-solid fa-paper-plane mr-2"></i> ${isTh ? "1. คลิกเปิดโปรแกรม Outlook เพื่อส่งอีเมล" : "1. Open Outlook / Mail Client to Send"}
+          </button>
+        </div>
+        <div id="enforcedMailStatusText" class="text-center text-[11px] text-rose-600 font-semibold"></div>
+        <div class="text-center pt-1 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+          <button type="button" onclick="discardUnsentComplaintDraft('${orderNo}', '${c.id}', ${idx}, true)" class="text-rose-500 hover:text-rose-700 font-semibold underline cursor-pointer">
+            <i class="fa-solid fa-trash-can mr-1"></i>${isTh ? "ยกเลิก / ลบร่างนี้" : "Discard Draft"}
+          </button>
+          <button type="button" id="btnManualUnlockAlreadySent" class="text-indigo-600 hover:text-indigo-800 font-semibold underline cursor-pointer">
+            ${isTh ? "ส่งอีเมลไปแล้วก่อนหน้านี้? คลิกปลดล็อกปุ่มปิดทันที" : "Already sent the email? Click here to unlock"}
+          </button>
+        </div>
+      </div>`,
+    width: 540, showConfirmButton: true,
+    confirmButtonText: `<i class="fa-solid fa-lock mr-1.5"></i> ${isTh ? "2. ส่งเมลเรียบร้อยแล้ว (กรุณากดปุ่ม 1 ก่อน)" : "2. Email Sent — Close (Click Step 1 first)"}`,
+    confirmButtonColor: "#94a3b8", allowOutsideClick: false, allowEscapeKey: false,
+    customClass: { popup: "rounded-3xl shadow-2xl p-5" },
+    didOpen: () => {
+      const confirmBtn = Swal.getConfirmButton();
+      const unlockStep2Button = () => {
+        confirmBtn.disabled = false;
+        confirmBtn.style.cursor = "pointer";
+        confirmBtn.style.opacity = "1";
+        if (confirmBtn.classList) {
+          confirmBtn.classList.remove("swal-btn-locked");
+          confirmBtn.classList.add("swal-btn-emerald");
+        }
+        confirmBtn.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5"></i> ${isTh ? "2. ส่งเมลใน Outlook เรียบร้อยแล้ว — ปิดและอัปเดตสถานะ" : "2. Email Sent in Outlook — Close & Update Status"}`;
+        $("#btnOpenMailClientStep1").removeClass("bg-indigo-600 hover:bg-indigo-700").addClass("bg-slate-700 hover:bg-slate-800")
+          .html(`<i class="fa-solid fa-rotate-right mr-2"></i> ${isTh ? "เปิด Outlook แล้ว (คลิกหากต้องการเปิดซ้ำ)" : "Outlook Opened (Click to reopen)"}`);
+        $("#modalLiveStateBadge").removeClass("bg-rose-600").addClass("bg-emerald-600").html(`✓ ${isTh ? "พร้อมเปลี่ยนเป็น: " : "Ready: "}${targetStatusLabel}`);
+        $("#enforcedMailStatusText").html(`<span class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> ${isTh ? "หากกด Send ใน Outlook แล้ว คลิกปุ่มสีเขียวด้านล่างเพื่อจบขั้นตอนได้เลย!" : "Once sent in Outlook, click the green button below to finish!"}</span>`);
+      };
+      if (c.mailClientOpened) {
+        unlockStep2Button();
+      } else {
+        confirmBtn.disabled = true;
+        confirmBtn.style.cursor = "not-allowed";
+        confirmBtn.style.opacity = "0.45";
+        $("#enforcedMailStatusText").html(`<i class="fa-solid fa-lock mr-1"></i> ${isTh ? "ปุ่มปิดถูกล็อกอยู่ — กรุณากดปุ่มสีน้ำเงิน (ข้อ 1) เพื่อเปิด Outlook ก่อน" : "Close button locked — Click button 1 to open Outlook first"}`);
+      }
+      $("#btnOpenMailClientStep1").on("click", function () {
+        markMailClientOpenedInStorage(orderNo, c.id, idx);
+        unlockStep2Button();
+        window.location.href = mailtoUrl;
+      });
+      $("#btnManualUnlockAlreadySent").on("click", function () {
+        markMailClientOpenedInStorage(orderNo, c.id, idx);
+        unlockStep2Button();
+      });
+    }
+  }).then((res) => {
+    if (res.isConfirmed) markComplaintEmailDispatched(orderNo, c.id, isQaPhase ? "QA" : "SALE", idx);
+  });
+}
+
+function resumeFirstPendingEmail(orderNo) {
+  const pending = getPendingEmailsForOrder(orderNo);
+  if (pending.length > 0) resumePendingComplaintEmail(orderNo, pending[0].id);
+}
+
+// แถบแจ้งเตือนสีแดงด้านบนสุด กรณีผู้ใช้เผลอกด F5 หรือปิดแท็บหนีโดยยังไม่ได้กดยืนยันส่งเมล
+function renderUnsentEmailTopBanner() {
+  const all = loadAllComplaintsFromStorage();
+  const pendingItems = [];
+  Object.keys(all).forEach((ordNo) => {
+    if (Array.isArray(all[ordNo])) {
+      all[ordNo].forEach((c, idx) => {
+        if (hasPendingComplaintEmail(c)) pendingItems.push({ orderNo: ordNo, complaint: c, idx });
+      });
+    }
+  });
+
+  $("#unsentComplaintGlobalBanner").remove();
+  if (pendingItems.length === 0) return pendingItems;
+
+  const first = pendingItems[0];
+  const isTh = (typeof currentLang === "undefined" || currentLang === "th");
+  const bannerHtml = `
+    <div id="unsentComplaintGlobalBanner" class="no-print sticky top-0 z-50 bg-rose-600 text-white px-4 py-2.5 shadow-lg flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center space-x-2">
+        <i class="fa-solid fa-bell text-amber-300 animate-bounce text-sm"></i>
+        <span>
+          <strong>${isTh ? `พบรายการรอส่ง/ยืนยันอีเมล ${pendingItems.length} รายการ!` : `${pendingItems.length} Pending Email Confirmation(s)!`}</strong>
+          (Order ${first.orderNo} [${first.complaint.id}])
+        </span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button type="button" onclick="discardUnsentComplaintDraft('${first.orderNo}', '${first.complaint.id}', ${first.idx})" class="px-2.5 py-1 bg-rose-800/80 hover:bg-rose-900 text-rose-100 font-semibold rounded-lg cursor-pointer transition">
+          <i class="fa-solid fa-trash-can mr-1"></i> ${isTh ? "ยกเลิกร่าง" : "Discard"}
+        </button>
+        <button type="button" onclick="markComplaintEmailDispatched('${first.orderNo}', '${first.complaint.id}', '${first.complaint.emailStatus === 'PENDING_QA_EMAIL' ? 'QA' : 'SALE'}', ${first.idx})" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg shadow-xs cursor-pointer transition">
+          <i class="fa-solid fa-check mr-1"></i> ${isTh ? "ส่งเมลไปแล้ว (กดยืนยันจบงาน)" : "Already Sent (Confirm)"}
+        </button>
+        <button type="button" onclick="resumePendingComplaintEmail('${first.orderNo}', '${first.complaint.id}', ${first.idx})" class="px-3 py-1 bg-white text-rose-700 hover:bg-amber-100 font-bold rounded-lg shadow-xs cursor-pointer transition">
+          <i class="fa-solid fa-paper-plane mr-1"></i> ${isTh ? "เปิดหน้าต่างส่งเมล" : "Open Email Modal"}
+        </button>
+      </div>
+    </div>`;
+  $("body").prepend(bannerHtml);
+  return pendingItems;
+}
+
+function checkUnsentComplaintEmailsOnLoad() {
+  const pendingItems = renderUnsentEmailTopBanner();
+  if (pendingItems.length > 0) {
+    const first = pendingItems[0];
+    setTimeout(() => { resumePendingComplaintEmail(first.orderNo, first.complaint.id, first.idx); }, 450);
+  }
+}
+
+function renderComplaintsListHtml(orderNo) {
+  const complaints = getComplaintsForOrder(orderNo);
+  const isAdmin = typeof isSimulatedAdmin === "function" && isSimulatedAdmin();
+  if (!complaints || complaints.length === 0) {
+    return `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center text-slate-400 text-xs"><i class="fa-solid fa-shield-check text-emerald-500 mr-1.5"></i> No customer complaints recorded for this order.</div>`;
+  }
+
+  return `
+    <div class="mb-2 px-2.5 py-1.5 rounded-lg border ${isAdmin ? "bg-purple-50 border-purple-200 text-purple-900" : "bg-slate-50 border-slate-200 text-slate-600"} flex items-center justify-between flex-wrap gap-1.5 text-[11px]">
+      <div class="flex items-center space-x-1.5">
+        <i class="fa-solid ${isAdmin ? "fa-user-shield text-purple-600" : "fa-lock text-slate-400"}"></i>
+        <span>${isAdmin ? "<strong>โหมด Admin (จำลอง):</strong> สามารถลบรายการข้อร้องเรียนได้ทันที" : "<strong>สิทธิ์ User ทั่วไป:</strong> ลบประวัติเองไม่ได้ (กด <strong>แจ้ง Admin ขอลบ</strong> หรือสลับเป็น Admin จำลอง)"}</span>
+      </div>
+      <div class="flex items-center space-x-1.5">
+        ${isAdmin ? `<button type="button" onclick="event.stopPropagation(); adminClearOrderComplaints('${orderNo}');" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-700 text-white rounded font-bold text-[10px] cursor-pointer shadow-2xs"><i class="fa-solid fa-broom mr-1"></i>ล้างทั้งหมด (${complaints.length})</button>` : ""}
+        <button type="button" onclick="event.stopPropagation(); toggleSimulatedAdminRole();" class="px-2 py-0.5 ${isAdmin ? "bg-white text-purple-700 border border-purple-300" : "bg-purple-600 hover:bg-purple-700 text-white"} rounded font-semibold text-[10px] cursor-pointer transition">
+          <i class="fa-solid fa-repeat mr-1"></i>${isAdmin ? "สลับกลับเป็น User" : "จำลองเป็น Admin"}
+        </button>
+      </div>
+    </div>
+    <div class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1">
+      ${complaints.map((c, idx) => {
+        const isPendingMail = hasPendingComplaintEmail(c);
+        const isResolved = !isPendingMail && c.status && c.status.toLowerCase().includes("resolved");
+        let sevBadge = "bg-amber-100 text-amber-800 border-amber-300";
+        if (c.severity === "High") sevBadge = "bg-rose-100 text-rose-800 border-rose-300";
+        if (c.severity === "Low") sevBadge = "bg-emerald-100 text-emerald-800 border-emerald-300";
+        const roleActionBtn = isAdmin
+          ? `<button type="button" onclick="event.stopPropagation(); adminDeleteComplaint('${orderNo}', '${c.id}', ${idx});" title="ลบรายการนี้ (เฉพาะ Admin)" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 rounded text-[10px] font-bold transition cursor-pointer"><i class="fa-solid fa-trash-can mr-1"></i>ลบ (Admin)</button>`
+          : `<button type="button" onclick="event.stopPropagation(); requestAdminDeleteComplaint('${orderNo}', '${c.id}', ${idx});" title="แจ้ง Admin ให้ลบรายการนี้" class="px-2 py-0.5 bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border border-slate-200 rounded text-[10px] font-medium transition cursor-pointer"><i class="fa-solid fa-user-lock mr-1"></i>แจ้ง Admin ขอลบ</button>`;
+
+        return `
+          <div class="p-3 bg-white rounded-xl border ${isPendingMail ? "border-2 border-rose-400 bg-rose-50/30 shadow-sm" : (isResolved ? "border-emerald-200 shadow-2xs" : "border-amber-300 shadow-sm")} space-y-2 text-xs">
+            <div class="flex items-center justify-between flex-wrap gap-1">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-mono text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">[${c.id}]</span>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border ${sevBadge}"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${c.category} (${c.severity})</span>
+                ${isPendingMail ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-600 text-white animate-pulse"><i class="fa-solid fa-envelope mr-1"></i>รอส่ง/ยืนยันอีเมล</span>` : ""}
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-mono text-slate-400"><i class="fa-solid fa-clock mr-1"></i>${c.timestamp}</span>
+                ${roleActionBtn}
+              </div>
+            </div>
+            <p class="text-slate-800 text-xs font-medium leading-relaxed">${c.description}</p>
+            <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-[10px] text-slate-500 flex-wrap gap-1">
+              <span><i class="fa-solid fa-user-pen mr-1 text-indigo-500"></i>Sale: <strong class="text-slate-800 font-semibold">${c.recordedBy}</strong> ${c.saleEmailSentAt ? `<span class="text-emerald-600 font-semibold ml-1">(✉️ ส่งเมลแล้ว ${c.saleEmailSentAt})</span>` : ""}</span>
+              <span class="font-bold ${isPendingMail ? "text-rose-600" : (isResolved ? "text-emerald-600" : "text-amber-600")}">
+                <i class="fa-solid ${isPendingMail ? "fa-lock" : (isResolved ? "fa-circle-check" : "fa-hourglass-half")} mr-1"></i>${c.status}
+              </span>
+            </div>
+            ${isPendingMail ? `
+              <div class="p-2.5 bg-rose-100/80 border border-rose-300 rounded-lg flex items-center justify-between flex-wrap gap-2">
+                <span class="text-[11px] font-bold text-rose-900"><i class="fa-solid fa-circle-exclamation mr-1 text-rose-600"></i>สถานะยังไม่เปลี่ยนจนกว่าจะยืนยันการส่งอีเมล</span>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="event.stopPropagation(); discardUnsentComplaintDraft('${orderNo}', '${c.id}', ${idx});" class="px-2 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-300 rounded-lg text-[10px] font-bold cursor-pointer"><i class="fa-solid fa-trash-can mr-1"></i>ยกเลิกร่าง</button>
+                  <button type="button" onclick="event.stopPropagation(); markComplaintEmailDispatched('${orderNo}', '${c.id}', '${c.emailStatus === 'PENDING_QA_EMAIL' ? 'QA' : 'SALE'}', ${idx});" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-[11px] shadow-xs cursor-pointer"><i class="fa-solid fa-check mr-1"></i> ส่งเมลไปแล้ว (ยืนยัน)</button>
+                  <button type="button" onclick="event.stopPropagation(); resumePendingComplaintEmail('${orderNo}', '${c.id}', ${idx});" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-[11px] shadow-xs flex items-center cursor-pointer"><i class="fa-solid fa-paper-plane mr-1.5"></i> เปิดส่งเมล</button>
+                </div>
+              </div>
+            ` : isResolved && c.qaOfficer ? `
+              <div class="p-2.5 bg-emerald-50/70 rounded-lg border border-emerald-200 text-[11px] text-emerald-950 space-y-1 mt-1">
+                <div class="flex items-center justify-between text-emerald-800 font-bold text-[10px]">
+                  <span><i class="fa-solid fa-certificate text-emerald-600 mr-1"></i>QA Resolution & Approval (Closed)</span>
+                  <span class="text-emerald-700 font-mono">${c.qaEmailSentAt ? `✉️ ส่งเมลแจ้งผลแล้ว ${c.qaEmailSentAt}` : (c.resolvedAt || "-")}</span>
+                </div>
+                <div><span class="font-semibold text-emerald-900">Root Cause:</span> ${c.rootCause || "-"}</div>
+                <div><span class="font-semibold text-emerald-900">Corrective Action (CAPA):</span> ${c.actionTaken || "-"}</div>
+                <div class="flex items-center justify-between pt-1 border-t border-emerald-200/60 text-[10px] text-slate-500">
+                  <span>Approved by QA: <strong class="text-emerald-800 font-bold">${c.qaOfficer}</strong></span>
+                  <button type="button" onclick="event.stopPropagation(); openQaReviewModal('${orderNo}', '${c.id}', ${idx});" class="text-indigo-600 hover:text-indigo-800 font-medium underline cursor-pointer">Edit QA CAPA / Resend</button>
+                </div>
+              </div>
+            ` : `
+              <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] text-amber-700 italic"><i class="fa-solid fa-bell text-amber-500 mr-1"></i>Awaiting QA review & CAPA input</span>
+                <button type="button" onclick="event.stopPropagation(); openQaReviewModal('${orderNo}', '${c.id}', ${idx});" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-[11px] shadow-xs flex items-center transition cursor-pointer">
+                  <i class="fa-solid fa-clipboard-check mr-1.5"></i> QA Review & Approve
+                </button>
+              </div>
+            `}
+          </div>`;
+      }).join("")}
+    </div>`;
+}

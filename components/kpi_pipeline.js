@@ -34,19 +34,23 @@ Object.assign(window.Components, {
         const allOrders = (typeof globalData !== "undefined" && Array.isArray(globalData)) ? globalData : [];
         const targetItem = activeItem || allOrders[0] || {};
         
-        // ข้อมูลเรือขนส่ง ท่าเรือ และกำหนดส่ง (ดึงจาก step6 ของ Order จริง)
-        const shippingLine = targetItem.step6?.shippingLine ? `${targetItem.step6.shippingLine} Line` : "Shipping Carrier";
-        const etdDate = targetItem.step6?.etd || "2026/10/29";
+        // ข้อมูลเรือขนส่ง ท่าเรือ และกำหนดส่ง ETD -> ETA , ATD (ดึงจาก step6/step8 และ ATD Override ล่าสุด)
+        const shipInfo = targetItem.step8_shipping || targetItem.step6 || {};
+        const atdOverrides = (typeof loadShippingAtdOverrides === "function") ? loadShippingAtdOverrides() : {};
+        const shippingLine = (targetItem.step6?.shippingLine || shipInfo.shippingLine) ? `${targetItem.step6?.shippingLine || shipInfo.shippingLine} Line` : "Shipping Carrier";
+        const etdDate = targetItem.step6?.etd || shipInfo.etd || "-";
+        const etaDate = targetItem.step6?.eta || shipInfo.eta || "-";
+        const atdRaw = (targetItem.orderNo && atdOverrides[targetItem.orderNo]?.atd) || targetItem.step6?.atd || shipInfo.atd || "-";
+        const hasAtd = Boolean(atdRaw && atdRaw !== "-");
         const destPort = targetItem.destination || "Songkhla Port";
         const orderRef = targetItem.orderNo || "Order Ref";
         
-        // คำนวณสัดส่วนความถูกต้อง EUDR DDS จากออเดอร์ทั้งหมด
+        // คำนวณสัดส่วนความถูกต้อง EUDR จากออเดอร์ทั้งหมด
         const dataset = (typeof dashboardFilteredData !== "undefined" && Array.isArray(dashboardFilteredData) && dashboardFilteredData.length > 0)
             ? dashboardFilteredData : allOrders;
-        const totalOrders = summaryData?.activeOrders || dataset.length || 48;
+        const totalOrders = summaryData?.activeOrders || dataset.length || 68;
         const eudrApprovedOrders = dataset.filter(x => (x.step2?.status || "").toUpperCase() === "APPROVED" || Number(x.currentStep) >= 2).length || totalOrders;
         const eudrPercent = totalOrders > 0 ? Math.round((eudrApprovedOrders / totalOrders) * 100) : 100;
-        const eudrPending = Math.max(0, totalOrders - eudrApprovedOrders);
         const ddsRef = `DDS-2026-TH-${targetItem.moNo ? targetItem.moNo.replace(/[^0-9]/g, '').slice(-5) : '00412'}`;
 
         // ค่าผลผลิต (Yield) และใบรับรองจริงของออเดอร์
@@ -137,26 +141,45 @@ Object.assign(window.Components, {
 
                 <!-- Card 3: Pending Shipments with Inline SVG Sparkline -->
                 <div id="kpiCard3" onclick="selectKpiCard(3)" class="glass-card glass-card-interactive kpi-card ${activeIdx === 3 ? 'kpi-active' : ''} stagger-in delay-4 p-5 rounded-3xl flex flex-col justify-between">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="flex items-center space-x-1.5">
-                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider kpi-label">${t.kpi_ship || (isTh ? 'จัดส่งแล้ว' : 'Shipped')}</p>
-                                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200 kpi-badge">${targetItem.statusBadge || 'On Schedule'}</span>
+                    <div>
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="flex items-center space-x-1.5">
+                                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider kpi-label">${t.kpi_ship || (isTh ? 'จัดส่งแล้ว' : 'Shipped')}</p>
+                                    <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200 kpi-badge">${targetItem.statusBadge || 'On Schedule'}</span>
+                                </div>
+                                <h3 class="text-2xl font-black text-slate-900 mt-1">${summaryData.pendingShipments || '41'}</h3>
                             </div>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1">${summaryData.pendingShipments || '41'}</h3>
-                            <p class="text-xs text-indigo-600 font-medium mt-1">${t.etd_label || 'ETD'}: <span class="font-bold font-mono text-indigo-700">${etdDate}</span></p>
+                            <div class="flex flex-col items-end">
+                                <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-xl mb-1 kpi-icon-box">
+                                    <i class="fa-solid fa-truck-fast text-base"></i>
+                                </div>
+                                <svg class="w-14 h-6 text-indigo-500" viewBox="0 0 80 32" fill="none">
+                                    <path d="M0,28 Q25,18 45,22 T70,10 T80,6 L80,32 L0,32 Z" fill="#6366f1" fill-opacity="0.15"/>
+                                    <path d="M0,28 Q25,18 45,22 T70,10 T80,6" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="flex flex-col items-end">
-                            <div class="bg-indigo-50 text-indigo-600 p-2.5 rounded-xl mb-1 kpi-icon-box">
-                                <i class="fa-solid fa-truck-fast text-base"></i>
+                        <div class="mt-2 bg-white/60 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-white/60 shadow-2xs space-y-1 text-[11px] kpi-sub-card">
+                            <div class="flex items-center justify-between gap-1.5">
+                                <span class="text-[10px] text-slate-500 font-semibold shrink-0">ETD &rarr; ETA:</span>
+                                <span class="font-bold font-mono text-indigo-700 truncate">${etdDate} &rarr; ${etaDate}</span>
                             </div>
-                            <svg class="w-14 h-6 text-indigo-500" viewBox="0 0 80 32" fill="none">
-                                <path d="M0,28 Q25,18 45,22 T70,10 T80,6 L80,32 L0,32 Z" fill="#6366f1" fill-opacity="0.15"/>
-                                <path d="M0,28 Q25,18 45,22 T70,10 T80,6" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-                            </svg>
+                            <div class="flex items-center justify-between gap-1.5 pt-1 border-t border-slate-200/50 kpi-border-t">
+                                <span class="text-[10px] text-slate-500 font-semibold shrink-0">${isTh ? 'ATD (เรือออกจริง):' : 'ATD (Actual):'}</span>
+                                ${hasAtd ? `
+                                    <span onclick="event.stopPropagation(); if(typeof openUpdateAtdModal==='function') openUpdateAtdModal('${orderRef}');" title="${isTh ? 'คลิกเพื่อแก้ไขวันเรือออกจริง (ATD)' : 'Click to edit ATD'}" class="font-bold font-mono text-emerald-700 inline-flex items-center hover:underline">
+                                        <i class="fa-solid fa-ship text-emerald-500 mr-1 text-[9px]"></i>${atdRaw}<i class="fa-solid fa-pen ml-1 text-[8px] opacity-60"></i>
+                                    </span>
+                                ` : `
+                                    <span onclick="event.stopPropagation(); if(typeof openUpdateAtdModal==='function') openUpdateAtdModal('${orderRef}');" class="font-bold text-amber-600 inline-flex items-center hover:underline">
+                                        <i class="fa-solid fa-anchor mr-1 text-[9px]"></i>${isTh ? '+ ระบุ ATD' : '+ Set ATD'}
+                                    </span>
+                                `}
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between kpi-border-t">
+                    <div class="mt-2.5 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between kpi-border-t">
                         <span class="truncate mr-2">${isTh ? 'ท่าเรือส่งออก:' : 'Port:'} <strong class="text-slate-800">${destPort}</strong></span>
                         <span class="text-emerald-600 font-semibold shrink-0">${targetItem.step6?.shippingLine ? `${targetItem.step6.shippingLine} Booked` : 'Vessel Booked'}</span>
                     </div>
@@ -182,12 +205,11 @@ Object.assign(window.Components, {
                             </svg>
                         </div>
                     </div>
-                    <div class="mt-3 pt-2.5 border-t border-slate-100 kpi-border-t">
-                        <p class="text-xs text-slate-700 font-medium flex items-center truncate">
+                    <div class="mt-3 pt-2 border-t border-slate-100 kpi-border-t">
+                        <p class="text-[11px] text-slate-600 font-medium flex items-center truncate">
                             <i class="fa-solid fa-circle-check text-emerald-500 mr-1.5 shrink-0"></i>
-                            <span>${isTh ? `พร้อมยื่น DDS: ${eudrApprovedOrders} ออเดอร์ ${eudrPending > 0 ? `(${t.kpi_wait_audit || 'รอตรวจ'} ${eudrPending})` : '(ครบถ้วน)'}` : `DDS Ready: ${eudrApprovedOrders} Orders ${eudrPending > 0 ? `(${eudrPending} Pending)` : '(Complete)'}`}</span>
+                            <span class="truncate">${isTh ? 'ปลอดการตัดไม้ทำลายป่า 100% (Zero Deforestation)' : 'Zero Deforestation • Satellite Geolocation 100%'}</span>
                         </p>
-                        <p class="text-[10px] text-slate-500 mt-0.5 truncate">${isTh ? 'ปลอดการตัดไม้ทำลายป่า 100% (Zero Deforestation)' : 'Zero Deforestation • Satellite Geolocation 100%'}</p>
                     </div>
                 </div>
             </div>

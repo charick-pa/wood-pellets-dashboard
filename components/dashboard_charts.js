@@ -34,7 +34,7 @@ Object.assign(window.Components, {
         const dataset = (typeof dashboardFilteredData !== "undefined" && dashboardFilteredData.length > 0)
             ? dashboardFilteredData : (typeof globalData !== "undefined" ? globalData : []);
 
-        // 1. รวมยอดจริงจากชุดข้อมูล 48 ออเดอร์ (Real Data: 2025 - 2028)
+        // 1. รวมยอดจริงจากชุดข้อมูล 68 ออเดอร์ (Real Data: 2025 - 2028)
         const yearlyMap = {};
         dataset.forEach(o => {
             const d = o.orderDate || o.requestedDeliveryDate || (o.step6 && o.step6.etd) || '2026-10-15';

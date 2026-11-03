@@ -62,6 +62,10 @@ $(document).ready(function () {
     applyLanguage(currentLang);
   }
 
+  if (typeof applyShippingAtdOverridesToDataset === "function" && typeof globalData !== "undefined") {
+    applyShippingAtdOverridesToDataset(globalData);
+  }
+
   if (typeof globalData !== "undefined" && globalData.length > 0) {
     currentSelectedOrderNo = globalData[0].orderNo;
     if (typeof renderDashboard === "function") {
@@ -76,6 +80,13 @@ $(document).ready(function () {
   // ดึงตัวเลือก Filter ทั้งหมดจาก mockdata ตั้งแต่ต้น (และพร้อมสลับไปดึงจากฐานข้อมูลจริงทันทีเมื่อเชื่อมต่อ)
   if (typeof populateQueryFilters === "function") {
     populateQueryFilters(typeof globalData !== "undefined" ? globalData : []);
+  }
+
+  // ตรวจสอบรายการ Complaint ที่ยังไม่ได้กดส่งอีเมล (Pending Email State) ทันทีที่เปิดหน้าเว็บ
+  if (typeof syncAdminRoleButtons === "function") syncAdminRoleButtons();
+
+  if (typeof checkUnsentComplaintEmailsOnLoad === "function") {
+    checkUnsentComplaintEmailsOnLoad();
   }
 
   // รองรับการเปิดวิวผ่าน URL Query หรือ Hash เช่น ?view=query หรือ #map
@@ -99,6 +110,7 @@ $(document).ready(function () {
   // ปิด Modal หรือ Fullscreen ด้วยปุ่ม ESC
   $(document).on("keydown", function (e) {
     if (e.key === "Escape") {
+      if (typeof Swal !== "undefined" && Swal.isVisible()) return;
       if (typeof closeBpmModal === "function") closeBpmModal();
       if (typeof closeMapModal === "function") closeMapModal();
       if (typeof closeCadastralImportModal === "function") closeCadastralImportModal();
