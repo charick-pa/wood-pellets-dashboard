@@ -58,7 +58,7 @@ Object.assign(window.Components, {
                             <i class="fa-solid fa-location-dot"></i>
                         </button>
                     </div>
-                    ${item.location ? `<div class="text-[10px] text-slate-400 truncate max-w-[140px] mt-0.5 cursor-pointer hover:text-rose-600" onclick="openMapModal('${item.orderNo}')" title="${item.location.placeName}">📍 ${item.location.placeName.split('(')[0]}</div>` : ''}
+                    ${item.location ? `<div class="text-[10px] text-slate-400 truncate max-w-[210px] xl:max-w-[260px] mt-0.5 cursor-pointer hover:text-rose-600" onclick="openMapModal('${item.orderNo}')" title="${item.location.placeName}">📍 ${item.location.placeName.split('(')[0]}</div>` : ''}
                     ${(() => {
                         const plots = (typeof window.cadastralPlots !== "undefined" && Array.isArray(window.cadastralPlots))
                             ? window.cadastralPlots.filter(p => p.linkedMoNo && p.linkedMoNo.trim().toUpperCase() === String(item.moNo || '').trim().toUpperCase())
@@ -67,7 +67,7 @@ Object.assign(window.Components, {
                         const firstPlot = plots[0];
                         const deed = firstPlot.attributes?.['Land Title No.'] || firstPlot.attributes?.['Title Deed No.'] || firstPlot.attributes?.['Deed Title No'] || '';
                         const plotLabel = deed ? `โฉนด: ${deed}` : (plots.length === 1 ? firstPlot.name.split('(')[0] : `${plots.length} แปลง EUDR`);
-                        return `<div class="mt-1"><button onclick="openPlotInCadastralView('${firstPlot.id}')" title="เปิดดูแปลงที่ดิน & แบบประเมิน EUDR: ${plots.map(p => p.name).join(', ')}" class="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors truncate max-w-[150px]"><i class="fa-solid fa-draw-polygon text-emerald-600 mr-1 text-[8.5px]"></i><span class="truncate">${plotLabel}</span></button></div>`;
+                        return `<div class="mt-1"><button onclick="openPlotInCadastralView('${firstPlot.id}')" title="เปิดดูแปลงที่ดิน & แบบประเมิน EUDR: ${plots.map(p => p.name).join(', ')}" class="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors truncate max-w-[210px] xl:max-w-[260px]"><i class="fa-solid fa-draw-polygon text-emerald-600 mr-1 text-[8.5px]"></i><span class="truncate">${plotLabel}</span></button></div>`;
                     })()}
                 </td>
                 <td class="py-3 px-3">
